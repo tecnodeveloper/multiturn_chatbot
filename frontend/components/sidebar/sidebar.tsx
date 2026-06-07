@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/auth-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Brand } from "@/components/ui/brand";
+import Link from "next/link";
 
 interface SidebarProps {
   onNewChat: () => void;

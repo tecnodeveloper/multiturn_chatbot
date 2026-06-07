@@ -1,11 +1,11 @@
 "use client";
 
-import { FC, useRef, useEffect } from "react";
+import { FC, useRef, useEffect, useState } from "react";
 import { Message } from "@/context/chat-context";
 import { useAuth } from "@/context/auth-context";
 import { EmptyChatState } from "./empty-chat-state";
 import { Button } from "@/components/ui/button";
-import { Copy } from "lucide-react";
+import { Copy, ThumbsUp, ThumbsDown } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 interface MessageListProps {
@@ -14,6 +14,59 @@ interface MessageListProps {
   onNewChat: () => void;
   onSuggestionClick: (suggestion: string) => void;
 }
+
+const AssistantMessage: FC<{ content: string }> = ({ content }) => {
+  const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
+
+  return (
+    <div className="flex gap-3 justify-start">
+      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground flex-shrink-0">
+        AI
+      </div>
+      <div className="flex flex-col gap-1 max-w-2xl">
+        <div className="relative rounded-2xl rounded-bl-md bg-background border border-border px-4 py-3 shadow-sm text-sm">
+          <ReactMarkdown className="prose dark:prose-invert max-w-none break-words leading-6 pb-6">
+            {content}
+          </ReactMarkdown>
+          
+          <div className="absolute bottom-2 right-2 flex gap-1">
+            <button
+              onClick={() => setFeedback(feedback === 'up' ? null : 'up')}
+              className={`p-1 rounded-md transition-colors ${
+                feedback === 'up' 
+                  ? "text-[#a8c686] bg-[#a8c686]/10" 
+                  : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              <ThumbsUp 
+                className="h-4 w-4" 
+                fill={feedback === 'up' ? "#a8c686" : "none"} 
+              />
+            </button>
+            <button
+              onClick={() => setFeedback(feedback === 'down' ? null : 'down')}
+              className={`p-1 rounded-md transition-colors ${
+                feedback === 'down' 
+                  ? "text-[#e57373] bg-[#e57373]/10" 
+                  : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              <ThumbsDown 
+                className="h-4 w-4" 
+                fill={feedback === 'down' ? "#e57373" : "none"} 
+              />
+            </button>
+          </div>
+        </div>
+      </div>
+      <Button variant="ghost" size="icon" className="h-9 w-9 flex-shrink-0" onClick={() => {
+        navigator.clipboard.writeText(content);
+      }}>
+        <Copy className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+};
 
 export const MessageList: FC<MessageListProps> = ({
   messages,
@@ -44,36 +97,22 @@ export const MessageList: FC<MessageListProps> = ({
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-4">
       {messages.map((item, index) => (
-        <div
-          key={`${item.role}-${index}`}
-          className={`flex gap-3 ${
-            item.role === "user" ? "justify-end" : "justify-start"
-          }`}
-        >
-          {item.role === "assistant" && (
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground flex-shrink-0">
-              AI
-            </div>
-          )}
+        item.role === "assistant" ? (
+          <AssistantMessage key={`${item.role}-${index}`} content={item.content} />
+        ) : (
           <div
-            className={`max-w-2xl rounded-2xl px-4 py-3 text-sm ${
-              item.role === "user"
-                ? "rounded-br-md bg-primary text-primary-foreground shadow-sm"
-                : "rounded-bl-md bg-background border border-border shadow-sm"
-            }`}
+            key={`${item.role}-${index}`}
+            className="flex gap-3 justify-end"
           >
-            <ReactMarkdown className="prose dark:prose-invert max-w-none break-words leading-6">
-              {item.content}
-            </ReactMarkdown>
+            <div
+              className="max-w-2xl rounded-2xl rounded-br-md bg-primary text-primary-foreground px-4 py-3 shadow-sm text-sm"
+            >
+              <ReactMarkdown className="prose dark:prose-invert max-w-none break-words leading-6">
+                {item.content}
+              </ReactMarkdown>
+            </div>
           </div>
-          {item.role === "assistant" && (
-            <Button variant="ghost" size="icon" className="h-9 w-9 flex-shrink-0" onClick={() => {
-              navigator.clipboard.writeText(item.content);
-            }}>
-              <Copy className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
+        )
       ))}
 
       {isSending && (
