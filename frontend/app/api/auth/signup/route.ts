@@ -30,11 +30,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
-  return NextResponse.json(
+  const finalResponse = NextResponse.json(
     { user: data.user, session: data.session },
-    {
-      status: 200,
-      headers: response.headers,
-    },
+    { status: 200 },
   );
+
+  // Copy headers from the Supabase-managed response to the final response
+  response.headers.forEach((value, key) => {
+    finalResponse.headers.append(key, value);
+  });
+
+  return finalResponse;
 }
