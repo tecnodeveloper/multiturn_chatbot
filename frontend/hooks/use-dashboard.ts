@@ -211,7 +211,7 @@ export function useDashboard() {
 
       if (!response.body) throw new Error("No response body");
 
-      const assistantId = crypto.randomUUID();
+      const assistantId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 11);
       const assistantMessage: Message = {
         id: assistantId,
         role: "assistant",

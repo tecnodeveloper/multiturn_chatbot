@@ -20,10 +20,14 @@ export function createRouteClient(
             options?: CookieOptions;
           }>,
         ) {
+          const isLocal = request.nextUrl.hostname === 'localhost' || request.nextUrl.hostname === '127.0.0.1';
+          
           cookiesToSet.forEach(({ name, value, options }) => {
             response.cookies.set(name, value, {
               ...options,
               path: options?.path || "/",
+              secure: isLocal ? false : options.secure,
+              sameSite: 'lax',
             });
           });
         },

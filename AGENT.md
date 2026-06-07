@@ -227,16 +227,53 @@ Build Phase 1 of a multi-turn AI chatbot system using:
 **Files Modified:**
 
 - frontend/lib/supabase.ts - Added proper type annotations
-- frontend/middleware.ts - Fixed Next.js 16 import compatibility
+- frontend/proxy.ts - Replaced middleware.ts to align with Next.js 16 conventions
 
-### ⏳ NEXT PHASE (Phase 3-4)
+### 🔧 Middleware to Proxy Transition & Dashboard Access (June 7, 2026)
 
-- [x] Supabase schema creation (users, sessions, messages, feedback)
-- [x] Replace remaining localStorage chat storage with Supabase persistence
-- [ ] Polish dashboard to more closely mirror chatbot-ui component-by-component
-- [ ] Add feedback modal after 6 messages
-- [ ] Add AI provider switching UI and offline logic
-- [ ] Add optional PWA support
+#### ✅ COMPLETED
+
+- **Renamed `middleware.ts` to `proxy.ts`**: Next.js 16 has deprecated the `middleware.ts` convention in favor of `proxy.ts`. 
+- **Broke Redirection Loop**: Successfully reached the `/dashboard` page using the "Sledgehammer" token extraction fix in `proxy.ts`.
+- **Fixed Dashboard UI Crash**: Resolved a runtime error where `TabsList` was used outside of a `Tabs` parent in `sidebar-switcher.tsx`.
+- **Supabase URL Standardization**: Standardized `NEXT_PUBLIC_SUPABASE_URL` to `http://127.0.0.1:54321` in `.env.local` to prevent cookie naming mismatches.
+- **Hard Redirection & Cookie Hardening**: Implemented global `path: "/"` and `secure: false` (for local) to ensure session persistence.
+
+#### ❗ IMPORTANT RULES
+
+- **NEVER write `middleware.ts`**: The project has shifted 100% to `proxy.ts`. Next.js will ignore `middleware.ts` or throw deprecation errors.
+- **Always use `127.0.0.1` for local Supabase**: Never use `localhost` in the Supabase URL to avoid "Ghost Cookie" session mismatches.
+- **Nest Tabs Components correctly**: Always ensure `TabsList` and `TabsTrigger` are wrapped in a `Tabs` root.
+
+#### Files Modified
+
+- `frontend/proxy.ts`
+- `frontend/components/sidebar/sidebar-switcher.tsx`
+- `frontend/lib/supabase/route.ts`
+- `frontend/app/(auth)/login/page.tsx`
+
+### 🔧 Diagnostic Hardening & Cookie Path Fix (June 7, 2026 - Session 7)
+
+#### ✅ COMPLETED
+
+- **Resolved "Cookie Path Trap"**: Forced `path: "/"` for all cookies in both `proxy.ts` and auth API routes. This prevents the browser from locking session cookies to specific sub-folders and ensures they are sent with dashboard requests.
+- **TypeScript Type Hardening**: Added explicit types for `cookiesToSet` in all `setAll` handlers to satisfy VS Code and prevent "implicit any" errors.
+- **Localhost Persistence Fix**: Forced `secure: false` and `sameSite: 'lax'` for local development (`127.0.0.1`/`localhost`) to ensure browsers correctly save tokens over insecure HTTP connections.
+- **Diagnostic Proxy Implementation**: Added aggressive logging (`[PROXY TRACKER]`) to trace incoming requests, cookie visibility, and server-side auth failures.
+- **Redirection Race Condition Fix**: Added a 100ms buffer in `login/page.tsx` to allow the browser to physically write cookies to disk before the final redirect to `/dashboard`.
+
+#### ❗ IMPORTANT RULES
+
+- **NEVER write `middleware.ts`**: Standardized on `proxy.ts` for Next.js 16 compatibility.
+- **Always Force Global Cookie Path**: Every `response.cookies.set` call MUST include `path: "/"`.
+- **Local Dev Standard**: Always use `http://127.0.0.1:54321` for local Supabase URLs in `.env.local`.
+
+#### Files Modified
+
+- `frontend/proxy.ts`
+- `frontend/lib/supabase/route.ts`
+- `frontend/app/api/auth/login/route.ts`
+- `frontend/app/(auth)/login/page.tsx`
 
 ### 🔧 Auth Route Cleanup (May 24, 2026)
 

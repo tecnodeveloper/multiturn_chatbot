@@ -29,8 +29,10 @@ export default function LoginPage() {
     try {
       setIsSigningIn(true);
       await signIn(email, password);
-      // Use window.location.href for a hard redirect to ensure cookies are sent and middleware runs correctly
-      window.location.href = "/dashboard";
+      // Use window.location.href for a hard redirect with a tiny delay to ensure cookies are physicaly written
+      setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 100);
     } catch (error: any) {
       toast.error(error.message || "Invalid email or password");
       setIsSigningIn(false);
