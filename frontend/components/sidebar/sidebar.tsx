@@ -210,21 +210,23 @@ export const Sidebar: FC<SidebarProps> = ({
 
         {/* User Profile Section */}
         <div className="border-t border-border p-3 bg-muted/10">
-          <div className="flex items-center gap-3 rounded-lg p-2 hover:bg-muted/50 transition-colors cursor-pointer group">
-            <Avatar className="h-9 w-9 border border-border">
-              <AvatarImage src={user?.avatar} />
-              <AvatarFallback className="bg-primary/10 text-primary">
-                {user?.name
-                  ? user.name.charAt(0).toUpperCase()
-                  : user?.email?.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-1 flex-col overflow-hidden text-xs">
-              <span className="truncate font-semibold text-foreground">{user?.name || "User"}</span>
-              <span className="truncate text-muted-foreground/80">{user?.email}</span>
+          <Link href="/account" className="block">
+            <div className="flex items-center gap-3 rounded-lg p-2 hover:bg-muted/50 transition-colors cursor-pointer group">
+              <Avatar className="h-9 w-9 border border-border">
+                <AvatarImage src={user?.avatar} />
+                <AvatarFallback className="bg-primary/10 text-primary">
+                  {user?.name
+                    ? user.name.charAt(0).toUpperCase()
+                    : user?.email?.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-1 flex-col overflow-hidden text-xs">
+                <span className="truncate font-semibold text-foreground">{user?.name || "User"}</span>
+                <span className="truncate text-muted-foreground/80">{user?.email}</span>
+              </div>
+              <IconAdjustmentsHorizontal size={16} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
-            <IconAdjustmentsHorizontal size={16} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
+          </Link>
         </div>
       </div>
     </div>
