@@ -29,11 +29,10 @@ export default function LoginPage() {
     try {
       setIsSigningIn(true);
       await signIn(email, password);
-      router.push("/dashboard");
-      router.refresh();
+      // Use window.location.href for a hard redirect to ensure cookies are sent and middleware runs correctly
+      window.location.href = "/dashboard";
     } catch (error: any) {
       toast.error(error.message || "Invalid email or password");
-    } finally {
       setIsSigningIn(false);
     }
   };
