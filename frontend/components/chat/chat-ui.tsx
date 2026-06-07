@@ -44,6 +44,14 @@ export const ChatUI: FC<ChatUIProps> = ({
     setUserInput(suggestion);
   };
 
+  const handleProviderChange = (providerId: string) => {
+    setSelectedProvider(providerId);
+    const provider = AI_PROVIDERS.find(p => p.id === providerId);
+    if (provider && provider.models.length > 0) {
+      setSelectedModel(provider.models[0].id);
+    }
+  };
+
   return (
     <main className="relative flex min-w-0 flex-1 flex-col bg-background">
       {/* Sidebar Toggle Button */}
@@ -70,7 +78,7 @@ export const ChatUI: FC<ChatUIProps> = ({
         <div className="flex items-center gap-2">
           <select
             value={selectedProvider}
-            onChange={(e) => setSelectedProvider(e.target.value)}
+            onChange={(e) => handleProviderChange(e.target.value)}
             className="hidden h-9 md:block rounded-md border border-border bg-muted/30 px-2 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all cursor-pointer"
           >
             {AI_PROVIDERS.map((provider) => (

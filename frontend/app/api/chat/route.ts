@@ -8,7 +8,6 @@ export async function POST(req: Request) {
   try {
     const { messages, provider, model: requestedModel, fileContexts } = await req.json();
     console.log("Chat API Request - Provider:", provider, "Model:", requestedModel);
-    console.log("OLLAMA_URL env:", process.env.OLLAMA_URL);
 
     let apiKey = "";
     let baseURL = "";
@@ -21,7 +20,10 @@ export async function POST(req: Request) {
         apiKey: apiKey,
       });
       aiProvider = groq;
-      if (!model) model = "llama-3.3-70b-versatile";
+      // If model is missing or doesn't look like a Groq/Mixtral model, use default
+      if (!model || (!model.startsWith("llama") && !model.startsWith("mixtral"))) {
+        model = "llama-3.3-70b-versatile";
+      }
     } else if (provider === "OpenRouter") {
       apiKey = process.env.OPENROUTER_API_KEY || process.env.NEXT_PUBLIC_OPENROUTER_API_KEY || "";
       baseURL = "https://openrouter.ai/api/v1";
@@ -30,16 +32,22 @@ export async function POST(req: Request) {
         baseURL: baseURL,
       });
       aiProvider = openai;
-      if (!model) model = "meta-llama/llama-3.3-70b-instruct";
+      // If model doesn't have a slash (like meta-llama/...), it's probably a stale ID from Groq/Ollama
+      if (!model || !model.includes("/")) {
+        model = "meta-llama/llama-3.3-70b-instruct";
+      }
     } else if (provider === "Ollama") {
       apiKey = "ollama";
-      baseURL = process.env.OLLAMA_URL || "http://localhost:11434/v1";
+      baseURL = process.env.OLLAMA_URL || "http://127.0.0.1:11434/v1";
       const openai = createOpenAI({
         apiKey: apiKey,
         baseURL: baseURL,
       });
       aiProvider = openai;
-      if (!model) model = "llama3:latest";
+      // If model has a slash or looks like a Groq model ID, use Ollama default
+      if (!model || model.includes("/") || model.includes("-versatile") || model.includes("-8192")) {
+        model = "llama3:latest";
+      }
     }
 
     if (!apiKey && provider !== "Ollama") {
@@ -48,6 +56,8 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
+
+    console.log(`[CHAT API] Final Choice - Provider: ${provider}, Model: ${model}`);
 
     const finalMessages = [...messages];
     if (fileContexts) {
