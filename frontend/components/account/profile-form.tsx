@@ -11,7 +11,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export const ProfileForm: FC = () => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -20,7 +20,7 @@ export const ProfileForm: FC = () => {
     email: "",
     phone: "",
     bio: "",
-    avatarUrl: ""
+    avatarUrl: "",
   });
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export const ProfileForm: FC = () => {
           email: user?.email || profile.email || "",
           phone: profile.phone_number || "",
           bio: profile.bio || "",
-          avatarUrl: profile.image_url || profile.avatar_url || ""
+          avatarUrl: profile.image_url || profile.avatar_url || "",
         });
       }
     } catch (error) {
@@ -55,7 +55,7 @@ export const ProfileForm: FC = () => {
     setUploading(true);
     try {
       const url = await uploadAvatar(file, user.id);
-      setFormData(prev => ({ ...prev, avatarUrl: url }));
+      setFormData((prev) => ({ ...prev, avatarUrl: url }));
       toast.success("Photo uploaded!");
     } catch (error: any) {
       toast.error(error.message || "Upload failed");
@@ -73,8 +73,12 @@ export const ProfileForm: FC = () => {
         phone_number: formData.phone,
         bio: formData.bio,
         image_url: formData.avatarUrl,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       });
+
+      // Refresh global auth state to reflect changes in sidebar immediately
+      await refreshUser();
+
       toast.success("Profile updated successfully!");
     } catch (error: any) {
       console.error("Update error:", error);
@@ -95,13 +99,15 @@ export const ProfileForm: FC = () => {
   return (
     <div className="bg-card rounded-2xl shadow-sm p-6 flex flex-col gap-8 w-full max-w-2xl mx-auto border border-border">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-foreground">Personal Information</h2>
+        <h2 className="text-xl font-bold text-foreground">
+          Personal Information
+        </h2>
       </div>
 
       <div>
-        <PhotoUpload 
-          name={formData.fullName || user?.name || "User"} 
-          imageUrl={formData.avatarUrl} 
+        <PhotoUpload
+          name={formData.fullName || user?.name || "User"}
+          imageUrl={formData.avatarUrl}
           onUpload={handleUpload}
           isUploading={uploading}
         />
@@ -112,7 +118,9 @@ export const ProfileForm: FC = () => {
           label="Full Name"
           value={formData.fullName}
           placeholder="Joe Doe"
-          onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, fullName: e.target.value })
+          }
         />
         <FormGroup
           label="Phone Number"
@@ -131,7 +139,7 @@ export const ProfileForm: FC = () => {
       </div>
 
       <div className="mt-4 flex flex-col sm:flex-row items-center gap-3">
-        <Button 
+        <Button
           onClick={handleSubmit}
           disabled={saving || uploading}
           className="w-full sm:w-auto bg-green-600 text-white font-semibold hover:bg-green-700 h-12 px-10 transition-all shadow-md active:scale-[0.98]"
@@ -139,9 +147,12 @@ export const ProfileForm: FC = () => {
           {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Save Changes
         </Button>
-        
+
         <Link href="/dashboard" className="w-full sm:flex-1">
-          <Button variant="outline" className="w-full h-12 border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 font-semibold transition-all">
+          <Button
+            variant="outline"
+            className="w-full h-12 border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 font-semibold transition-all"
+          >
             Go to Dashboard
           </Button>
         </Link>
