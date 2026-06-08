@@ -4,8 +4,8 @@ export interface FeedbackData {
   chat_id: string;
   user_id: string;
   rating: number;
-  correctness: string;
-  length_type: string;
+  correctness?: string;
+  length_type?: string;
   comment?: string;
   category?: string;
 }
@@ -20,8 +20,8 @@ export async function submitFeedback(feedback: FeedbackData) {
         chat_id: feedback.chat_id,
         user_id: feedback.user_id,
         rating: feedback.rating,
-        correctness: feedback.correctness,
-        length_type: feedback.length_type,
+        correctness: feedback.correctness || "none",
+        length_type: feedback.length_type || "none",
         comment: feedback.comment,
         category: feedback.category,
       },

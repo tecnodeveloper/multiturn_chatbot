@@ -78,12 +78,24 @@ export const submitFeedback = async (feedback: {
   chat_id: string;
   user_id: string;
   rating: number;
+  correctness?: string;
+  length_type?: string;
   comment?: string;
   category?: string;
 }) => {
   const { data, error } = await supabase
     .from("feedback")
-    .insert([feedback])
+    .insert([
+      {
+        chat_id: feedback.chat_id,
+        user_id: feedback.user_id,
+        rating: feedback.rating,
+        correctness: feedback.correctness || "none",
+        length_type: feedback.length_type || "none",
+        comment: feedback.comment,
+        category: feedback.category,
+      },
+    ])
     .select("*")
     .single();
 

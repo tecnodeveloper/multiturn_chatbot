@@ -8,6 +8,7 @@ import {
   signUpWithEmail,
 } from "@/lib/auth";
 import type { User } from "@supabase/supabase-js";
+import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 export interface AuthUser {
@@ -56,6 +57,7 @@ function mapUser(user: User | null): AuthUser | null {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const initialize = async () => {
@@ -71,12 +73,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(mapUser(session?.user ?? null));
+      
+      // If signed out, redirect to login
+      if (event === 'SIGNED_OUT') {
+        router.push('/login');
+      }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [router]);
 
   const signIn = async (email: string, password: string) => {
     const userData = await signInWithEmail(email, password);
@@ -97,8 +104,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const handleLogout = async () => {
-    await signOut();
-    setUser(null);
+    try {
+      await signOut(); // Server-side logout (clears cookies)
+      await supabase.auth.signOut(); // Client-side logout (clears local storage)
+      setUser(null);
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Fallback
+      window.location.href = "/login";
+    }
   };
 
   const value = useMemo<AuthContextType>(

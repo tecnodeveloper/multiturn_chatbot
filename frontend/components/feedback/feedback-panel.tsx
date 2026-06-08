@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, useState } from "react";
-import { Star, CheckCircle2, AlertCircle, XCircle, Ruler, Info } from "lucide-react";
+import { Star, CheckCircle2, AlertCircle, XCircle, Ruler, Info, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { submitFeedback } from "@/lib/feedback-service";
@@ -18,6 +18,7 @@ export const FeedbackPanel: FC<FeedbackPanelProps> = ({ chatId }) => {
   const [lengthType, setLengthType] = useState<string>("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
 
   const handleRating = (value: number) => setRating(value);
 
@@ -45,15 +46,23 @@ export const FeedbackPanel: FC<FeedbackPanelProps> = ({ chatId }) => {
       toast.success("Thank you for your feedback!");
     } catch (error) {
       console.error("Feedback error:", error);
-      toast.error("Failed to submit feedback");
+      toast.error("Failed to submit feedback: " + (error instanceof Error ? error.message : "Unknown error"));
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  if (isDismissed) return null;
+
   if (isSubmitted) {
     return (
-      <div className="my-6 rounded-xl border border-green-200 bg-green-50/50 p-6 text-center dark:border-green-900/30 dark:bg-green-900/10">
+      <div className="my-6 relative rounded-xl border border-green-200 bg-green-50/50 p-6 text-center dark:border-green-900/30 dark:bg-green-900/10">
+        <button 
+          onClick={() => setIsDismissed(true)}
+          className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <X className="h-4 w-4" />
+        </button>
         <div className="mb-2 flex justify-center">
           <CheckCircle2 className="h-8 w-8 text-green-500" />
         </div>
@@ -64,7 +73,15 @@ export const FeedbackPanel: FC<FeedbackPanelProps> = ({ chatId }) => {
   }
 
   return (
-    <div className="my-6 overflow-hidden rounded-xl border border-border bg-background shadow-sm transition-all animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="my-6 relative overflow-hidden rounded-xl border border-border bg-background shadow-sm transition-all animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <button 
+        onClick={() => setIsDismissed(true)}
+        className="absolute top-3 right-3 z-10 p-1 rounded-full hover:bg-muted text-muted-foreground transition-colors"
+        title="Dismiss feedback"
+      >
+        <X className="h-4 w-4" />
+      </button>
+
       <div className="bg-primary/5 px-6 py-3 border-b border-border flex items-center gap-2">
         <Info className="h-4 w-4 text-primary" />
         <h3 className="text-sm font-semibold text-primary">Help us Improve</h3>
@@ -152,9 +169,17 @@ export const FeedbackPanel: FC<FeedbackPanelProps> = ({ chatId }) => {
           </div>
         </div>
 
-        <div className="pt-2">
+        <div className="flex gap-3 pt-2">
           <Button 
-            className="w-full h-11 text-sm font-semibold shadow-md transition-all hover:shadow-lg active:scale-[0.98]"
+            variant="outline"
+            className="flex-1 h-11 text-sm font-semibold"
+            onClick={() => setIsDismissed(true)}
+            disabled={isSubmitting}
+          >
+            Maybe Later
+          </Button>
+          <Button 
+            className="flex-[2] h-11 text-sm font-semibold shadow-md transition-all hover:shadow-lg active:scale-[0.98]"
             onClick={handleSubmit}
             disabled={isSubmitting}
           >

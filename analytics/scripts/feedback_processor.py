@@ -3,7 +3,7 @@ import numpy as np
 import requests
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
@@ -25,18 +25,35 @@ def fetch_feedback_data():
     """Fetch all feedback and associated message content for analysis."""
     if not SUPABASE_URL or not SUPABASE_KEY or SUPABASE_URL == "None":
         print("Supabase credentials missing. Returning mock data for demonstration.")
-        return [
-            {"created_at": "2026-06-01T10:00:00Z", "rating": 5, "correctness": "correct", "length_type": "medium", "comment": "Very helpful and accurate response on mindfulness.", "category": "Mindfulness"},
-            {"created_at": "2026-06-01T14:00:00Z", "rating": 4, "correctness": "correct", "length_type": "short", "comment": "Good advice on stress management.", "category": "Stress"},
-            {"created_at": "2026-06-02T09:00:00Z", "rating": 3, "correctness": "partial", "length_type": "long", "comment": "A bit too wordy, but mostly correct.", "category": "General"},
-            {"created_at": "2026-06-02T11:00:00Z", "rating": 5, "correctness": "correct", "length_type": "short", "comment": "Perfectly answered my question about sleep.", "category": "Sleep"},
-            {"created_at": "2026-06-03T15:00:00Z", "rating": 2, "correctness": "incorrect", "length_type": "medium", "comment": "The explanation for anxiety was confusing.", "category": "Anxiety"},
-            {"created_at": "2026-06-04T08:00:00Z", "rating": 5, "correctness": "correct", "length_type": "medium", "comment": "Excellent mindfulness techniques.", "category": "Mindfulness"},
-            {"created_at": "2026-06-05T12:00:00Z", "rating": 4, "correctness": "partial", "length_type": "medium", "comment": "Mostly helpful for relationships.", "category": "Relationships"},
-            {"created_at": "2026-06-05T16:00:00Z", "rating": 5, "correctness": "correct", "length_type": "short", "comment": "Quick and accurate.", "category": "General"},
-            {"created_at": "2026-06-06T10:00:00Z", "rating": 1, "correctness": "incorrect", "length_type": "long", "comment": "Completely wrong about depression symptoms.", "category": "Depression"},
-            {"created_at": "2026-06-07T11:00:00Z", "rating": 4, "correctness": "correct", "length_type": "medium", "comment": "Good job on stress relief tips.", "category": "Stress"},
+        now = datetime.now()
+        mock_data = []
+        topics_and_comments = [
+            ("Machine Learning", "The explanation of transformers was very clear and mathematically sound.", 5, "correct", "perfect"),
+            ("Coding Help", "Helped me refactor my React components efficiently.", 5, "correct", "perfect"),
+            ("EMail writing", "The tone was a bit too formal, but the structure was good.", 4, "partial", "long"),
+            ("fix the bug", "Identified the race condition in my Python script immediately. Life saver!", 5, "correct", "short"),
+            ("Tip for day", "Nice productivity tip, but I already knew most of it.", 3, "partial", "medium"),
+            ("Emotional challenges", "Very empathetic response, helped me calm down during a stressful moment.", 5, "correct", "medium"),
+            ("Exam help", "The summary of organic chemistry reactions was exactly what I needed for my test.", 5, "correct", "long"),
+            ("Machine Learning", "The code for the neural network had a minor syntax error in the loss function.", 2, "incorrect", "medium"),
+            ("Coding Help", "Found a better way to implement the API calls.", 4, "correct", "perfect"),
+            ("fix the bug", "It suggested a fix that didn't work for my specific environment.", 2, "incorrect", "short"),
+            ("EMail writing", "The draft for the outreach email was persuasive and well-structured.", 5, "correct", "perfect"),
+            ("Exam help", "Helped me understand the difference between mitosis and meiosis clearly.", 4, "correct", "medium"),
         ]
+        
+        for i, (topic, comment, rating, correctness, length) in enumerate(topics_and_comments):
+            # Stagger dates over the last 3 days to ensure multi-day trends
+            date = now - timedelta(days=i % 4, hours=i * 3, minutes=i * 10)
+            mock_data.append({
+                "created_at": date.isoformat(),
+                "rating": rating,
+                "correctness": correctness,
+                "length_type": length,
+                "comment": comment,
+                "category": topic
+            })
+        return mock_data
 
     # Fetch feedback
     feedback_url = f"{SUPABASE_URL}/rest/v1/feedback?select=*,chats(title)"
