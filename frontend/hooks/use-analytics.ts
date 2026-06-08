@@ -13,11 +13,26 @@ export interface AnalyticsData {
     correctness: Record<string, number>;
     length_distribution: Record<string, number>;
   };
+  trends: Array<{
+    day: string;
+    total: number;
+    helpful: number;
+    accuracy: number;
+  }>;
+  recent_feedback: Array<{
+    time: string;
+    topic: string;
+    preview: string;
+    feedback: "up" | "down" | "none";
+    status: string;
+    rating: number;
+  }>;
   topics: Array<{
     cluster: number;
     keywords: string[];
     count: number;
   }>;
+  raw_data_count: number;
 }
 
 export function useAnalytics() {

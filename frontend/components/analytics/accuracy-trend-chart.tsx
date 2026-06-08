@@ -10,19 +10,19 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { AnalyticsData } from "@/hooks/use-analytics";
 
-const data = [
-  { day: 'Mon', val: 85 },
-  { day: 'Tue', val: 88 },
-  { day: 'Wed', val: 82 },
-  { day: 'Thu', val: 91 },
-  { day: 'Fri', val: 89 },
-  { day: 'Sat', val: 93 },
-  { day: 'Sun', val: 95 },
-];
+interface AccuracyTrendChartProps {
+  data: AnalyticsData | null;
+}
 
-export const AccuracyTrendChart: FC = () => {
+export const AccuracyTrendChart: FC<AccuracyTrendChartProps> = ({ data: analyticsData }) => {
   const [range, setRange] = useState("Week");
+  
+  const chartData = analyticsData?.trends.map(t => ({
+    day: t.day,
+    val: t.accuracy
+  })) || [];
 
   return (
     <div className="bg-white rounded-2xl shadow-sm p-6 flex flex-col gap-6 w-full">
@@ -47,7 +47,7 @@ export const AccuracyTrendChart: FC = () => {
 
       <div className="h-[250px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data}>
+          <AreaChart data={chartData}>
             <defs>
               <linearGradient id="colorAccuracy" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#a8c686" stopOpacity={0.3} />

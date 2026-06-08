@@ -1,12 +1,19 @@
 import { FC, InputHTMLAttributes } from "react";
 
-interface FormGroupProps extends InputHTMLAttributes<HTMLInputElement | HTMLTextAreaElement> {
+interface FormGroupProps extends InputHTMLAttributes<
+  HTMLInputElement | HTMLTextAreaElement
+> {
   label: string;
   type?: string;
   isTextArea?: boolean;
 }
 
-export const FormGroup: FC<FormGroupProps> = ({ label, type = "text", isTextArea = false, ...props }) => {
+export const FormGroup: FC<FormGroupProps> = ({
+  label,
+  type = "text",
+  isTextArea = false,
+  ...props
+}) => {
   return (
     <div className="flex flex-col gap-2 w-full">
       <label className="text-sm font-medium text-gray-700 dark:text-zinc-300">

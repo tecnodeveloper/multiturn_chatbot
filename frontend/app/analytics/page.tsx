@@ -66,7 +66,7 @@ const AnalyticsPage: FC = () => {
           {/* Recent User Feedback Table & Performance Insights */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              <FeedbackTable />
+              <FeedbackTable data={data} />
             </div>
             <div className="lg:col-span-1">
               <PerformanceInsights data={data} />
