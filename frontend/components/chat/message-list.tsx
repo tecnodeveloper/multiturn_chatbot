@@ -7,12 +7,14 @@ import { EmptyChatState } from "./empty-chat-state";
 import { Button } from "@/components/ui/button";
 import { Copy, ThumbsUp, ThumbsDown } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { FeedbackPanel } from "../feedback/feedback-panel";
 
 interface MessageListProps {
   messages: Message[];
   isSending: boolean;
   onNewChat: () => void;
   onSuggestionClick: (suggestion: string) => void;
+  chatId?: string;
 }
 
 const AssistantMessage: FC<{ content: string }> = ({ content }) => {
@@ -72,7 +74,8 @@ export const MessageList: FC<MessageListProps> = ({
   messages,
   isSending,
   onNewChat,
-  onSuggestionClick
+  onSuggestionClick,
+  chatId
 }) => {
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -96,24 +99,31 @@ export const MessageList: FC<MessageListProps> = ({
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-4">
-      {messages.map((item, index) => (
-        item.role === "assistant" ? (
-          <AssistantMessage key={`${item.role}-${index}`} content={item.content} />
-        ) : (
-          <div
-            key={`${item.role}-${index}`}
-            className="flex gap-3 justify-end"
-          >
-            <div
-              className="max-w-2xl rounded-2xl rounded-br-md bg-primary text-primary-foreground px-4 py-3 shadow-sm text-sm"
-            >
-              <ReactMarkdown className="prose dark:prose-invert max-w-none break-words leading-6">
-                {item.content}
-              </ReactMarkdown>
-            </div>
+      {messages.map((item, index) => {
+        const isAssistant = item.role === "assistant";
+        const messageCount = index + 1;
+        const showFeedback = messageCount % 4 === 0;
+
+        return (
+          <div key={`${item.role}-${index}`} className="flex flex-col gap-4">
+            {isAssistant ? (
+              <AssistantMessage content={item.content} />
+            ) : (
+              <div className="flex gap-3 justify-end">
+                <div className="max-w-2xl rounded-2xl rounded-br-md bg-primary text-primary-foreground px-4 py-3 shadow-sm text-sm">
+                  <ReactMarkdown className="prose dark:prose-invert max-w-none break-words leading-6">
+                    {item.content}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            )}
+            
+            {showFeedback && chatId && (
+              <FeedbackPanel chatId={chatId} />
+            )}
           </div>
-        )
-      ))}
+        );
+      })}
 
       {isSending && (
         <div className="flex items-center gap-3">

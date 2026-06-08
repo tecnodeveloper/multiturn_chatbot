@@ -116,6 +116,7 @@ export const ChatUI: FC<ChatUIProps> = ({
             isSending={isSending}
             onNewChat={onNewChat}
             onSuggestionClick={handleSuggestionClick}
+            chatId={currentChatId}
           />
         </div>
       </div>

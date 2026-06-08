@@ -1,35 +1,47 @@
 import { FC } from "react";
 import { Target, MessageCircle, ThumbsUp, Award } from "lucide-react";
 import { StatCard } from "./stat-card";
+import { AnalyticsData } from "@/hooks/use-analytics";
 
-export const OverviewStats: FC = () => {
+interface OverviewStatsProps {
+  data: AnalyticsData | null;
+}
+
+export const OverviewStats: FC<OverviewStatsProps> = ({ data }) => {
+  const totalFeedback = data?.summary.total_feedback || 0;
+  const avgRating = data?.summary.average_rating || 0;
+  
+  // Calculate accuracy from correctness stats (correct + partial)
+  const correctness = data?.stats.correctness || {};
+  const accuracyRate = ((correctness.correct || 0) + (correctness.partial || 0)).toFixed(1);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
       <StatCard
         title="Accuracy Rate"
-        value="91.5%"
-        trend={{ value: "+4.2% this week", isUp: true }}
+        value={`${accuracyRate}%`}
+        subtitle="Correct + Partial"
         icon={<Target className="h-6 w-6" />}
         iconBgColor="bg-[#a8c686]/10 text-[#a8c686]"
       />
       <StatCard
-        title="Total Responses"
-        value="1,300"
-        subtitle="Last 7 days"
+        title="Total Feedback"
+        value={totalFeedback.toLocaleString()}
+        subtitle="Across all chats"
         icon={<MessageCircle className="h-6 w-6" />}
         iconBgColor="bg-blue-50 text-blue-500"
       />
       <StatCard
-        title="Positive Feedback"
-        value="782"
-        subtitle="60.2% helpful rate"
+        title="Average Rating"
+        value={avgRating.toFixed(1)}
+        subtitle="Out of 5 stars"
         icon={<ThumbsUp className="h-6 w-6" />}
         iconBgColor="bg-[#a8c686]/10 text-[#a8c686]"
       />
       <StatCard
-        title="Avg Response Time"
-        value="1.2s"
-        subtitle="Per response"
+        title="Responses Found"
+        value={data?.raw_data_count?.toString() || "0"}
+        subtitle="Analyzed data points"
         icon={<Award className="h-6 w-6" />}
         iconBgColor="bg-purple-50 text-purple-500"
       />

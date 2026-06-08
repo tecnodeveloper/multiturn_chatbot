@@ -4,7 +4,7 @@ import { FC, useState } from "react";
 import { useChat } from "@/context/chat-context";
 import { SidebarSwitcher } from "./sidebar-switcher";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Trash2 } from "lucide-react";
+import { Plus, Search, Trash2, LogOut } from "lucide-react";
 import { 
   IconMessage, 
   IconPencil, 
@@ -38,7 +38,7 @@ export const Sidebar: FC<SidebarProps> = ({
     presets,
     folders
   } = useChat();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const filteredChats = chats.filter((chat) =>
     chat.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -224,7 +224,18 @@ export const Sidebar: FC<SidebarProps> = ({
                 <span className="truncate font-semibold text-foreground">{user?.name || "User"}</span>
                 <span className="truncate text-muted-foreground/80">{user?.email}</span>
               </div>
-              <IconAdjustmentsHorizontal size={16} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  logout();
+                }}
+              >
+                <LogOut size={16} />
+              </Button>
             </div>
           </Link>
         </div>

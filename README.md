@@ -137,7 +137,49 @@ Responsible for:
 - docker
 - supabase cli
 - Python > 3.8
-- Next.js 16.2.6 stable versio
+- Next.js 16.2.6 stable version
+
+---
+
+# How to Run This Project
+
+Follow these steps to set up and run the project locally:
+
+### 1. Clone the Repository and Switch Branch
+```bash
+git clone <repository-url>
+cd MultiturnAiChatbotWithLlama3
+git checkout phase1
+```
+
+### 2. Install Frontend Dependencies
+```bash
+cd frontend
+npm install
+```
+
+### 3. Start Supabase (Requires Docker)
+Ensure Docker is running on your system, then start the Supabase local environment:
+```bash
+supabase start
+```
+*Note: This will provide you with several URLs and keys. You will need these for the next step.*
+
+### 4. Configure Environment Variables
+Copy the example environment file and update it with your local Supabase credentials:
+```bash
+cp .env.example .env.local
+```
+Edit `.env.local` and fill in the values provided by the `supabase start` command:
+- `NEXT_PUBLIC_SUPABASE_URL` (usually `http://127.0.0.1:54321`)
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+### 5. Run the Application
+```bash
+npm run dev
+```
+The frontend will be available at `http://localhost:3000`.
 
 ---
 
