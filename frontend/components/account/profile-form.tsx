@@ -6,7 +6,7 @@ import { FormGroup } from "./form-group";
 import { useAuth } from "@/context/auth-context";
 import { getProfile, updateProfile, uploadAvatar } from "@/db/profiles";
 import { toast } from "sonner";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -55,7 +55,6 @@ export const ProfileForm: FC = () => {
     setUploading(true);
     try {
       const url = await uploadAvatar(file, user.id);
-      // Update DB immediately or wait for save? Usually better to update state and let user save
       setFormData(prev => ({ ...prev, avatarUrl: url }));
       toast.success("Photo uploaded!");
     } catch (error: any) {
@@ -96,13 +95,7 @@ export const ProfileForm: FC = () => {
   return (
     <div className="bg-card rounded-2xl shadow-sm p-6 flex flex-col gap-8 w-full max-w-2xl mx-auto border border-border">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-foreground">Account Information</h2>
-        <Link href="/dashboard">
-          <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Dashboard
-          </Button>
-        </Link>
+        <h2 className="text-xl font-bold text-foreground">Personal Information</h2>
       </div>
 
       <div>
@@ -122,18 +115,10 @@ export const ProfileForm: FC = () => {
           onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
         />
         <FormGroup
-          label="Email (Managed by Auth)"
-          type="email"
-          value={formData.email}
-          readOnly
-          disabled
-          className="bg-muted/30 cursor-not-allowed text-muted-foreground border-dashed"
-        />
-        <FormGroup
           label="Phone Number"
           type="tel"
           value={formData.phone}
-          placeholder="+1 (555) 000-0000"
+          placeholder="+92000 1234567"
           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
         />
         <FormGroup

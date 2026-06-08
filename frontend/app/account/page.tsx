@@ -3,7 +3,6 @@
 import { FC } from "react";
 import { AccountHeader } from "@/components/account/header";
 import { ProfileForm } from "@/components/account/profile-form";
-import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -12,11 +11,6 @@ const AccountPage: FC = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <div className="bg-card border-b border-border">
         <div className="flex items-center gap-4 px-8 max-w-[1600px] mx-auto w-full">
-           <Link href="/dashboard">
-              <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
           <AccountHeader />
         </div>
       </div>
