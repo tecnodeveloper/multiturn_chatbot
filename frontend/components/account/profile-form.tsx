@@ -141,8 +141,8 @@ export const ProfileForm: FC = () => {
         </Button>
         
         <Link href="/dashboard" className="w-full sm:flex-1">
-          <Button variant="outline" className="w-full h-12 border-border text-muted-foreground hover:text-foreground hover:bg-muted/50">
-            Cancel & Exit
+          <Button variant="outline" className="w-full h-12 border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 font-semibold transition-all">
+            Go to Dashboard
           </Button>
         </Link>
       </div>

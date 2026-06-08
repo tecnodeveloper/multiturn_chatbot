@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Copy, ThumbsUp, ThumbsDown } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { FeedbackPanel } from "../feedback/feedback-panel";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface MessageListProps {
   messages: Message[];
@@ -21,8 +22,8 @@ const AssistantMessage: FC<{ content: string }> = ({ content }) => {
   const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
 
   return (
-    <div className="flex gap-3 justify-start">
-      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground flex-shrink-0">
+    <div className="flex gap-3 justify-start group">
+      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground flex-shrink-0 shadow-sm">
         AI
       </div>
       <div className="flex flex-col gap-1 max-w-2xl">
@@ -31,7 +32,7 @@ const AssistantMessage: FC<{ content: string }> = ({ content }) => {
             {content}
           </ReactMarkdown>
           
-          <div className="absolute bottom-2 right-2 flex gap-1">
+          <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
               onClick={() => setFeedback(feedback === 'up' ? null : 'up')}
               className={`p-1 rounded-md transition-colors ${
@@ -61,7 +62,7 @@ const AssistantMessage: FC<{ content: string }> = ({ content }) => {
           </div>
         </div>
       </div>
-      <Button variant="ghost" size="icon" className="h-9 w-9 flex-shrink-0" onClick={() => {
+      <Button variant="ghost" size="icon" className="h-9 w-9 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => {
         navigator.clipboard.writeText(content);
       }}>
         <Copy className="h-4 w-4" />
@@ -98,7 +99,7 @@ export const MessageList: FC<MessageListProps> = ({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-4">
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
       {messages.map((item, index) => {
         const isAssistant = item.role === "assistant";
         const messageCount = index + 1;
@@ -111,10 +112,16 @@ export const MessageList: FC<MessageListProps> = ({
             ) : (
               <div className="flex gap-3 justify-end">
                 <div className="max-w-2xl rounded-2xl rounded-br-md bg-primary text-primary-foreground px-4 py-3 shadow-sm text-sm">
-                  <ReactMarkdown className="prose dark:prose-invert max-w-none break-words leading-6">
+                  <ReactMarkdown className="prose prose-invert max-w-none break-words leading-6">
                     {item.content}
                   </ReactMarkdown>
                 </div>
+                <Avatar className="h-9 w-9 flex-shrink-0 border border-primary/20 shadow-sm">
+                  <AvatarImage src={user?.avatar} />
+                  <AvatarFallback className="bg-primary/20 text-primary text-xs font-bold">
+                    {user?.name?.charAt(0) || user?.email?.charAt(0) || "U"}
+                  </AvatarFallback>
+                </Avatar>
               </div>
             )}
             
@@ -127,7 +134,7 @@ export const MessageList: FC<MessageListProps> = ({
 
       {isSending && (
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
             AI
           </div>
           <div className="rounded-2xl rounded-bl-md bg-background border border-border px-4 py-3 shadow-sm">

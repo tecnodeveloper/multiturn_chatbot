@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useState, useEffect } from "react";
 import { Star, CheckCircle2, AlertCircle, XCircle, Ruler, Info, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -19,6 +19,25 @@ export const FeedbackPanel: FC<FeedbackPanelProps> = ({ chatId }) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
+
+  // Auto-dismiss logic
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    
+    if (isSubmitted) {
+      // Disappear after 5 seconds when submitted
+      timer = setTimeout(() => {
+        setIsDismissed(true);
+      }, 5000);
+    } else if (!isDismissed && !isSubmitting && rating === 0) {
+      // Disappear after 10 seconds if no interaction
+      timer = setTimeout(() => {
+        setIsDismissed(true);
+      }, 10000);
+    }
+
+    return () => clearTimeout(timer);
+  }, [isSubmitted, isDismissed, isSubmitting, rating]);
 
   const handleRating = (value: number) => setRating(value);
 
@@ -56,7 +75,7 @@ export const FeedbackPanel: FC<FeedbackPanelProps> = ({ chatId }) => {
 
   if (isSubmitted) {
     return (
-      <div className="my-6 relative rounded-xl border border-green-200 bg-green-50/50 p-6 text-center dark:border-green-900/30 dark:bg-green-900/10">
+      <div className="my-6 relative rounded-xl border border-green-200 bg-green-50/50 p-6 text-center dark:border-green-900/30 dark:bg-green-900/10 animate-in fade-in zoom-in duration-300">
         <button 
           onClick={() => setIsDismissed(true)}
           className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition-colors"
@@ -68,6 +87,9 @@ export const FeedbackPanel: FC<FeedbackPanelProps> = ({ chatId }) => {
         </div>
         <h3 className="text-lg font-semibold text-green-800 dark:text-green-300">Feedback Submitted!</h3>
         <p className="text-sm text-green-600 dark:text-green-400">Your input helps us improve MultiTurn AI.</p>
+        <div className="mt-4 h-1 w-full bg-green-100 rounded-full overflow-hidden">
+          <div className="h-full bg-green-500 animate-progress-5" />
+        </div>
       </div>
     );
   }
@@ -186,6 +208,10 @@ export const FeedbackPanel: FC<FeedbackPanelProps> = ({ chatId }) => {
             {isSubmitting ? "Submitting..." : "Submit Feedback"}
           </Button>
         </div>
+      </div>
+      
+      <div className="h-1 w-full bg-gray-100 dark:bg-zinc-800">
+        <div className="h-full bg-primary/30 animate-progress-10" />
       </div>
     </div>
   );

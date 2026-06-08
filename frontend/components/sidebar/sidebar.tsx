@@ -212,22 +212,26 @@ export const Sidebar: FC<SidebarProps> = ({
         <div className="border-t border-border p-3 bg-muted/10">
           <Link href="/account" className="block">
             <div className="flex items-center gap-3 rounded-lg p-2 hover:bg-muted/50 transition-colors cursor-pointer group">
-              <Avatar className="h-9 w-9 border border-border">
+              <Avatar className="h-10 w-10 border border-border shadow-sm">
                 <AvatarImage src={user?.avatar} />
-                <AvatarFallback className="bg-primary/10 text-primary">
+                <AvatarFallback className="bg-primary text-primary-foreground font-bold">
                   {user?.name
                     ? user.name.charAt(0).toUpperCase()
                     : user?.email?.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex flex-1 flex-col overflow-hidden text-xs">
-                <span className="truncate font-semibold text-foreground">{user?.name || "User"}</span>
-                <span className="truncate text-muted-foreground/80">{user?.email}</span>
+              <div className="flex flex-1 flex-col overflow-hidden">
+                <span className="truncate text-sm font-bold text-foreground leading-tight">
+                  {user?.name || "MultiTurn User"}
+                </span>
+                <span className="truncate text-[11px] text-muted-foreground/70 leading-tight">
+                  {user?.email}
+                </span>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive"
+                className="h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive shrink-0"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
