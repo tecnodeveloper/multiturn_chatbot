@@ -59,17 +59,7 @@ export async function signUpWithEmail(
     throw new Error(data.error || "Failed to sign up");
   }
 
-  if (data.session?.access_token && data.session?.refresh_token) {
-    const { error } = await supabase.auth.setSession({
-      access_token: data.session.access_token,
-      refresh_token: data.session.refresh_token,
-    });
-
-    if (error) {
-      throw new Error(error.message || "Failed to sync session");
-    }
-  }
-
+  // We don't call setSession here because we want the user to login manually
   return data.user;
 }
 

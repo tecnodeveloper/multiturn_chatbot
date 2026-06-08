@@ -2,19 +2,18 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-
 import { Brand } from "@/components/ui/brand";
 
 export default function SignupPage() {
   const router = useRouter();
   const { signUp, signInWithGoogle, isLoading } = useAuth();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -23,7 +22,7 @@ export default function SignupPage() {
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email || !password || !confirmPassword) {
+    if (!name || !email || !password || !confirmPassword) {
       toast.error("Please fill in all fields");
       return;
     }
@@ -40,9 +39,12 @@ export default function SignupPage() {
 
     try {
       setIsSigningUp(true);
-      await signUp(email, password);
-      router.push("/dashboard");
-      router.refresh();
+      await signUp(email, password, name);
+
+      toast.success(
+        "Account created successfully! Please login with your credentials.",
+      );
+      router.push("/login");
     } catch (error: any) {
       toast.error(error.message || "Failed to create account");
     } finally {
@@ -65,12 +67,29 @@ export default function SignupPage() {
     <div className="min-h-screen flex items-center justify-center bg-black p-4">
       <div className="w-full max-w-sm">
         {/* Logo Section */}
-        <div className="flex flex-col items-center mb-12">
+        <div className="flex flex-col items-center mb-8">
           <Brand size="xl" showText={false} className="mb-4" />
         </div>
 
         {/* Form Section */}
-        <form onSubmit={handleEmailSignUp} className="space-y-6 mb-8">
+        <form onSubmit={handleEmailSignUp} className="space-y-4 mb-8">
+          {/* Name Field */}
+          <div className="space-y-2">
+            <Label htmlFor="name" className="text-white font-medium block">
+              Full Name
+            </Label>
+            <Input
+              id="name"
+              type="text"
+              placeholder="Joe Doe"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              disabled={isSigningUp || isLoading}
+              className="h-11 bg-black border border-[#2A2A2A] text-white placeholder:text-gray-500 rounded-lg focus:border-blue-500 focus:ring-0"
+            />
+          </div>
+
           {/* Email Field */}
           <div className="space-y-2">
             <Label htmlFor="email" className="text-white font-medium block">
@@ -84,7 +103,7 @@ export default function SignupPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={isSigningUp || isLoading}
-              className="h-12 bg-black border border-[#2A2A2A] text-white placeholder:text-gray-500 rounded-lg focus:border-blue-500 focus:ring-0"
+              className="h-11 bg-black border border-[#2A2A2A] text-white placeholder:text-gray-500 rounded-lg focus:border-blue-500 focus:ring-0"
             />
           </div>
 
@@ -101,7 +120,7 @@ export default function SignupPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={isSigningUp || isLoading}
-              className="h-12 bg-black border border-[#2A2A2A] text-white placeholder:text-gray-500 rounded-lg focus:border-blue-500 focus:ring-0"
+              className="h-11 bg-black border border-[#2A2A2A] text-white placeholder:text-gray-500 rounded-lg focus:border-blue-500 focus:ring-0"
             />
           </div>
 
@@ -121,7 +140,7 @@ export default function SignupPage() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               disabled={isSigningUp || isLoading}
-              className="h-12 bg-black border border-[#2A2A2A] text-white placeholder:text-gray-500 rounded-lg focus:border-blue-500 focus:ring-0"
+              className="h-11 bg-black border border-[#2A2A2A] text-white placeholder:text-gray-500 rounded-lg focus:border-blue-500 focus:ring-0"
             />
           </div>
 
@@ -129,7 +148,7 @@ export default function SignupPage() {
           <Button
             type="submit"
             disabled={isSigningUp || isLoading}
-            className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+            className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors mt-2"
           >
             {isSigningUp ? "Creating account..." : "Sign Up"}
           </Button>

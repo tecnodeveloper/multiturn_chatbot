@@ -31,24 +31,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    const finalResponse = NextResponse.json(
-      { user: data.user, session: data.session },
+    // We explicitly DO NOT merge the set-cookie headers here
+    // because we want to prevent the user from being auto-logged in.
+    
+    return NextResponse.json(
+      { user: data.user, success: true },
       { status: 200 },
     );
-
-    // Merge headers safely
-    response.headers.forEach((value, key) => {
-      if (key.toLowerCase() === "set-cookie") {
-        const cookies = response.headers.getSetCookie();
-        cookies.forEach(cookie => {
-          finalResponse.headers.append("set-cookie", cookie);
-        });
-      } else {
-        finalResponse.headers.set(key, value);
-      }
-    });
-
-    return finalResponse;
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
