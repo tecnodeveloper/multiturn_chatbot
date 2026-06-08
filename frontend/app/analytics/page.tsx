@@ -17,10 +17,10 @@ const AnalyticsPage: FC = () => {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#e8ddd1]">
+      <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-12 w-12 animate-spin text-[#8b6f5c]" />
-          <p className="text-[#8b6f5c] font-medium">Loading Analytics Data...</p>
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <p className="text-primary font-medium">Loading Analytics Data...</p>
         </div>
       </div>
     );
@@ -28,18 +28,18 @@ const AnalyticsPage: FC = () => {
 
   if (error) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#e8ddd1]">
-        <div className="rounded-xl bg-white p-8 shadow-xl text-center">
-          <h2 className="text-xl font-bold text-red-600 mb-2">Error Loading Analytics</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <p className="text-sm text-gray-400">Ensure the analytics backend service is running on port 5001.</p>
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="rounded-xl bg-card p-8 shadow-xl text-center border border-border">
+          <h2 className="text-xl font-bold text-destructive mb-2">Error Loading Analytics</h2>
+          <p className="text-muted-foreground mb-4">{error}</p>
+          <p className="text-xs text-muted-foreground/60">Ensure the analytics backend service is running on port 5001.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#e8ddd1] flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <AnalyticsHeader />
       
       <main className="flex-1 p-8 max-w-[1600px] mx-auto w-full">

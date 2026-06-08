@@ -8,10 +8,10 @@ interface FeedbackTableProps {
 
 const StatusBadge: FC<{ status: string }> = ({ status }) => {
   const styles: Record<string, string> = {
-    'Helpful': 'bg-[#a8c686]/20 text-[#a8c686]',
-    'Not Helpful': 'bg-[#e57373]/20 text-[#e57373]',
-    'Partially Helpful': 'bg-[#ffb74d]/20 text-[#ffb74d]',
-    'No Feedback': 'bg-gray-100 text-gray-400',
+    'Helpful': 'bg-secondary/20 text-secondary',
+    'Not Helpful': 'bg-destructive/20 text-destructive',
+    'Partially Helpful': 'bg-amber-500/20 text-amber-500',
+    'No Feedback': 'bg-muted text-muted-foreground',
   };
 
   return (
@@ -22,12 +22,12 @@ const StatusBadge: FC<{ status: string }> = ({ status }) => {
 };
 
 const FeedbackIcon: FC<{ type: "up" | "down" | "none" }> = ({ type }) => {
-  if (type === 'up') return <ThumbsUp className="h-4 w-4 text-[#a8c686]" />;
-  if (type === 'down') return <ThumbsDown className="h-4 w-4 text-[#e57373]" />;
+  if (type === 'up') return <ThumbsUp className="h-4 w-4 text-secondary" />;
+  if (type === 'down') return <ThumbsDown className="h-4 w-4 text-destructive" />;
   return (
     <div className="flex gap-1">
-      <ThumbsUp className="h-4 w-4 text-gray-300" />
-      <ThumbsDown className="h-4 w-4 text-gray-300" />
+      <ThumbsUp className="h-4 w-4 text-muted-foreground/30" />
+      <ThumbsDown className="h-4 w-4 text-muted-foreground/30" />
     </div>
   );
 };
@@ -36,27 +36,27 @@ export const FeedbackTable: FC<FeedbackTableProps> = ({ data: analyticsData }) =
   const feedbackItems = analyticsData?.recent_feedback || [];
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-6 flex flex-col gap-6 w-full overflow-hidden">
-      <h3 className="text-lg font-bold text-gray-900">Recent User Feedback</h3>
+    <div className="bg-card rounded-2xl shadow-sm p-6 flex flex-col gap-6 w-full overflow-hidden border border-border">
+      <h3 className="text-lg font-bold text-foreground">Recent User Feedback</h3>
       
       <div className="overflow-x-auto">
         {feedbackItems.length > 0 ? (
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-gray-100">
-                <th className="pb-4 font-semibold text-sm text-gray-500">Date/Time</th>
-                <th className="pb-4 font-semibold text-sm text-gray-500">Question Topic</th>
-                <th className="pb-4 font-semibold text-sm text-gray-500">Response Preview</th>
-                <th className="pb-4 font-semibold text-sm text-gray-500">User Feedback</th>
-                <th className="pb-4 font-semibold text-sm text-gray-500">Status</th>
+              <tr className="border-b border-border">
+                <th className="pb-4 font-semibold text-sm text-muted-foreground">Date/Time</th>
+                <th className="pb-4 font-semibold text-sm text-muted-foreground">Question Topic</th>
+                <th className="pb-4 font-semibold text-sm text-muted-foreground">Response Preview</th>
+                <th className="pb-4 font-semibold text-sm text-muted-foreground">User Feedback</th>
+                <th className="pb-4 font-semibold text-sm text-muted-foreground">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-border/50">
               {feedbackItems.map((item, i) => (
-                <tr key={i} className="hover:bg-gray-50 transition-colors group">
-                  <td className="py-4 text-sm text-gray-600 whitespace-nowrap">{item.time}</td>
-                  <td className="py-4 text-sm font-medium text-gray-900">{item.topic}</td>
-                  <td className="py-4 text-sm text-gray-500 italic">"{item.preview}"</td>
+                <tr key={i} className="hover:bg-muted/30 transition-colors group">
+                  <td className="py-4 text-sm text-muted-foreground whitespace-nowrap">{item.time}</td>
+                  <td className="py-4 text-sm font-medium text-foreground">{item.topic}</td>
+                  <td className="py-4 text-sm text-muted-foreground italic">"{item.preview}"</td>
                   <td className="py-4">
                     <FeedbackIcon type={item.feedback} />
                   </td>
@@ -68,7 +68,7 @@ export const FeedbackTable: FC<FeedbackTableProps> = ({ data: analyticsData }) =
             </tbody>
           </table>
         ) : (
-          <div className="py-8 text-center text-gray-400">
+          <div className="py-8 text-center text-muted-foreground italic">
             No recent feedback to display
           </div>
         )}

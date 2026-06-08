@@ -22,6 +22,8 @@ interface SidebarSwitcherProps {
   contentType: ContentType;
 }
 
+import { ThemeToggle } from "@/components/theme-toggle";
+
 export const SidebarSwitcher: FC<SidebarSwitcherProps> = ({
   onContentTypeChange,
   contentType
@@ -95,6 +97,10 @@ export const SidebarSwitcher: FC<SidebarSwitcherProps> = ({
           />
         </TabsList>
       </Tabs>
+
+      <div className="flex flex-col items-center px-2">
+        <ThemeToggle />
+      </div>
     </div>
   );
 };

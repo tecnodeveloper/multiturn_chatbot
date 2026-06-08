@@ -6,7 +6,9 @@ import { FormGroup } from "./form-group";
 import { useAuth } from "@/context/auth-context";
 import { getProfile, updateProfile, uploadAvatar } from "@/db/profiles";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export const ProfileForm: FC = () => {
   const { user } = useAuth();
@@ -14,10 +16,10 @@ export const ProfileForm: FC = () => {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: "Joe Doe",
-    email: "email@gmail.com",
-    phone: "+923123456789",
-    bio: "improving my skills that matters in for real world",
+    fullName: "",
+    email: "",
+    phone: "",
+    bio: "",
     avatarUrl: ""
   });
 
@@ -32,11 +34,11 @@ export const ProfileForm: FC = () => {
       const profile = await getProfile(user!.id);
       if (profile) {
         setFormData({
-          fullName: profile.full_name || "Joe Doe",
-          email: profile.email || "email@gmail.com",
-          phone: profile.phone_number || "+932123456789",
-          bio: profile.bio || "improving my skills that matters in for real world",
-          avatarUrl: profile.avatar_url || ""
+          fullName: profile.full_name || "",
+          email: user?.email || profile.email || "",
+          phone: profile.phone_number || "",
+          bio: profile.bio || "",
+          avatarUrl: profile.image_url || profile.avatar_url || ""
         });
       }
     } catch (error) {
@@ -53,6 +55,7 @@ export const ProfileForm: FC = () => {
     setUploading(true);
     try {
       const url = await uploadAvatar(file, user.id);
+      // Update DB immediately or wait for save? Usually better to update state and let user save
       setFormData(prev => ({ ...prev, avatarUrl: url }));
       toast.success("Photo uploaded!");
     } catch (error: any) {
@@ -68,13 +71,14 @@ export const ProfileForm: FC = () => {
     try {
       await updateProfile(user.id, {
         full_name: formData.fullName,
-        email: formData.email,
         phone_number: formData.phone,
         bio: formData.bio,
-        avatar_url: formData.avatarUrl
+        image_url: formData.avatarUrl,
+        updated_at: new Date().toISOString()
       });
       toast.success("Profile updated successfully!");
     } catch (error: any) {
+      console.error("Update error:", error);
       toast.error(error.message || "Failed to update profile");
     } finally {
       setSaving(false);
@@ -84,59 +88,78 @@ export const ProfileForm: FC = () => {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[#8b6f5c]" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-6 flex flex-col gap-8 w-full max-w-2xl mx-auto dark:bg-zinc-900 dark:border dark:border-zinc-800">
+    <div className="bg-card rounded-2xl shadow-sm p-6 flex flex-col gap-8 w-full max-w-2xl mx-auto border border-border">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold text-foreground">Account Information</h2>
+        <Link href="/dashboard">
+          <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Dashboard
+          </Button>
+        </Link>
+      </div>
+
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-6 dark:text-zinc-100">Profile</h2>
-        
         <PhotoUpload 
-          name={formData.fullName} 
+          name={formData.fullName || user?.name || "User"} 
           imageUrl={formData.avatarUrl} 
           onUpload={handleUpload}
           isUploading={uploading}
         />
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-5">
         <FormGroup
           label="Full Name"
           value={formData.fullName}
+          placeholder="Joe Doe"
           onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
         />
         <FormGroup
-          label="Email Address"
+          label="Email (Managed by Auth)"
           type="email"
           value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          readOnly
+          disabled
+          className="bg-muted/30 cursor-not-allowed text-muted-foreground border-dashed"
         />
         <FormGroup
           label="Phone Number"
           type="tel"
           value={formData.phone}
+          placeholder="+1 (555) 000-0000"
           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
         />
         <FormGroup
           label="Bio"
           isTextArea
           value={formData.bio}
+          placeholder="Tell us about yourself..."
           onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
         />
       </div>
 
-      <div className="mt-6">
-        <button 
+      <div className="mt-4 flex flex-col sm:flex-row items-center gap-3">
+        <Button 
           onClick={handleSubmit}
           disabled={saving || uploading}
-          className="bg-[#16a34a] text-white font-medium rounded-md px-4 py-2 hover:bg-green-700 transition-colors w-fit flex items-center gap-2 disabled:opacity-50"
+          className="w-full sm:w-auto bg-green-600 text-white font-semibold hover:bg-green-700 h-12 px-10 transition-all shadow-md active:scale-[0.98]"
         >
-          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-          {saving ? "Saving..." : "Save Changes"}
-        </button>
+          {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Save Changes
+        </Button>
+        
+        <Link href="/dashboard" className="w-full sm:flex-1">
+          <Button variant="outline" className="w-full h-12 border-border text-muted-foreground hover:text-foreground hover:bg-muted/50">
+            Cancel & Exit
+          </Button>
+        </Link>
       </div>
     </div>
   );
