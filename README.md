@@ -1,47 +1,176 @@
-# Multi-Turn AI Chatbot With using Llama3
-     (Artifical Intelligence / Natural language Processing / Conversational AI)
-## Project IDEA: 
+# Multi-Turn AI Chatbot with LLaMA 3 [AI / NLP / Conversational AI]
 
- - We first install ollama Software and then run llama3 model locally, Then llama3 model exposes it's api then we use this api in our website. We build backend & frontend In backend we do query classification and validation about query length and taking input feedback after 4 to 5 queries and storing the queries in database with validation. Then making two roles User & Admin. Admin see feedback analytics graph, statics of multi-dimmensional query classification and see response time from starting to end 
+## Project Overview
 
-## Phases:
+This project is a **Multi-Turn AI Chatbot System** developed using **LLaMA 3** as the core conversational AI engine. The chatbot supports multi-turn conversations, user authentication, feedback collection, analytics, and local AI inference.
 
-- The project has already divided into three phases
-  1. Phase 1: Chatbot System Development (Frontend + Backend)
-  2. Phase 2: Chat Execution + Data Storage System
-  3. Phase 3: Analytics System 
+# Phase 1 Objectives
 
-## Phase 1: ChatBot System Development (Frontend + Backend)
+Phase 1 focuses on building the complete system foundation including:
 
-**FR1: System Initialization**
- - LLaMA 3 local model loading
- - Backend server initialization
- - Database connection setup
- - Analytics module initialization
+- Frontend Chat Interface
+- Backend API Server
+- Google OAuth Authentication
+- LLaMA 3 Integration
+- Database Connectivity
+- Feedback Collection System
+- Analytics Module Initialization
 
-**FR2: Frontend Chat Interface Development**
- - Google OAuth login page
- - Chat interface (user input + response display)
- - Feedback panel (rating, correctness, length type)
+---
 
-**FR3: Backend Server Development**
+# Tech Stack
 
- - The system shall implement a backend using Flask/FastAPI.
- - The backend shall handle:
- - User authentication
- - Session creation and management
- - Message routing to model
- - Data storage operations
+I'm facing difficulty running **LLaMA 3 locally** due to limited hardware resources So I'm using grok or openRouter api
 
-**FR4: LLaMA 3 Model Integration**
+This project uses an upgraded modern stack while maintaining all required functionality.
 
- - The system shall integrate LLaMA 3 as the core chatbot engine.
- - The system shall process user queries locally through the model.
+| Technology      | Purpose             |
+| --------------- | ------------------- |
+| Python          | Backend development |
+| FastAPI / Flask | Backend APIs        |
+| Next.js         | Frontend framework  |
+| Ollama          | Local LLaMA serving |
+| Supabase        | Database            |
 
-**FR5: Service Connectivity**
-- The system shall connect:
-    1. Frontend UI
-    2. Backend API
-    3. LLaMA 3 model inference engine
-    4. Database
-    5. Analytics module
+---
+
+# Project Architecture
+
+## Main Components
+
+### 1. Frontend Web Application
+
+Built using **Next.js**.
+
+Responsible for:
+
+- Login/signup pages
+- Google authentication
+- Chat dashboard
+- Chat interface
+- Feedback collection
+
+---
+
+### 2. Backend API Server
+
+Responsible for:
+
+- API routing
+- Session management
+- Authentication
+- AI request handling
+- Database communication
+
+---
+
+### 3. LLaMA 3 Inference Engine
+
+Responsible for:
+
+- Generating chatbot responses
+- Processing prompts locally
+- Maintaining conversational context
+
+---
+
+### 4. Database
+
+Built using **supabase**.
+
+Stores:
+
+- User accounts
+- Sessions
+- Chat history
+- Feedback data
+- Analytics data
+
+---
+
+### 5. Analytics Module
+
+Responsible for:
+
+- Feedback analysis
+- Usage analytics
+- Topic classification
+- Graph generation
+
+---
+
+# Requirements
+
+- docker
+- supabase cli
+- Python > 3.8
+- Next.js 16.2.6 stable version
+- uv (Python package manager)
+
+---
+
+# How to Run This Project
+
+Follow these steps to set up and run the project locally:
+
+### 1. Clone the Repository
+
+```bash
+git clone <repository-url>
+cd MultiturnAiChatbotWithLlama3
+```
+
+### 2. Start Supabase (Requires Docker)
+
+Ensure Docker is running on your system, navigate to the frontend directory, and start the Supabase local environment:
+
+```bash
+cd frontend
+supabase start
+```
+
+_Note: This will provide you with several URLs and keys. You will need these for the next steps._
+
+### 3. Configure and Run Frontend
+
+Copy the example environment file and update it with your local Supabase credentials:
+
+```bash
+# Assuming you are still in the frontend directory
+cp .env.example .env.local
+```
+
+Edit `.env.local` and fill in the values provided by the `supabase start` command:
+
+- `NEXT_PUBLIC_SUPABASE_URL` (usually `http://127.0.0.1:54321`)
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `GROQ_API_KEY` (if using Groq)
+- `OPENROUTER_API_KEY` (if using OpenRouter)
+
+Install dependencies and run:
+
+```bash
+npm install
+npm run dev
+```
+
+The frontend will be available at `http://localhost:3000`.
+
+### 4. Configure and Run Backend
+
+Open a new terminal window:
+
+```bash
+cd MultiturnAiChatbotWithLlama3/backend
+cp ../frontend/.env.local .env
+```
+
+Install dependencies using `uv` and start the server:
+
+```bash
+uv pip install -r requirements.txt # Or run directly:
+uv run python app.py
+```
+
+The backend API will be available at `http://localhost:5000`.
