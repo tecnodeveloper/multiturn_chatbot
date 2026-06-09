@@ -24,7 +24,6 @@ export function Brand({ className, showText = true, size = "md" }: BrandProps) {
         alt="MultiTurn AI"
         width={dim.width}
         height={dim.height}
-        style={{ width: "auto", height: "auto" }}
         className="rounded-lg"
         priority
       />

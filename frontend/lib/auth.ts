@@ -16,28 +16,34 @@ export async function signInWithGoogle() {
 }
 
 export async function signInWithEmail(email: string, password: string) {
+  console.log(`AUTH_LIB: signInWithEmail called for ${email}`);
   const response = await fetch("/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
   });
 
+  console.log(`AUTH_LIB: Received response from /api/auth/login, status: ${response.status}`);
   const data = await response.json();
 
   if (!response.ok) {
+    console.error(`AUTH_LIB: Login request failed:`, data.error);
     throw new Error(data.error || "Failed to sign in");
   }
 
   if (data.session?.access_token && data.session?.refresh_token) {
+    console.log(`AUTH_LIB: Syncing Supabase session`);
     const { error } = await supabase.auth.setSession({
       access_token: data.session.access_token,
       refresh_token: data.session.refresh_token,
     });
 
     if (error) {
+      console.error(`AUTH_LIB: Failed to set session:`, error.message);
       throw new Error(error.message || "Failed to sync session");
     }
 
+    console.log(`AUTH_LIB: Setting client-side cookies`);
     // Explicitly set cookies for the proxy and Next.js middleware/server components
     // This helps resolve race conditions where the client state is stale
     const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toUTCString();
@@ -45,6 +51,7 @@ export async function signInWithEmail(email: string, password: string) {
     document.cookie = `sb-refresh-token=${data.session.refresh_token}; path=/; expires=${expires}; SameSite=Lax;`;
   }
 
+  console.log(`AUTH_LIB: signInWithEmail successful for ${email}`);
   return data.user;
 }
 

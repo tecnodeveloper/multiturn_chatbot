@@ -17,6 +17,7 @@ import {
   useState,
   useCallback,
 } from "react";
+import logger from "@/lib/logger";
 
 export interface AuthUser {
   id: string;
@@ -47,9 +48,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUserProfile = useCallback(async (authUser: User | null) => {
     if (!authUser) {
+      logger.info("fetchUserProfile: No authUser, setting user to null");
       setUser(null);
       return;
     }
+
+    logger.info({ userId: authUser.id }, "fetchUserProfile: Starting profile fetch");
 
     // 1. Set initial user from metadata IMMEDIATELY
     const metadata = authUser.user_metadata ?? {};
@@ -78,23 +82,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .maybeSingle();
 
       if (error) {
-        console.error("Supabase profile fetch error:", error);
+        logger.error({ error, userId: authUser.id }, "Supabase profile fetch error");
       }
 
       if (profile) {
+        logger.info({ userId: authUser.id }, "Profile fetched successfully");
         setUser({
           id: authUser.id,
           email: authUser.email ?? "",
           name: profile.full_name || profile.name || initialUser.name,
           avatar: profile.image_url || profile.avatar_url || initialUser.avatar,
         });
+      } else {
+        logger.warn({ userId: authUser.id }, "No profile found in profiles table");
       }
     } catch (error) {
-      console.error("Error fetching profile in AuthContext:", error);
+      logger.error({ error, userId: authUser.id }, "Error fetching profile in AuthContext");
     }
   }, []);
 
   const refreshUser = useCallback(async () => {
+    logger.info("refreshUser called");
     const { data } = await supabase.auth.getUser();
     if (data.user) {
       await fetchUserProfile(data.user);
@@ -104,14 +112,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initialize = async () => {
       try {
+        logger.info("Auth initialization starting");
         const { data } = await supabase.auth.getSession();
         if (data.session?.user) {
+          logger.info({ userId: data.session.user.id }, "Active session found");
           await fetchUserProfile(data.session.user);
+        } else {
+          logger.info("No active session found during initialization");
         }
       } catch (error) {
-        console.error("Initialization error:", error);
+        logger.error({ error }, "Auth initialization error");
       } finally {
         setIsLoading(false);
+        logger.info("Auth initialization complete, isLoading=false");
       }
     };
 
@@ -121,13 +134,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      logger.info({ event, userId: session?.user?.id }, "Auth state change event");
       if (session?.user) {
-        await fetchUserProfile(session.user);
+        // Don't await here to prevent blocking the auth flow if profile fetch is slow
+        fetchUserProfile(session.user);
       } else {
         setUser(null);
       }
 
       if (event === "SIGNED_OUT") {
+        logger.info("User signed out, redirecting to login");
         router.push("/login");
       }
     });
@@ -138,34 +154,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [router, fetchUserProfile]);
 
   const signIn = async (email: string, password: string) => {
+    logger.info({ email }, "signIn context method called");
     const userData = await signInWithEmail(email, password);
+    logger.info({ userId: userData.id }, "signIn context method successful");
     // Don't wait for the full profile fetch to complete before returning
     // This prevents the UI from getting stuck if the profile fetch is slow
     fetchUserProfile(userData);
   };
 
   const signUp = async (email: string, password: string, name?: string) => {
+    logger.info({ email, name }, "signUp context method called");
     const userData = await signUpWithEmail(
       email,
       password,
       name || email.split("@")[0],
     );
+    logger.info({ userId: userData.id }, "signUp context method successful");
     // Trigger profile fetch without awaiting
     fetchUserProfile(userData);
   };
 
   const handleGoogleSignIn = async () => {
+    logger.info("handleGoogleSignIn context method called");
     await signInWithGoogle();
   };
 
   const handleLogout = async () => {
+    logger.info("handleLogout context method called");
     try {
       await signOut();
       await supabase.auth.signOut();
       setUser(null);
+      logger.info("Logout successful, redirecting to login");
       router.push("/login");
     } catch (error) {
-      console.error("Logout error:", error);
+      logger.error({ error }, "Logout error");
       window.location.href = "/login";
     }
   };
