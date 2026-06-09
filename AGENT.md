@@ -335,3 +335,35 @@ Build Phase 1 of a multi-turn AI chatbot system using:
 - **Root Directory Cleanup**: Removed stray `node_modules` and moved `.venv` (virtual environment) into the `backend/` directory to adhere strictly to the project architecture.
 - **Supabase Folder Cleanup**: Deleted the unused, empty `supabase/` folder from the root directory to avoid confusion with the actual active `frontend/supabase/` configuration.
 - **Documentation Updates**: Removed all emoji tick signs from the project documentation to ensure a clean and professional presentation. Added final structural cleanup summary to `AGENT.md`.
+
+---
+
+# Deployment Strategy
+
+This project is separated into frontend, backend, and database tiers. Each requires a distinct deployment method for production environments.
+
+### 1. Frontend Deployment (Next.js) -> Vercel (Recommended)
+Because the frontend is built with Next.js, **Vercel** is the optimal hosting platform.
+- **Method**: Import your GitHub repository into Vercel.
+- **Settings**: 
+  - **Root Directory**: `frontend`
+  - **Framework Preset**: Next.js
+- **Environment Variables**: Add all variables from `frontend/.env.local` (e.g., `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, etc.).
+
+### 2. Database Deployment (PostgreSQL) -> Supabase Cloud
+Move from local Docker (`supabase start`) to a hosted Supabase project.
+- **Method**: 
+  - Create a new project on [Supabase.com](https://supabase.com).
+  - Run `supabase link --project-ref <your-project-id>` inside the `frontend/` directory.
+  - Run `supabase db push` to push the local schema and migrations to the cloud database.
+- **Configuration**: Update your frontend environment variables in Vercel to use the new live database URLs and API keys.
+
+### 3. Backend Deployment (Python/FastAPI/Flask) -> Render or Railway
+Serverless platforms like Vercel are not ideal for long-running Python processes. 
+- **Method**: Connect your GitHub repository to a PaaS provider like [Render](https://render.com) or [Railway](https://railway.app).
+- **Settings**:
+  - **Root Directory**: `backend`
+  - **Build Command**: `pip install -r requirements.txt` (or equivalent `uv` commands).
+  - **Start Command**: `gunicorn app:app` (Flask) or `uvicorn app.main:app --host 0.0.0.0 --port $PORT` (FastAPI).
+- **Configuration**: Ensure you update the Vercel frontend environment to point its API requests to this live Python backend URL instead of `localhost:5000`.
+

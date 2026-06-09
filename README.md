@@ -1,6 +1,4 @@
-# Multi-Turn AI Chatbot with LLaMA 3
-
-Artificial Intelligence / Natural Language Processing / Conversational AI
+# Multi-Turn AI Chatbot with LLaMA 3 [AI / NLP / Conversational AI]
 
 ## Project Overview
 
@@ -20,7 +18,7 @@ Phase 1 focuses on building the complete system foundation including:
 
 ---
 
-# Updated Tech Stack
+# Tech Stack
 
 I'm facing difficulty running **LLaMA 3 locally** due to limited hardware resources So I'm using grok or openRouter api
 
@@ -33,37 +31,6 @@ This project uses an upgraded modern stack while maintaining all required functi
 | Next.js         | Frontend framework  |
 | Ollama          | Local LLaMA serving |
 | Supabase        | Database            |
-
----
-
-# Why Next.js Was Used Instead of HTML/CSS/JavaScript
-
-The original requirement suggested: HTML/CSS/JavaScript. This project uses **Next.js** because it provides:
-
-- Better scalability
-- Component-based architecture
-- Faster development workflow
-- Better routing and dashboard management
-- Easier backend API integration
-- Improved maintainability
-- Modern industry-standard frontend development
-  Therefore, the project remains fully aligned with the original requirements.
-
----
-
-# Why Supabase Was Used as Database
-
-This project uses **Supabase** as the database backend. Supabase provides:
-
-- Real-time database capabilities for chatbot systems
-- Built-in authentication and authorization
-- Multi-user application support
-- Scalable chat/session storage
-- Analytics data management
-- Easy integration with Next.js frontend
-- Pre-built REST and GraphQL APIs
-
-The backend architecture and project functionality remain unchanged.
 
 ---
 
@@ -146,27 +113,35 @@ Responsible for:
 
 Follow these steps to set up and run the project locally:
 
-### 1. Clone the Repository and Switch Branch
+### 1. Clone the Repository
+
 ```bash
 git clone <repository-url>
 cd MultiturnAiChatbotWithLlama3
-git checkout phase1
 ```
 
 ### 2. Start Supabase (Requires Docker)
-Ensure Docker is running on your system, then start the Supabase local environment:
-```bash
-supabase start
-```
-*Note: This will provide you with several URLs and keys. You will need these for the next steps.*
 
-### 3. Configure Frontend
-Copy the example environment file and update it with your local Supabase credentials:
+Ensure Docker is running on your system, navigate to the frontend directory, and start the Supabase local environment:
+
 ```bash
 cd frontend
+supabase start
+```
+
+_Note: This will provide you with several URLs and keys. You will need these for the next steps._
+
+### 3. Configure and Run Frontend
+
+Copy the example environment file and update it with your local Supabase credentials:
+
+```bash
+# Assuming you are still in the frontend directory
 cp .env.example .env.local
 ```
-Edit `frontend/.env.local` and fill in the values provided by the `supabase start` command:
+
+Edit `.env.local` and fill in the values provided by the `supabase start` command:
+
 - `NEXT_PUBLIC_SUPABASE_URL` (usually `http://127.0.0.1:54321`)
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
@@ -174,41 +149,28 @@ Edit `frontend/.env.local` and fill in the values provided by the `supabase star
 - `OPENROUTER_API_KEY` (if using OpenRouter)
 
 Install dependencies and run:
+
 ```bash
 npm install
 npm run dev
 ```
+
 The frontend will be available at `http://localhost:3000`.
 
 ### 4. Configure and Run Backend
+
 Open a new terminal window:
+
 ```bash
-cd backend
+cd MultiturnAiChatbotWithLlama3/backend
 cp ../frontend/.env.local .env
 ```
+
 Install dependencies using `uv` and start the server:
+
 ```bash
 uv pip install -r requirements.txt # Or run directly:
 uv run python app.py
 ```
+
 The backend API will be available at `http://localhost:5000`.
-
----
-
-## Supervisor
-
-**Neelam Alam**
-
-Email: [neelam.alam@vu.edu.pk](mailto:neelam.alam@vu.edu.pk)
-
-Skype ID: neelam-cs
-
----
-
-# Output
-
-- This project is implementation-based and not an SRS document.
-- Focus on developing working modules and integrations.
-- Ensure frontend and backend connectivity is functional.
-- Verify LLaMA 3 integration before final submission.
-- The project fulfills all PHASE 1 functional requirements successfully.
