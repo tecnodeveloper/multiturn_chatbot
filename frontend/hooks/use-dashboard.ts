@@ -295,9 +295,7 @@ export function useDashboard() {
       }
 
     } catch (error: any) {
-      if (error.name === "AbortError") {
-        console.log("Fetch aborted");
-      } else {
+      if (error.name !== "AbortError") {
         toast.error(error.message || "Failed to send message");
       }
     } finally {

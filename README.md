@@ -138,6 +138,7 @@ Responsible for:
 - supabase cli
 - Python > 3.8
 - Next.js 16.2.6 stable version
+- uv (Python package manager)
 
 ---
 
@@ -152,34 +153,45 @@ cd MultiturnAiChatbotWithLlama3
 git checkout phase1
 ```
 
-### 2. Install Frontend Dependencies
-```bash
-cd frontend
-npm install
-```
-
-### 3. Start Supabase (Requires Docker)
+### 2. Start Supabase (Requires Docker)
 Ensure Docker is running on your system, then start the Supabase local environment:
 ```bash
 supabase start
 ```
-*Note: This will provide you with several URLs and keys. You will need these for the next step.*
+*Note: This will provide you with several URLs and keys. You will need these for the next steps.*
 
-### 4. Configure Environment Variables
+### 3. Configure Frontend
 Copy the example environment file and update it with your local Supabase credentials:
 ```bash
+cd frontend
 cp .env.example .env.local
 ```
-Edit `.env.local` and fill in the values provided by the `supabase start` command:
+Edit `frontend/.env.local` and fill in the values provided by the `supabase start` command:
 - `NEXT_PUBLIC_SUPABASE_URL` (usually `http://127.0.0.1:54321`)
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
+- `GROQ_API_KEY` (if using Groq)
+- `OPENROUTER_API_KEY` (if using OpenRouter)
 
-### 5. Run the Application
+Install dependencies and run:
 ```bash
+npm install
 npm run dev
 ```
 The frontend will be available at `http://localhost:3000`.
+
+### 4. Configure and Run Backend
+Open a new terminal window:
+```bash
+cd backend
+cp ../frontend/.env.local .env
+```
+Install dependencies using `uv` and start the server:
+```bash
+uv pip install -r requirements.txt # Or run directly:
+uv run python app.py
+```
+The backend API will be available at `http://localhost:5000`.
 
 ---
 

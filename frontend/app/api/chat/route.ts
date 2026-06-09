@@ -7,7 +7,6 @@ export const runtime = "edge";
 export async function POST(req: Request) {
   try {
     const { messages, provider, model: requestedModel, fileContexts } = await req.json();
-    console.log("Chat API Request - Provider:", provider, "Model:", requestedModel);
 
     let apiKey = "";
     let baseURL = "";
@@ -57,7 +56,6 @@ export async function POST(req: Request) {
       );
     }
 
-    console.log(`[CHAT API] Final Choice - Provider: ${provider}, Model: ${model}`);
 
     const finalMessages = [...messages];
     if (fileContexts) {

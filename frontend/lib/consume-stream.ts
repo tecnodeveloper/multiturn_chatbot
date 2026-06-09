@@ -21,9 +21,7 @@ export async function consumeReadableStream(
       }
     }
   } catch (error: any) {
-    if (signal.aborted) {
-      console.log("Stream reading was aborted");
-    } else {
+    if (!signal.aborted) {
       console.error("Error consuming stream:", error);
       throw error;
     }

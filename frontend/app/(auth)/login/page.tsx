@@ -2,15 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import logger from "@/lib/logger";
-
 import { Brand } from "@/components/ui/brand";
 
 export default function LoginPage() {
@@ -22,47 +19,36 @@ export default function LoginPage() {
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    logger.info({ email }, "Login form submitted");
     if (!email || !password) {
-      logger.warn("Login failed: Missing fields");
       toast.error("Please fill in all fields");
       return;
     }
 
     try {
       setIsSigningIn(true);
-      logger.info({ email }, "Attempting email sign in");
       await signIn(email, password);
       
-      logger.info({ email }, "Sign in successful, calling router.refresh()");
       toast.success("Signed in successfully!");
       
       // Force an immediate refresh of the router state to recognize new cookies
       router.refresh();
 
-      logger.info({ email }, "router.refresh() called, setting timeout for redirect");
       // Use window.location.href for a hard redirect to force a full page reload.
       // This ensures Next.js server components and middleware see the new cookies.
       setTimeout(() => {
-        logger.info({ email }, "Timeout reached, setting window.location.href = /dashboard");
         window.location.href = "/dashboard";
-      }, 500); // Increased timeout slightly to give router.refresh some room
+      }, 500);
     } catch (error: any) {
-      logger.error({ email, error: error.message }, "Login failed");
       toast.error(error.message || "Invalid email or password");
       setIsSigningIn(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
-    logger.info("Google login button clicked");
     try {
       setIsSigningIn(true);
-      logger.info("Attempting Google sign in");
       await signInWithGoogle();
-      logger.info("Google sign in successful");
     } catch (error: any) {
-      logger.error({ error: error.message }, "Google login failed");
       toast.error(error.message || "Failed to sign in with Google");
     } finally {
       setIsSigningIn(false);

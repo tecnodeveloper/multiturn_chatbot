@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Brand } from "@/components/ui/brand";
-import logger from "@/lib/logger";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -22,38 +21,31 @@ export default function SignupPage() {
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    logger.info({ email, name }, "Sign up form submitted");
 
     if (!name || !email || !password || !confirmPassword) {
-      logger.warn("Sign up failed: Missing fields");
       toast.error("Please fill in all fields");
       return;
     }
 
     if (password !== confirmPassword) {
-      logger.warn("Sign up failed: Passwords do not match");
       toast.error("Passwords do not match");
       return;
     }
 
     if (password.length < 6) {
-      logger.warn("Sign up failed: Password too short");
       toast.error("Password must be at least 6 characters");
       return;
     }
 
     try {
       setIsSigningUp(true);
-      logger.info({ email }, "Attempting email sign up");
       await signUp(email, password, name);
 
-      logger.info({ email }, "Sign up successful, redirecting to login");
       toast.success(
         "Account created successfully! Please login with your credentials.",
       );
       router.push("/login");
     } catch (error: any) {
-      logger.error({ email, error: error.message }, "Sign up failed");
       toast.error(error.message || "Failed to create account");
     } finally {
       setIsSigningUp(false);
@@ -61,14 +53,10 @@ export default function SignupPage() {
   };
 
   const handleGoogleSignUp = async () => {
-    logger.info("Google sign up button clicked");
     try {
       setIsSigningUp(true);
-      logger.info("Attempting Google sign up");
       await signInWithGoogle();
-      logger.info("Google sign up/in successful");
     } catch (error: any) {
-      logger.error({ error: error.message }, "Google sign up failed");
       toast.error(error.message || "Failed to sign up with Google");
     } finally {
       setIsSigningUp(false);

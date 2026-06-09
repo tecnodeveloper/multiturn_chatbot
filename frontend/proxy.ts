@@ -36,8 +36,6 @@ export async function proxy(request: NextRequest) {
     const authCookie = request.cookies.getAll().find(c => c.name.startsWith('sb-') && c.name.endsWith('-auth-token'));
     
     if (authCookie && authCookie.value) {
-      console.log(`[PROXY] Found Cookie. Raw snippet: ${authCookie.value.substring(0, 20)}...`);
-      
       try {
         const parsed = JSON.parse(authCookie.value);
         if (parsed.access_token) {
@@ -51,10 +49,8 @@ export async function proxy(request: NextRequest) {
     }
 
     if (accessToken) {
-      console.log("[PROXY] Forcing authentication with extracted token...");
       // Pass the token directly to Supabase, completely bypassing its cookie parser
       const { data, error } = await supabase.auth.getUser(accessToken);
-      if (error) console.log("[PROXY] ❌ Token rejected by Supabase API:", error.message);
       user = data?.user;
     } else {
       // Fallback to standard behavior if no cookie is found
@@ -68,7 +64,6 @@ export async function proxy(request: NextRequest) {
     const isProtectedPage = path.startsWith("/dashboard") || path.startsWith("/account");
 
     if (!user && isProtectedPage) {
-      console.log("[PROXY] Access Denied. Redirecting to /login.");
       url.pathname = "/login";
       const redirectResponse = NextResponse.redirect(url);
       response.headers.forEach((value, key) => redirectResponse.headers.append(key, value));
@@ -76,7 +71,6 @@ export async function proxy(request: NextRequest) {
     }
 
     if (user && isAuthPage) {
-      console.log("[PROXY] ✅ Access Granted. Redirecting to /dashboard.");
       url.pathname = "/dashboard";
       const redirectResponse = NextResponse.redirect(url);
       response.headers.forEach((value, key) => redirectResponse.headers.append(key, value));

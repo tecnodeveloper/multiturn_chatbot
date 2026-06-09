@@ -2,14 +2,13 @@
 
 import { useAuth } from "@/context/auth-context";
 import { useChat } from "@/context/chat-context";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Sidebar } from "@/components/sidebar/sidebar";
 import { ChatUI } from "@/components/chat/chat-ui";
 import { useDashboard } from "@/hooks/use-dashboard";
 import { FeedbackModal } from "@/components/feedback-modal";
 import { CreatePromptModal } from "@/components/sidebar/create-prompt-modal";
 import { CreatePresetModal } from "@/components/sidebar/create-preset-modal";
-import logger from "@/lib/logger";
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -17,10 +16,6 @@ export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [isPresetModalOpen, setIsPresetModalOpen] = useState(false);
-
-  useEffect(() => {
-    logger.info({ userId: user?.id }, "DashboardPage mounted");
-  }, [user]);
 
   const {
     handleNewChat,

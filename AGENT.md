@@ -1,4 +1,4 @@
-# Project Overview
+an# Project Overview
 
 ## Project Name
 
@@ -35,7 +35,8 @@ This project is focused on Phase 1 implementation and functional development.
 ## Backend
 
 - Python
-- FastAPI
+- Flask / FastAPI
+- UV for package management
 
 ## Database
 
@@ -90,7 +91,7 @@ npm install
 Build Phase 1 of a multi-turn AI chatbot system using:
 
 - Next.js 16.2.6 (stable) frontend
-- FastAPI backend
+- FastAPI/Flask backend
 - Supabase (PostgreSQL hosted) database
 - Google OAuth via Supabase Auth
 - OpenRouter/Groq API for LLaMA 3 inference
@@ -121,40 +122,16 @@ Build Phase 1 of a multi-turn AI chatbot system using:
   │ ├── tailwind.config.ts
   │ └── package.json
   │
-  ├── backend/ # FastAPI backend
-  │ ├── app/
-  │ │ ├── api/
-  │ │ │ ├── routes/
-  │ │ │ └── dependencies/
-  │ │ │
-  │ │ ├── core/
-  │ │ │ ├── config.py
-  │ │ │ ├── security.py
-  │ │ │ └── database.py
-  │ │ │
-  │ │ ├── models/
-  │ │ ├── schemas/
-  │ │ ├── services/
-  │ │ │ ├── ai/
-  │ │ │ ├── auth/
-  │ │ │ ├── chat/
-  │ │ │ └── analytics/
-  │ │ │
-  │ │ ├── utils/
-  │ │ └── main.py
-  │ │
-  │ ├── requirements.txt
-  │ └── .env
+  ├── backend/ # Python backend
+  │ ├── app.py
+  │ ├── pyproject.toml
+  │ ├── uv.lock
+  │ └── analytics/
   │
   ├── database/
   │ ├── migrations/
   │ ├── seeds/
   │ └── schema.sql
-  │
-  ├── analytics/
-  │ ├── notebooks/
-  │ ├── reports/
-  │ └── scripts/
   │
   ├── docs/
   │ ├── diagrams/
@@ -170,42 +147,42 @@ Build Phase 1 of a multi-turn AI chatbot system using:
 
 ---
 
-# Phase 2-3 IMPLEMENTATION STATUS ✅
+# Phase 2-3 IMPLEMENTATION STATUS
 
 ## Build & Dependencies (May 24, 2026)
 
-### ✅ COMPLETED
+### COMPLETED
 
 **Frontend Setup:**
 
-- ✅ Next.js 16.2.6 build successful (Turbopack)
-- ✅ TypeScript strict mode fully passing
-- ✅ All 580 npm packages installed
-- ✅ Dev server running on localhost:3000
+- Next.js 16.2.6 build successful (Turbopack)
+- TypeScript strict mode fully passing
+- All 580 npm packages installed
+- Dev server running on localhost:3000
 
 **UI Components (8 components):**
 
-- ✅ Button (6 variants)
-- ✅ Input, Label, Dialog, Avatar
-- ✅ Dropdown Menu, Sonner Toast
-- ✅ MultiTurn AI Brand component
+- Button (6 variants)
+- Input, Label, Dialog, Avatar
+- Dropdown Menu, Sonner Toast
+- MultiTurn AI Brand component
 
 **Authentication Pages:**
 
-- ✅ /login - Google OAuth + email/password form
-- ✅ /signup - Google OAuth registration form
-- ✅ /api/auth/google - OAuth initiation route
-- ✅ /api/auth/callback - OAuth callback handler
+- /login - Google OAuth + email/password form
+- /signup - Google OAuth registration form
+- /api/auth/google - OAuth initiation route
+- /api/auth/callback - OAuth callback handler
 
 **Utilities & Config:**
 
-- ✅ Supabase SSR client (server + browser)
-- ✅ Auth helper functions
-- ✅ Tailwind CSS with MultiTurn AI blue (#0055FF)
-- ✅ Dark/Light mode via next-themes
-- ✅ TypeScript paths alias (@/\*)
-- ✅ Root layout with Providers
-- ✅ Middleware with auth context
+- Supabase SSR client (server + browser)
+- Auth helper functions
+- Tailwind CSS with MultiTurn AI blue (#0055FF)
+- Dark/Light mode via next-themes
+- TypeScript paths alias (@/\*)
+- Root layout with Providers
+- Middleware with auth context
 
 **Dependencies Added:**
 
@@ -231,9 +208,9 @@ Build Phase 1 of a multi-turn AI chatbot system using:
 
 ### 🔧 Middleware to Proxy Transition & Dashboard Access (June 7, 2026)
 
-#### ✅ COMPLETED
+#### COMPLETED
 
-- **Renamed `middleware.ts` to `proxy.ts`**: Next.js 16 has deprecated the `middleware.ts` convention in favor of `proxy.ts`. 
+- **Renamed `middleware.ts` to `proxy.ts`**: Next.js 16 has deprecated the `middleware.ts` convention in favor of `proxy.ts`.
 - **Broke Redirection Loop**: Successfully reached the `/dashboard` page using the "Sledgehammer" token extraction fix in `proxy.ts`.
 - **Fixed Dashboard UI Crash**: Resolved a runtime error where `TabsList` was used outside of a `Tabs` parent in `sidebar-switcher.tsx`.
 - **Supabase URL Standardization**: Standardized `NEXT_PUBLIC_SUPABASE_URL` to `http://127.0.0.1:54321` in `.env.local` to prevent cookie naming mismatches.
@@ -256,7 +233,7 @@ Build Phase 1 of a multi-turn AI chatbot system using:
 
 ### 🔧 Diagnostic Hardening & Cookie Path Fix (June 7, 2026 - Session 7)
 
-#### ✅ COMPLETED
+#### COMPLETED
 
 - **Resolved "Cookie Path Trap"**: Forced `path: "/"` for all cookies in both `proxy.ts` and auth API routes. This prevents the browser from locking session cookies to specific sub-folders and ensures they are sent with dashboard requests.
 - **TypeScript Type Hardening**: Added explicit types for `cookiesToSet` in all `setAll` handlers to satisfy VS Code and prevent "implicit any" errors.
@@ -279,15 +256,15 @@ Build Phase 1 of a multi-turn AI chatbot system using:
 
 ### 🔧 Multi-Provider Model Synchronization & API Keys (June 7, 2026 - Session 8)
 
-#### ✅ COMPLETED
+#### COMPLETED
 
 - **Fixed Model-Provider Mismatch**: Resolved issues where Ollama and OpenRouter would fail because they were receiving Groq-specific model IDs.
 - **Frontend Sync Logic**: Updated `ChatUI` to automatically reset the `selectedModel` to the first valid model whenever the `selectedProvider` is changed.
 - **Backend Model Recovery**: Hardened the `/api/chat` route to detect and ignore incompatible model IDs from other providers, automatically falling back to valid defaults.
-- **API Key Integration**: 
-    - Integrated **Groq** API key.
-    - Integrated **OpenRouter** API key (updated with new key).
-    - Configured **Ollama** local URL (`http://127.0.0.1:11434/v1`).
+- **API Key Integration**:
+  - Integrated **Groq** API key.
+  - Integrated **OpenRouter** API key (updated with new key).
+  - Configured **Ollama** local URL (`http://127.0.0.1:11434/v1`).
 - **Environment Consistency**: Standardized `OLLAMA_URL` usage in the backend to ensure reliable local connections.
 
 #### ❗ IMPORTANT RULES
@@ -303,7 +280,7 @@ Build Phase 1 of a multi-turn AI chatbot system using:
 
 ### 🔧 Auth Route Cleanup (May 24, 2026)
 
-#### ✅ COMPLETED
+#### COMPLETED
 
 - Removed duplicate session checks from `frontend/app/(auth)/layout.tsx` and `frontend/app/(chat)/layout.tsx`
 - Simplified `frontend/app/page.tsx` to rely on middleware for root routing
@@ -319,25 +296,42 @@ Build Phase 1 of a multi-turn AI chatbot system using:
 
 ### Key Metrics
 
-- **TypeScript Errors**: 0 ✅
+- **TypeScript Errors**: 0
 - **Build Time**: 4.8s
 - **Package Vulnerabilities**: 7 (to be addressed)
-- **Dev Server Status**: Running ✅
+- **Dev Server Status**: Running
 
-### Commands Ready
+### 🔧 Final Project Cleanup & Auth Flow Debugging (June 9, 2026)
 
-```bash
-npm run dev       # Start dev server
-npm run build     # Production build
-npm run lint      # Run linter
-npm run type-check # TypeScript check
-npm run format:write # Format code
-```
+#### COMPLETED
 
-### Frontend Verified
+- **Resolved Authentication Stall**: Debugged an issue where the application would get stuck on the "Signing in..." state. The fix involved removing a blocking `await` from the `fetchUserProfile` call inside the `onAuthStateChange` listener in `auth-context.tsx`. This ensures the UI updates immediately based on the session state without waiting for a potentially slow database query.
+- **Fixed Dashboard Build Error**: Removed accidental placeholder characters (`...`) that were causing an "Expression expected" syntax error during the build of `dashboard/page.tsx`.
+- **Cleaned Console Warnings**: Fixed an aspect ratio warning in the `Brand` component by removing redundant inline styles that conflicted with Next.js `Image` optimizations.
+- **Submission Preparation**: Removed all verbose debug logging (`console.log`, `logger.info`, `logger.warn`) across the frontend codebase to ensure a clean console output for the final submission. Error logs (`console.error`) were retained for critical failure points. The `pino` logger package was kept installed for potential future use in v2.
+- **Project Structure Reorganization**: Moved `app.py`, `pyproject.toml`, `uv.lock`, and the `analytics` folder from the project root into a dedicated `backend/` directory to strictly align with the planned architecture. Updated `README.md` with explicit instructions on how to install and run the Python backend from the `backend/` directory.
 
-- ✅ Builds without errors
-- ✅ Types check passing
-- ✅ All components created
-- ✅ Auth pages ready for testing
-- ✅ Dev server running
+#### Files Modified
+
+- `frontend/context/auth-context.tsx`
+- `frontend/app/(auth)/login/page.tsx`
+- `frontend/app/(auth)/signup/page.tsx`
+- `frontend/app/(chat)/dashboard/page.tsx`
+- `frontend/app/api/auth/login/route.ts`
+- `frontend/app/api/chat/route.ts`
+- `frontend/components/ui/brand.tsx`
+- `frontend/lib/auth.ts`
+- `frontend/lib/consume-stream.ts`
+- `frontend/proxy.ts`
+- `frontend/hooks/use-dashboard.ts`
+- `/` (Moved `app.py`, `pyproject.toml`, `uv.lock`, `analytics` to `backend/`)
+- `README.md`
+- `AGENT.md`
+
+### 🔧 Project Structure Reorganization & Cleanup (June 9, 2026)
+
+#### COMPLETED
+
+- **Root Directory Cleanup**: Removed stray `node_modules` and moved `.venv` (virtual environment) into the `backend/` directory to adhere strictly to the project architecture.
+- **Supabase Folder Cleanup**: Deleted the unused, empty `supabase/` folder from the root directory to avoid confusion with the actual active `frontend/supabase/` configuration.
+- **Documentation Updates**: Removed all emoji tick signs from the project documentation to ensure a clean and professional presentation. Added final structural cleanup summary to `AGENT.md`.
