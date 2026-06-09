@@ -45,6 +45,21 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    // Explicitly set sb-access-token and sb-refresh-token for proxy/middleware sync
+    if (data.session) {
+      const isLocal = request.nextUrl.hostname === 'localhost' || request.nextUrl.hostname === '127.0.0.1';
+      const cookieOptions = {
+        path: "/",
+        httpOnly: false, // Must be false for client-side proxy to read if needed
+        secure: !isLocal,
+        sameSite: 'lax' as const,
+        maxAge: 60 * 60 * 24 * 30, // 30 days
+      };
+
+      finalResponse.cookies.set("sb-access-token", data.session.access_token, cookieOptions);
+      finalResponse.cookies.set("sb-refresh-token", data.session.refresh_token, cookieOptions);
+    }
+
     return finalResponse;
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });

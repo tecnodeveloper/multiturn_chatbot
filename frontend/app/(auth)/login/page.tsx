@@ -29,7 +29,14 @@ export default function LoginPage() {
     try {
       setIsSigningIn(true);
       await signIn(email, password);
-      // Use window.location.href for a hard redirect with a tiny delay to ensure cookies are physicaly written
+      
+      toast.success("Signed in successfully!");
+      
+      // Force an immediate refresh of the router state to recognize new cookies
+      router.refresh();
+
+      // Use window.location.href for a hard redirect to force a full page reload.
+      // This ensures Next.js server components and middleware see the new cookies.
       setTimeout(() => {
         window.location.href = "/dashboard";
       }, 100);

@@ -139,7 +139,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     const userData = await signInWithEmail(email, password);
-    await fetchUserProfile(userData);
+    // Don't wait for the full profile fetch to complete before returning
+    // This prevents the UI from getting stuck if the profile fetch is slow
+    fetchUserProfile(userData);
   };
 
   const signUp = async (email: string, password: string, name?: string) => {
@@ -148,7 +150,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password,
       name || email.split("@")[0],
     );
-    await fetchUserProfile(userData);
+    // Trigger profile fetch without awaiting
+    fetchUserProfile(userData);
   };
 
   const handleGoogleSignIn = async () => {

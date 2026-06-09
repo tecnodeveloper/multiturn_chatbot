@@ -37,6 +37,12 @@ export async function signInWithEmail(email: string, password: string) {
     if (error) {
       throw new Error(error.message || "Failed to sync session");
     }
+
+    // Explicitly set cookies for the proxy and Next.js middleware/server components
+    // This helps resolve race conditions where the client state is stale
+    const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toUTCString();
+    document.cookie = `sb-access-token=${data.session.access_token}; path=/; expires=${expires}; SameSite=Lax;`;
+    document.cookie = `sb-refresh-token=${data.session.refresh_token}; path=/; expires=${expires}; SameSite=Lax;`;
   }
 
   return data.user;
