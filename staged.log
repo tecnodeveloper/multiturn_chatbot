@@ -1,0 +1,1115 @@
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..7af7f04
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,2 @@
++/node_modules
++.env
+\ No newline at end of file
+diff --git a/MultiTurnAIChatbot-ERD.jpg b/MultiTurnAIChatbot-ERD.jpg
+new file mode 100644
+index 0000000..83f066f
+Binary files /dev/null and b/MultiTurnAIChatbot-ERD.jpg differ
+diff --git a/package-lock.json b/package-lock.json
+new file mode 100644
+index 0000000..1890582
+--- /dev/null
++++ b/package-lock.json
+@@ -0,0 +1,245 @@
++{
++  "name": "multiturn_chatbot",
++  "lockfileVersion": 3,
++  "requires": true,
++  "packages": {
++    "": {
++      "devDependencies": {
++        "supabase": "^2.109.1"
++      }
++    },
++    "node_modules/@ecies/ciphers": {
++      "version": "0.2.6",
++      "resolved": "https://registry.npmjs.org/@ecies/ciphers/-/ciphers-0.2.6.tgz",
++      "integrity": "sha512-patgsRPKGkhhoBjETV4XxD0En4ui5fbX0hzayqI3M8tvNMGUoUvmyYAIWwlxBc1KX5cturfqByYdj5bYGRpN9g==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "bun": ">=1",
++        "deno": ">=2.7.10",
++        "node": ">=16"
++      },
++      "peerDependencies": {
++        "@noble/ciphers": "^1.0.0"
++      }
++    },
++    "node_modules/@noble/ciphers": {
++      "version": "1.3.0",
++      "resolved": "https://registry.npmjs.org/@noble/ciphers/-/ciphers-1.3.0.tgz",
++      "integrity": "sha512-2I0gnIVPtfnMw9ee9h1dJG7tp81+8Ob3OJb3Mv37rx5L40/b0i7djjCVvGOVqc9AEIQyvyu1i6ypKdFw8R8gQw==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": "^14.21.3 || >=16"
++      },
++      "funding": {
++        "url": "https://paulmillr.com/funding/"
++      }
++    },
++    "node_modules/@noble/curves": {
++      "version": "1.9.7",
++      "resolved": "https://registry.npmjs.org/@noble/curves/-/curves-1.9.7.tgz",
++      "integrity": "sha512-gbKGcRUYIjA3/zCCNaWDciTMFI0dCkvou3TL8Zmy5Nc7sJ47a0jtOeZoTaMxkuqRo9cRhjOdZJXegxYE5FN/xw==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@noble/hashes": "1.8.0"
++      },
++      "engines": {
++        "node": "^14.21.3 || >=16"
++      },
++      "funding": {
++        "url": "https://paulmillr.com/funding/"
++      }
++    },
++    "node_modules/@noble/hashes": {
++      "version": "1.8.0",
++      "resolved": "https://registry.npmjs.org/@noble/hashes/-/hashes-1.8.0.tgz",
++      "integrity": "sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": "^14.21.3 || >=16"
++      },
++      "funding": {
++        "url": "https://paulmillr.com/funding/"
++      }
++    },
++    "node_modules/@supabase/cli-darwin-arm64": {
++      "version": "2.109.1",
++      "resolved": "https://registry.npmjs.org/@supabase/cli-darwin-arm64/-/cli-darwin-arm64-2.109.1.tgz",
++      "integrity": "sha512-tkn8tfunyqIL7RE+7DVjg6Ql2cJLPkGgh9cPafp2LbXI0qDgds0TaS+UOTHQEjci8JQXXe2wS00+122ko2QI8A==",
++      "cpu": [
++        "arm64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "darwin"
++      ]
++    },
++    "node_modules/@supabase/cli-darwin-x64": {
++      "version": "2.109.1",
++      "resolved": "https://registry.npmjs.org/@supabase/cli-darwin-x64/-/cli-darwin-x64-2.109.1.tgz",
++      "integrity": "sha512-0Q5ZAoWhOyIv4ZzQOU8QbjjdB2JmznnDNyJ3VrIeuLMWoifVfUWaLZhHBNYzr4xXoxBpKrggomuAT8BaEhY3lg==",
++      "cpu": [
++        "x64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "darwin"
++      ]
++    },
++    "node_modules/@supabase/cli-linux-arm64": {
++      "version": "2.109.1",
++      "resolved": "https://registry.npmjs.org/@supabase/cli-linux-arm64/-/cli-linux-arm64-2.109.1.tgz",
++      "integrity": "sha512-MS1djJjq5laD99+jYJUoARfSZhzRX9aXmo5piZ1yl2JXb9IXTuhiTD5olkFKQcgNckRcAZqMf4fucQGTYC767A==",
++      "cpu": [
++        "arm64"
++      ],
++      "dev": true,
++      "libc": [
++        "glibc"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ]
++    },
++    "node_modules/@supabase/cli-linux-arm64-musl": {
++      "version": "2.109.1",
++      "resolved": "https://registry.npmjs.org/@supabase/cli-linux-arm64-musl/-/cli-linux-arm64-musl-2.109.1.tgz",
++      "integrity": "sha512-cXNOsSU7MS+jmslGQATTD4DfWBEIHiFi7LaBWyBxHmR7tzIiZXimUXgN26ZiQjfAxU+RZq52C3k0qhi7vmqXQw==",
++      "cpu": [
++        "arm64"
++      ],
++      "dev": true,
++      "libc": [
++        "musl"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ]
++    },
++    "node_modules/@supabase/cli-linux-x64": {
++      "version": "2.109.1",
++      "resolved": "https://registry.npmjs.org/@supabase/cli-linux-x64/-/cli-linux-x64-2.109.1.tgz",
++      "integrity": "sha512-svFmamF/vIq4/oinwY50jDi869itC9/GWrPaGtsHFkK4NUBcQtl1T37WWIivGsXwbBKNC4FjZD3dGqjL7bfW1g==",
++      "cpu": [
++        "x64"
++      ],
++      "dev": true,
++      "libc": [
++        "glibc"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ]
++    },
++    "node_modules/@supabase/cli-linux-x64-musl": {
++      "version": "2.109.1",
++      "resolved": "https://registry.npmjs.org/@supabase/cli-linux-x64-musl/-/cli-linux-x64-musl-2.109.1.tgz",
++      "integrity": "sha512-zeD9MrZpEKJrjkSPcYp4nZeGJ9FQt0i/kiRij4ZprPP6R5l+SLi6Pk20ln+Vj/GZuWTVxX7IHJ11pgViaReAWw==",
++      "cpu": [
++        "x64"
++      ],
++      "dev": true,
++      "libc": [
++        "musl"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ]
++    },
++    "node_modules/@supabase/cli-windows-arm64": {
++      "version": "2.109.1",
++      "resolved": "https://registry.npmjs.org/@supabase/cli-windows-arm64/-/cli-windows-arm64-2.109.1.tgz",
++      "integrity": "sha512-NeKzgWAOpglnLwMTggTp5t44fbkfxACLkQNlCRx0q332HMM3WqsKQUsHv1MHc6ZbEc5bcMwaYjqPNI/aOWnP5g==",
++      "cpu": [
++        "arm64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "win32"
++      ]
++    },
++    "node_modules/@supabase/cli-windows-x64": {
++      "version": "2.109.1",
++      "resolved": "https://registry.npmjs.org/@supabase/cli-windows-x64/-/cli-windows-x64-2.109.1.tgz",
++      "integrity": "sha512-L9/pDLM+4IR8646aT69ZDVcnJeg1lZZsB26ZgI775S3f8jOHP41+1UH9Oq1g9CvKiAQviuaLgtwkuvi0I/cc/A==",
++      "cpu": [
++        "x64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "win32"
++      ]
++    },
++    "node_modules/eciesjs": {
++      "version": "0.5.0",
++      "resolved": "https://registry.npmjs.org/eciesjs/-/eciesjs-0.5.0.tgz",
++      "integrity": "sha512-s0J9SEVYAEPg7J63GFMApLYzPH9VNIQIyC6s15JpnqVc0TqcKWdbgFlnAweEBRyMmko2dcs2sfC83Hj4J43tuA==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@ecies/ciphers": "^0.2.6",
++        "@noble/ciphers": "^1.3.0",
++        "@noble/curves": "^1.9.7",
++        "@noble/hashes": "^1.8.0"
++      },
++      "engines": {
++        "bun": ">=1",
++        "deno": ">=2.7.10",
++        "node": ">=16"
++      }
++    },
++    "node_modules/jose": {
++      "version": "6.2.3",
++      "resolved": "https://registry.npmjs.org/jose/-/jose-6.2.3.tgz",
++      "integrity": "sha512-YYVDInQKFJfR/xa3ojUTl8c2KoTwiL1R5Wg9YCydwH0x0B9grbzlg5HC7mMjCtUJjbQ/YnGEZIhI5tCgfTb4Hw==",
++      "dev": true,
++      "license": "MIT",
++      "funding": {
++        "url": "https://github.com/sponsors/panva"
++      }
++    },
++    "node_modules/supabase": {
++      "version": "2.109.1",
++      "resolved": "https://registry.npmjs.org/supabase/-/supabase-2.109.1.tgz",
++      "integrity": "sha512-N2yP2MHTxOxXBWhfn3poudpJn4pkPosAUo7J/46FTou/l7wOwFi9tox8NSN6HljWkfM0zhwPRimNNGC9XBMoxQ==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "eciesjs": "^0.5.0",
++        "jose": "^6.2.3"
++      },
++      "bin": {
++        "supabase": "dist/supabase.js"
++      },
++      "optionalDependencies": {
++        "@supabase/cli-darwin-arm64": "2.109.1",
++        "@supabase/cli-darwin-x64": "2.109.1",
++        "@supabase/cli-linux-arm64": "2.109.1",
++        "@supabase/cli-linux-arm64-musl": "2.109.1",
++        "@supabase/cli-linux-x64": "2.109.1",
++        "@supabase/cli-linux-x64-musl": "2.109.1",
++        "@supabase/cli-windows-arm64": "2.109.1",
++        "@supabase/cli-windows-x64": "2.109.1"
++      }
++    }
++  }
++}
+diff --git a/package.json b/package.json
+new file mode 100644
+index 0000000..3cc71d1
+--- /dev/null
++++ b/package.json
+@@ -0,0 +1,5 @@
++{
++  "devDependencies": {
++    "supabase": "^2.109.1"
++  }
++}
+diff --git a/phase1-Task.docx b/phase1-Task.docx
+deleted file mode 100644
+index 62d93d5..0000000
+Binary files a/phase1-Task.docx and /dev/null differ
+diff --git a/supabase/.gitignore b/supabase/.gitignore
+new file mode 100644
+index 0000000..ad9264f
+--- /dev/null
++++ b/supabase/.gitignore
+@@ -0,0 +1,8 @@
++# Supabase
++.branches
++.temp
++
++# dotenvx
++.env.keys
++.env.local
++.env.*.local
+diff --git a/supabase/config.toml b/supabase/config.toml
+new file mode 100644
+index 0000000..fca4015
+--- /dev/null
++++ b/supabase/config.toml
+@@ -0,0 +1,414 @@
++# For detailed configuration reference documentation, visit:
++# https://supabase.com/docs/guides/local-development/cli/config
++# A string used to distinguish different Supabase projects on the same host. Defaults to the
++# working directory name when running `supabase init`.
++project_id = "multiturn_chatbot"
++
++[api]
++enabled = true
++# Port to use for the API URL.
++port = 54321
++# Schemas to expose in your API. Tables, views and stored procedures in this schema will get API
++# endpoints. `public` and `graphql_public` schemas are included by default.
++schemas = ["public", "graphql_public"]
++# Extra schemas to add to the search_path of every request.
++extra_search_path = ["public", "extensions"]
++# The maximum number of rows returns from a view, table, or stored procedure. Limits payload size
++# for accidental or malicious requests.
++max_rows = 1000
++# Controls whether new tables, views, sequences and functions created in the `public` schema by
++# `postgres` are reachable through the Data API roles (`anon`, `authenticated`, `service_role`)
++# without explicit GRANTs. When unset, new entities are NOT auto-exposed, matching the new cloud
++# default. Set to `true` to keep the legacy behaviour of auto-exposing new entities; this is
++# deprecated and the field is removed on 2026-10-30 once the always-revoked behaviour is permanent.
++# auto_expose_new_tables = true
++
++[api.tls]
++# Enable HTTPS endpoints locally using a self-signed certificate.
++enabled = false
++# Paths to self-signed certificate pair.
++# cert_path = "../certs/my-cert.pem"
++# key_path = "../certs/my-key.pem"
++
++[db]
++# Port to use for the local database URL.
++port = 54322
++# Port used by db diff command to initialize the shadow database.
++shadow_port = 54320
++# Maximum amount of time to wait for health check when starting the local database.
++health_timeout = "2m"
++# The database major version to use. This has to be the same as your remote database's. Run `SHOW
++# server_version;` on the remote database to check.
++major_version = 17
++
++[db.pooler]
++enabled = false
++# Port to use for the local connection pooler.
++port = 54329
++# Specifies when a server connection can be reused by other clients.
++# Configure one of the supported pooler modes: `transaction`, `session`.
++pool_mode = "transaction"
++# How many server connections to allow per user/database pair.
++default_pool_size = 20
++# Maximum number of client connections allowed.
++max_client_conn = 100
++
++# [db.vault]
++# secret_key = "env(SECRET_VALUE)"
++
++[db.migrations]
++# If disabled, migrations will be skipped during a db push or reset.
++enabled = true
++# Specifies an ordered list of schema files that describe your database.
++# Supports glob patterns relative to supabase directory: "./schemas/*.sql"
++schema_paths = []
++
++[db.seed]
++# If enabled, seeds the database after migrations during a db reset.
++enabled = true
++# Specifies an ordered list of seed files to load during db reset.
++# Supports glob patterns relative to supabase directory: "./seeds/*.sql"
++sql_paths = ["./seed.sql"]
++
++[db.network_restrictions]
++# Enable management of network restrictions.
++enabled = false
++# List of IPv4 CIDR blocks allowed to connect to the database.
++# Defaults to allow all IPv4 connections. Set empty array to block all IPs.
++allowed_cidrs = ["0.0.0.0/0"]
++# List of IPv6 CIDR blocks allowed to connect to the database.
++# Defaults to allow all IPv6 connections. Set empty array to block all IPs.
++allowed_cidrs_v6 = ["::/0"]
++
++# Uncomment to reject non-secure connections to the database.
++# [db.ssl_enforcement]
++# enabled = true
++
++[realtime]
++enabled = true
++# Bind realtime via either IPv4 or IPv6. (default: IPv4)
++# ip_version = "IPv6"
++# The maximum length in bytes of HTTP request headers. (default: 4096)
++# max_header_length = 4096
++
++[studio]
++enabled = true
++# Port to use for Supabase Studio.
++port = 54323
++# External URL of the API server that frontend connects to.
++api_url = "http://127.0.0.1"
++# OpenAI API Key to use for Supabase AI in the Supabase Studio.
++openai_api_key = "env(OPENAI_API_KEY)"
++
++# Email testing server. Emails sent with the local dev setup are not actually sent - rather, they
++# are monitored, and you can view the emails that would have been sent from the web interface.
++[local_smtp]
++enabled = true
++# Port to use for the email testing server web interface.
++port = 54324
++# Uncomment to expose additional ports for testing user applications that send emails.
++# smtp_port = 54325
++# pop3_port = 54326
++# admin_email = "admin@email.com"
++# sender_name = "Admin"
++
++[storage]
++enabled = true
++# The maximum file size allowed (e.g. "5MB", "500KB").
++file_size_limit = "50MiB"
++
++# Uncomment to configure local storage buckets
++# [storage.buckets.images]
++# public = false
++# file_size_limit = "50MiB"
++# allowed_mime_types = ["image/png", "image/jpeg"]
++# objects_path = "./images"
++
++# Allow connections via S3 compatible clients
++[storage.s3_protocol]
++enabled = true
++
++# Image transformation API is available to Supabase Pro plan.
++# [storage.image_transformation]
++# enabled = true
++
++# Store analytical data in S3 for running ETL jobs over Iceberg Catalog
++# This feature is only available on the hosted platform.
++[storage.analytics]
++enabled = false
++max_namespaces = 5
++max_tables = 10
++max_catalogs = 2
++
++# Analytics Buckets is available to Supabase Pro plan.
++# [storage.analytics.buckets.my-warehouse]
++
++# Store vector embeddings in S3 for large and durable datasets
++[storage.vector]
++enabled = true
++max_buckets = 10
++max_indexes = 5
++
++# Vector Buckets is available to Supabase Pro plan.
++# [storage.vector.buckets.documents-openai]
++
++[auth]
++enabled = true
++# The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
++# in emails.
++site_url = "http://127.0.0.1:3000"
++# The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
++# external_url = ""
++# A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
++additional_redirect_urls = ["https://127.0.0.1:3000"]
++# How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
++jwt_expiry = 3600
++# JWT issuer URL. If not set, defaults to auth.external_url.
++# jwt_issuer = ""
++# Path to JWT signing key. DO NOT commit your signing keys file to git.
++# signing_keys_path = "./signing_keys.json"
++# If disabled, the refresh token will never expire.
++enable_refresh_token_rotation = true
++# Allows refresh tokens to be reused after expiry, up to the specified interval in seconds.
++# Requires enable_refresh_token_rotation = true.
++refresh_token_reuse_interval = 10
++# Allow/disallow new user signups to your project.
++enable_signup = true
++# Allow/disallow anonymous sign-ins to your project.
++enable_anonymous_sign_ins = false
++# Allow/disallow testing manual linking of accounts
++enable_manual_linking = false
++# Passwords shorter than this value will be rejected as weak. Minimum 6, recommended 8 or more.
++minimum_password_length = 6
++# Passwords that do not meet the following requirements will be rejected as weak. Supported values
++# are: `letters_digits`, `lower_upper_letters_digits`, `lower_upper_letters_digits_symbols`
++password_requirements = ""
++
++# Configure passkey sign-ins.
++# [auth.passkey]
++# enabled = false
++
++# Configure WebAuthn relying party settings (required when passkey is enabled).
++# [auth.webauthn]
++# rp_display_name = "Supabase"
++# rp_id = "localhost"
++# rp_origins = ["http://127.0.0.1:3000"]
++
++[auth.rate_limit]
++# Number of emails that can be sent per hour. Requires auth.email.smtp to be enabled.
++email_sent = 2
++# Number of SMS messages that can be sent per hour. Requires auth.sms to be enabled.
++sms_sent = 30
++# Number of anonymous sign-ins that can be made per hour per IP address. Requires enable_anonymous_sign_ins = true.
++anonymous_users = 30
++# Number of sessions that can be refreshed in a 5 minute interval per IP address.
++token_refresh = 150
++# Number of sign up and sign-in requests that can be made in a 5 minute interval per IP address (excludes anonymous users).
++sign_in_sign_ups = 30
++# Number of OTP / Magic link verifications that can be made in a 5 minute interval per IP address.
++token_verifications = 30
++# Number of Web3 logins that can be made in a 5 minute interval per IP address.
++web3 = 30
++
++# Configure one of the supported captcha providers: `hcaptcha`, `turnstile`.
++# [auth.captcha]
++# enabled = true
++# provider = "hcaptcha"
++# secret = ""
++
++[auth.email]
++# Allow/disallow new user signups via email to your project.
++enable_signup = true
++# If enabled, a user will be required to confirm any email change on both the old, and new email
++# addresses. If disabled, only the new email is required to confirm.
++double_confirm_changes = true
++# If enabled, users need to confirm their email address before signing in.
++enable_confirmations = false
++# If enabled, users will need to reauthenticate or have logged in recently to change their password.
++secure_password_change = false
++# Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
++max_frequency = "1s"
++# Number of characters used in the email OTP.
++otp_length = 6
++# Number of seconds before the email OTP expires (defaults to 1 hour).
++otp_expiry = 3600
++
++# Use a production-ready SMTP server
++# [auth.email.smtp]
++# enabled = true
++# host = "smtp.sendgrid.net"
++# port = 587
++# user = "apikey"
++# pass = "env(SENDGRID_API_KEY)"
++# admin_email = "admin@email.com"
++# sender_name = "Admin"
++
++# Uncomment to customize email template
++# [auth.email.template.invite]
++# subject = "You have been invited"
++# content_path = "./supabase/templates/invite.html"
++
++# Uncomment to customize notification email template
++# [auth.email.notification.password_changed]
++# enabled = true
++# subject = "Your password has been changed"
++# content_path = "./templates/password_changed_notification.html"
++
++[auth.sms]
++# Allow/disallow new user signups via SMS to your project.
++enable_signup = false
++# If enabled, users need to confirm their phone number before signing in.
++enable_confirmations = false
++# Template for sending OTP to users
++template = "Your code is {{ `{{ .Code }}` }}"
++# Controls the minimum amount of time that must pass before sending another sms otp.
++max_frequency = "5s"
++
++# Use pre-defined map of phone number to OTP for testing.
++# [auth.sms.test_otp]
++# 4152127777 = "123456"
++
++# Configure logged in session timeouts.
++# [auth.sessions]
++# Force log out after the specified duration.
++# timebox = "24h"
++# Force log out if the user has been inactive longer than the specified duration.
++# inactivity_timeout = "8h"
++
++# This hook runs before a new user is created and allows developers to reject the request based on the incoming user object.
++# [auth.hook.before_user_created]
++# enabled = true
++# uri = "pg-functions://postgres/auth/before-user-created-hook"
++
++# This hook runs before a token is issued and allows you to add additional claims based on the authentication method used.
++# [auth.hook.custom_access_token]
++# enabled = true
++# uri = "pg-functions://<database>/<schema>/<hook_name>"
++
++# Configure one of the supported SMS providers: `twilio`, `twilio_verify`, `messagebird`, `textlocal`, `vonage`.
++[auth.sms.twilio]
++enabled = false
++account_sid = ""
++message_service_sid = ""
++# DO NOT commit your Twilio auth token to git. Use environment variable substitution instead:
++auth_token = "env(SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN)"
++
++# Multi-factor-authentication is available to Supabase Pro plan.
++[auth.mfa]
++# Control how many MFA factors can be enrolled at once per user.
++max_enrolled_factors = 10
++
++# Control MFA via App Authenticator (TOTP)
++[auth.mfa.totp]
++enroll_enabled = false
++verify_enabled = false
++
++# Configure MFA via Phone Messaging
++[auth.mfa.phone]
++enroll_enabled = false
++verify_enabled = false
++otp_length = 6
++template = "Your code is {{ `{{ .Code }}` }}"
++max_frequency = "5s"
++
++# Configure MFA via WebAuthn
++# [auth.mfa.web_authn]
++# enroll_enabled = true
++# verify_enabled = true
++
++# Use an external OAuth provider. The full list of providers are: `apple`, `azure`, `bitbucket`,
++# `discord`, `facebook`, `github`, `gitlab`, `google`, `keycloak`, `linkedin_oidc`, `notion`, `twitch`,
++# `twitter`, `x`, `slack`, `spotify`, `workos`, `zoom`.
++[auth.external.apple]
++enabled = false
++client_id = ""
++# DO NOT commit your OAuth provider secret to git. Use environment variable substitution instead:
++secret = "env(SUPABASE_AUTH_EXTERNAL_APPLE_SECRET)"
++# Overrides the default auth callback URL derived from auth.external_url.
++redirect_uri = ""
++# Overrides the default auth provider URL. Used to support self-hosted gitlab, single-tenant Azure,
++# or any other third-party OIDC providers.
++url = ""
++# If enabled, the nonce check will be skipped. Required for local sign in with Google auth.
++skip_nonce_check = false
++# If enabled, it will allow the user to successfully authenticate when the provider does not return an email address.
++email_optional = false
++
++# Allow Solana wallet holders to sign in to your project via the Sign in with Solana (SIWS, EIP-4361) standard.
++# You can configure "web3" rate limit in the [auth.rate_limit] section and set up [auth.captcha] if self-hosting.
++[auth.web3.solana]
++enabled = false
++
++# Use Firebase Auth as a third-party provider alongside Supabase Auth.
++[auth.third_party.firebase]
++enabled = false
++# project_id = "my-firebase-project"
++
++# Use Auth0 as a third-party provider alongside Supabase Auth.
++[auth.third_party.auth0]
++enabled = false
++# tenant = "my-auth0-tenant"
++# tenant_region = "us"
++
++# Use AWS Cognito (Amplify) as a third-party provider alongside Supabase Auth.
++[auth.third_party.aws_cognito]
++enabled = false
++# user_pool_id = "my-user-pool-id"
++# user_pool_region = "us-east-1"
++
++# Use Clerk as a third-party provider alongside Supabase Auth.
++[auth.third_party.clerk]
++enabled = false
++# Obtain from https://clerk.com/setup/supabase
++# domain = "example.clerk.accounts.dev"
++
++# OAuth server configuration
++[auth.oauth_server]
++# Enable OAuth server functionality
++enabled = false
++# Path for OAuth consent flow UI
++authorization_url_path = "/oauth/consent"
++# Allow dynamic client registration
++allow_dynamic_registration = false
++
++[edge_runtime]
++enabled = true
++# Supported request policies: `oneshot`, `per_worker`.
++# `per_worker` (default) — enables hot reload during local development.
++# `oneshot` — fallback mode if hot reload causes issues (e.g. in large repos or with symlinks).
++policy = "per_worker"
++# Port to attach the Chrome inspector for debugging edge functions.
++inspector_port = 8083
++# The Deno major version to use.
++deno_version = 2
++
++# [edge_runtime.secrets]
++# secret_key = "env(SECRET_VALUE)"
++
++[analytics]
++enabled = true
++port = 54327
++# Configure one of the supported backends: `postgres`, `bigquery`.
++backend = "postgres"
++
++# Experimental features may be deprecated any time
++[experimental]
++# Configures Postgres storage engine to use OrioleDB (S3)
++orioledb_version = ""
++# Configures S3 bucket URL, eg. <bucket_name>.s3-<region>.amazonaws.com
++s3_host = "env(S3_HOST)"
++# Configures S3 bucket region, eg. us-east-1
++s3_region = "env(S3_REGION)"
++# Configures AWS_ACCESS_KEY_ID for S3 bucket
++s3_access_key = "env(S3_ACCESS_KEY)"
++# Configures AWS_SECRET_ACCESS_KEY for S3 bucket
++s3_secret_key = "env(S3_SECRET_KEY)"
++
++# pg-delta is the schema diff engine for db diff / db pull / db remote commit.
++# Set enabled = false to fall back to the legacy migra engine.
++[experimental.pgdelta]
++enabled = true
++# Directory under `supabase/` where declarative files are written.
++# declarative_schema_path = "./database"
++# JSON string passed through to pg-delta SQL formatting.
++# format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":80,\"commaStyle\":\"trailing\"}"
+diff --git a/supabase/snippets/ddl_SqlQueries.sql b/supabase/snippets/ddl_SqlQueries.sql
+new file mode 100644
+index 0000000..7f7ff21
+--- /dev/null
++++ b/supabase/snippets/ddl_SqlQueries.sql
+@@ -0,0 +1,102 @@
++-- ==========================================
++-- 1. CREATE CUSTOM ENUM TYPES
++-- ==========================================
++CREATE TYPE auth_type AS ENUM ('email', 'google');
++CREATE TYPE message_sender AS ENUM ('user', 'bot');
++CREATE TYPE session_phase_type AS ENUM ('start', 'middle', 'end');
++CREATE TYPE correctness_type AS ENUM ('correct', 'partial', 'Incorrect');
++CREATE TYPE length_classification AS ENUM ('short', 'To the point', 'lengthy');
++CREATE TYPE llm_deployment_type AS ENUM ('GrokAPI', 'LocalDeploy');
++CREATE TYPE domain_category_type AS ENUM ('Machine learning', 'Deep Learning', 'HealthCare', 'Ecommerce', 'Power System');
++
++-- ==========================================
++-- 2. CREATE TABLES (In topological dependency order)
++-- ==========================================
++
++-- User Table
++CREATE TABLE users (
++    user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
++    full_name VARCHAR(255) NOT NULL,
++    email VARCHAR(255) UNIQUE NOT NULL,
++    password VARCHAR(255), -- Can be null for Google OAuth users
++    phone_number VARCHAR(50),
++    image_url TEXT,
++    bio TEXT,
++    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
++    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
++    type auth_type NOT NULL DEFAULT 'email'
++);
++
++-- Chat Session Table
++CREATE TABLE chat_sessions (
++    chat_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
++    user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
++    context TEXT,
++    sidebar_title VARCHAR(255),
++    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
++    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
++);
++
++-- Files Table (Handles document attachments)
++CREATE TABLE files (
++    file_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
++    chat_id UUID NOT NULL REFERENCES chat_sessions(chat_id) ON DELETE CASCADE,
++    user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
++    name VARCHAR(255) NOT NULL,
++    size_mb NUMERIC(4, 2) NOT NULL,
++    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
++    -- Enforces the max 2MB requirement directly at database level
++    CONSTRAINT check_file_size CHECK (size_mb <= 2.00) 
++);
++
++-- Model Table (Tracks LLM configuration metadata)
++CREATE TABLE models (
++    model_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
++    model_name VARCHAR(255) NOT NULL,
++    llm_type llm_deployment_type NOT NULL DEFAULT 'LocalDeploy',
++    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
++);
++
++-- Domain Table (Master Lookup for cross-session topic metrics)
++CREATE TABLE domains (
++    domain_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
++    category domain_category_type NOT NULL
++);
++
++-- Message Table (Stores multi-turn logs)
++CREATE TABLE messages (
++    message_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
++    chat_id UUID NOT NULL REFERENCES chat_sessions(chat_id) ON DELETE CASCADE,
++    domain_id UUID REFERENCES domains(domain_id) ON DELETE SET NULL, -- Allows multi-topic turns in one chat
++    sender message_sender NOT NULL,
++    response TEXT NOT NULL, -- The text payload
++    image_url TEXT,
++    response_time FLOAT NOT NULL, -- Saved as numerical Float for mathematical averaging (FR17)
++    session_phase session_phase_type NOT NULL, -- Tracks start/middle/end segmentation (FR16)
++    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
++);
++
++-- Feedback Table (Mandatory evaluation tracking)
++CREATE TABLE feedback (
++    feedback_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
++    message_id UUID UNIQUE NOT NULL REFERENCES messages(message_id) ON DELETE CASCADE, -- Tied directly to specific response
++    rating INT NOT NULL CHECK (rating >= 1 AND rating <= 4), -- Enforces 1-4 validation rules
++    comment TEXT,
++    correctness correctness_type NOT NULL,
++    length_type length_classification NOT NULL,
++    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
++);
++
++-- Analytics Summary Table (Aggregated session metadata for dashboard)
++CREATE TABLE analytics_summaries (
++    summary_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
++    chat_id UUID UNIQUE NOT NULL REFERENCES chat_sessions(chat_id) ON DELETE CASCADE,
++    dominant_domain_id UUID REFERENCES domains(domain_id) ON DELETE SET NULL,
++    avg_rating NUMERIC(3, 2),
++    total_duration_sec FLOAT,
++    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
++);
++
++
++
++SELECT * FROM users;
+\ No newline at end of file
+diff --git a/supabase/snippets/seeding.sql b/supabase/snippets/seeding.sql
+new file mode 100644
+index 0000000..53c7ded
+--- /dev/null
++++ b/supabase/snippets/seeding.sql
+@@ -0,0 +1,287 @@
++
++-- ==========================================
++-- 1. USERS SEED DATA (30 Rows)
++-- ==========================================
++INSERT INTO users (user_id, full_name, email, password, phone_number, bio, type) VALUES
++('a0000000-0000-0000-0000-000000000001', 'Alice Smith', 'alice@example.com', 'hashed_pw_1', '+1234567890', 'Data Scientist', 'email'),
++('a0000000-0000-0000-0000-000000000002', 'Bob Johnson', 'bob@gmail.com', NULL, '+1987654321', 'ML Engineer', 'google'),
++('a0000000-0000-0000-0000-000000000003', 'Charlie Brown', 'charlie@example.com', 'hashed_pw_3', '+1122334455', 'Healthcare Researcher', 'email'),
++('a0000000-0000-0000-0000-000000000004', 'Diana Prince', 'diana@google.com', NULL, '+1555666777', 'E-commerce Specialist', 'google'),
++('a0000000-0000-0000-0000-000000000005', 'Evan Wright', 'evan@example.com', 'hashed_pw_5', '+1999888777', 'Power Systems Analyst', 'email'),
++('a0000000-0000-0000-0000-000000000006', 'Fiona Gallagher', 'fiona@example.com', 'hashed_pw_6', NULL, 'Student', 'email'),
++('a0000000-0000-0000-0000-000000000007', 'George Costanza', 'george@vandelay.com', 'hashed_pw_7', '+1222333444', 'Architect', 'email'),
++('a0000000-0000-0000-0000-000000000008', 'Hannah Abbott', 'hannah@gmail.com', NULL, '+1444555666', 'Deep Learning Enthusiast', 'google'),
++('a0000000-0000-0000-0000-000000000009', 'Ian Malcolm', 'ian@jurassic.com', 'hashed_pw_9', '+1666777888', 'Chaos Theorist', 'email'),
++('a0000000-0000-0000-0000-000000000010', 'Julia Roberts', 'julia@gmail.com', NULL, '+1777888999', 'Actor and Tech Fan', 'google'),
++('a0000000-0000-0000-0000-000000000011', 'Kevin Mitnick', 'kevin@security.com', 'hashed_pw_11', '+1888999000', 'Cyber Security Consultant', 'email'),
++('a0000000-0000-0000-0000-000000000012', 'Luna Lovegood', 'luna@gmail.com', NULL, '+1000111222', 'Data Analyst', 'google'),
++('a0000000-0000-0000-0000-000000000013', 'Mike Ross', 'mike@pearson.com', 'hashed_pw_13', '+1231231234', 'Legal Tech AI Researcher', 'email'),
++('a0000000-0000-0000-0000-000000000014', 'Nina Simone', 'nina@music.com', 'hashed_pw_14', NULL, 'Musician and Dev', 'email'),
++('a0000000-0000-0000-0000-000000000015', 'Oscar Isaac', 'oscar@gmail.com', NULL, '+1321321432', 'AI hobbyist', 'google'),
++('a0000000-0000-0000-0000-000000000016', 'Pam Beesly', 'pam@dundermifflin.com', 'hashed_pw_16', '+1456456456', 'Admin and AI user', 'email'),
++('a0000000-0000-0000-0000-000000000017', 'Quentin Tarantino', 'quentin@movies.com', 'hashed_pw_17', '+1654654654', 'Director', 'email'),
++('a0000000-0000-0000-0000-000000000018', 'Rachel Green', 'rachel@gmail.com', NULL, '+1987987987', 'Fashion E-commerce', 'google'),
++('a0000000-0000-0000-0000-000000000019', 'Steve Jobs', 'steve@apple.com', 'hashed_pw_19', '+1345345345', 'Visionary', 'email'),
++('a0000000-0000-0000-0000-000000000020', 'Tina Fey', 'tina@gmail.com', NULL, '+1678678678', 'Comedian testing AI jokes', 'google'),
++('a0000000-0000-0000-0000-000000000021', 'Ursula Le Guin', 'ursula@books.com', 'hashed_pw_21', '+1789789789', 'Sci-fi Writer', 'email'),
++('a0000000-0000-0000-0000-000000000022', 'Victor Hugo', 'victor@gmail.com', NULL, '+1890890890', 'Classic Literature AI', 'google'),
++('a0000000-0000-0000-0000-000000000023', 'Walter White', 'walter@chemistry.com', 'hashed_pw_23', '+1123456789', 'Chemistry Teacher', 'email'),
++('a0000000-0000-0000-0000-000000000024', 'Xena Warrior', 'xena@gmail.com', NULL, '+1234123412', 'Historical AI bot trainer', 'google'),
++('a0000000-0000-0000-0000-000000000025', 'Yusuf Islam', 'yusuf@music.com', 'hashed_pw_25', '+1345134513', 'Artist', 'email'),
++('a0000000-0000-0000-0000-000000000026', 'Zoe Washburne', 'zoe@firefly.com', 'hashed_pw_26', '+1456145614', 'Pilot', 'email'),
++('a0000000-0000-0000-0000-000000000027', 'Alan Turing', 'alan@gmail.com', NULL, '+1567156715', 'Computer Scientist', 'google'),
++('a0000000-0000-0000-0000-000000000028', 'Betty White', 'betty@hollywood.com', 'hashed_pw_28', '+1678167816', 'Legend', 'email'),
++('a0000000-0000-0000-0000-000000000029', 'Carl Sagan', 'carl@cosmos.com', 'hashed_pw_29', '+1789178917', 'Astronomer', 'email'),
++('a0000000-0000-0000-0000-000000000030', 'Dorothy Gale', 'dorothy@gmail.com', NULL, '+1890189018', 'Lost in Oz', 'google');
++
++-- ==========================================
++-- 2. MODELS SEED DATA (30 Rows)
++-- ==========================================
++INSERT INTO models (model_id, model_name, llm_type) VALUES
++('b0000000-0000-0000-0000-000000000001', 'Grok-1', 'GrokAPI'),
++('b0000000-0000-0000-0000-000000000002', 'Llama-3-8B-Instruct', 'LocalDeploy'),
++('b0000000-0000-0000-0000-000000000003', 'Grok-1.5', 'GrokAPI'),
++('b0000000-0000-0000-0000-000000000004', 'Mistral-7B-v0.2', 'LocalDeploy'),
++('b0000000-0000-0000-0000-000000000005', 'Grok-1.5-Vision', 'GrokAPI'),
++('b0000000-0000-0000-0000-000000000006', 'Mixtral-8x7B', 'LocalDeploy'),
++('b0000000-0000-0000-0000-000000000007', 'Grok-Beta', 'GrokAPI'),
++('b0000000-0000-0000-0000-000000000008', 'Phi-3-Mini', 'LocalDeploy'),
++('b0000000-0000-0000-0000-000000000009', 'Grok-1-Turbo', 'GrokAPI'),
++('b0000000-0000-0000-0000-000000000010', 'Qwen1.5-14B', 'LocalDeploy'),
++('b0000000-0000-0000-0000-000000000011', 'Grok-Research', 'GrokAPI'),
++('b0000000-0000-0000-0000-000000000012', 'Gemma-7B', 'LocalDeploy'),
++('b0000000-0000-0000-0000-000000000013', 'Grok-2', 'GrokAPI'),
++('b0000000-0000-0000-0000-000000000014', 'Falcon-40B', 'LocalDeploy'),
++('b0000000-0000-0000-0000-000000000015', 'Grok-2-Mini', 'GrokAPI'),
++('b0000000-0000-0000-0000-000000000016', 'Llama-2-13B', 'LocalDeploy'),
++('b0000000-0000-0000-0000-000000000017', 'Grok-Pro', 'GrokAPI'),
++('b0000000-0000-0000-0000-000000000018', 'Vicuna-13B', 'LocalDeploy'),
++('b0000000-0000-0000-0000-000000000019', 'Grok-API-Legacy', 'GrokAPI'),
++('b0000000-0000-0000-0000-000000000020', 'Zephyr-7B-beta', 'LocalDeploy'),
++('b0000000-0000-0000-0000-000000000021', 'Grok-Chat', 'GrokAPI'),
++('b0000000-0000-0000-0000-000000000022', 'StarCoder2-15B', 'LocalDeploy'),
++('b0000000-0000-0000-0000-000000000023', 'Grok-Code', 'GrokAPI'),
++('b0000000-0000-0000-0000-000000000024', 'Yi-34B', 'LocalDeploy'),
++('b0000000-0000-0000-0000-000000000025', 'Grok-Math', 'GrokAPI'),
++('b0000000-0000-0000-0000-000000000026', 'Command-R-Plus', 'LocalDeploy'),
++('b0000000-0000-0000-0000-000000000027', 'Grok-Medical', 'GrokAPI'),
++('b0000000-0000-0000-0000-000000000028', 'DBRX-Instruct', 'LocalDeploy'),
++('b0000000-0000-0000-0000-000000000029', 'Grok-Finance', 'GrokAPI'),
++('b0000000-0000-0000-0000-000000000030', 'DeepSeek-Coder-33B', 'LocalDeploy');
++
++-- ==========================================
++-- 3. DOMAINS SEED DATA (30 Rows)
++-- ==========================================
++INSERT INTO domains (domain_id, category) VALUES
++('c0000000-0000-0000-0000-000000000001', 'Machine learning'),
++('c0000000-0000-0000-0000-000000000002', 'Deep Learning'),
++('c0000000-0000-0000-0000-000000000003', 'HealthCare'),
++('c0000000-0000-0000-0000-000000000004', 'Ecommerce'),
++('c0000000-0000-0000-0000-000000000005', 'Power System'),
++('c0000000-0000-0000-0000-000000000006', 'Machine learning'),
++('c0000000-0000-0000-0000-000000000007', 'Deep Learning'),
++('c0000000-0000-0000-0000-000000000008', 'HealthCare'),
++('c0000000-0000-0000-0000-000000000009', 'Ecommerce'),
++('c0000000-0000-0000-0000-000000000010', 'Power System'),
++('c0000000-0000-0000-0000-000000000011', 'Machine learning'),
++('c0000000-0000-0000-0000-000000000012', 'Deep Learning'),
++('c0000000-0000-0000-0000-000000000013', 'HealthCare'),
++('c0000000-0000-0000-0000-000000000014', 'Ecommerce'),
++('c0000000-0000-0000-0000-000000000015', 'Power System'),
++('c0000000-0000-0000-0000-000000000016', 'Machine learning'),
++('c0000000-0000-0000-0000-000000000017', 'Deep Learning'),
++('c0000000-0000-0000-0000-000000000018', 'HealthCare'),
++('c0000000-0000-0000-0000-000000000019', 'Ecommerce'),
++('c0000000-0000-0000-0000-000000000020', 'Power System'),
++('c0000000-0000-0000-0000-000000000021', 'Machine learning'),
++('c0000000-0000-0000-0000-000000000022', 'Deep Learning'),
++('c0000000-0000-0000-0000-000000000023', 'HealthCare'),
++('c0000000-0000-0000-0000-000000000024', 'Ecommerce'),
++('c0000000-0000-0000-0000-000000000025', 'Power System'),
++('c0000000-0000-0000-0000-000000000026', 'Machine learning'),
++('c0000000-0000-0000-0000-000000000027', 'Deep Learning'),
++('c0000000-0000-0000-0000-000000000028', 'HealthCare'),
++('c0000000-0000-0000-0000-000000000029', 'Ecommerce'),
++('c0000000-0000-0000-0000-000000000030', 'Power System');
++
++-- ==========================================
++-- 4. CHAT SESSIONS SEED DATA (30 Rows)
++-- ==========================================
++INSERT INTO chat_sessions (chat_id, user_id, context, sidebar_title) VALUES
++('d0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'User asked about Random Forests vs XGBoost', 'RF vs XGBoost'),
++('d0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000002', 'Debugging an issue with PyTorch gradients', 'PyTorch Gradient Debug'),
++('d0000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000003', 'Patient symptom analysis workflow', 'Symptom Checker Workflow'),
++('d0000000-0000-0000-0000-000000000004', 'a0000000-0000-0000-0000-000000000004', 'Optimizing shopping cart conversion', 'Cart Optimization'),
++('d0000000-0000-0000-0000-000000000005', 'a0000000-0000-0000-0000-000000000005', 'Grid load balancing equations', 'Grid Load Balancing'),
++('d0000000-0000-0000-0000-000000000006', 'a0000000-0000-0000-0000-000000000006', 'Explain linear regression to a beginner', 'Linear Regression Basics'),
++('d0000000-0000-0000-0000-000000000007', 'a0000000-0000-0000-0000-000000000007', 'CNN architecture for image recognition', 'CNN Architecture'),
++('d0000000-0000-0000-0000-000000000008', 'a0000000-0000-0000-0000-000000000008', 'Transformer models in NLP', 'Transformers Overview'),
++('d0000000-0000-0000-0000-000000000009', 'a0000000-0000-0000-0000-000000000009', 'EHR data privacy compliance', 'EHR Privacy'),
++('d0000000-0000-0000-0000-000000000010', 'a0000000-0000-0000-0000-000000000010', 'Pricing strategy for new products', 'Product Pricing'),
++('d0000000-0000-0000-0000-000000000011', 'a0000000-0000-0000-0000-000000000011', 'Renewable energy integration stats', 'Renewables Integration'),
++('d0000000-0000-0000-0000-000000000012', 'a0000000-0000-0000-0000-000000000012', 'K-Means clustering algorithm steps', 'K-Means Steps'),
++('d0000000-0000-0000-0000-000000000013', 'a0000000-0000-0000-0000-000000000013', 'Fine-tuning BERT on custom data', 'BERT Fine-tuning'),
++('d0000000-0000-0000-0000-000000000014', 'a0000000-0000-0000-0000-000000000014', 'AI in medical imaging diagnostic accuracy', 'AI Medical Imaging'),
++('d0000000-0000-0000-0000-000000000015', 'a0000000-0000-0000-0000-000000000015', 'Customer churn prediction models', 'Churn Prediction'),
++('d0000000-0000-0000-0000-000000000016', 'a0000000-0000-0000-0000-000000000016', 'Smart grid sensor deployment', 'Smart Grid Sensors'),
++('d0000000-0000-0000-0000-000000000017', 'a0000000-0000-0000-0000-000000000017', 'Handling imbalanced datasets', 'Imbalanced Data'),
++('d0000000-0000-0000-0000-000000000018', 'a0000000-0000-0000-0000-000000000018', 'RNNs vs LSTMs for time series', 'RNN vs LSTM'),
++('d0000000-0000-0000-0000-000000000019', 'a0000000-0000-0000-0000-000000000019', 'Telemedicine adoption rates 2024', 'Telemedicine Stats'),
++('d0000000-0000-0000-0000-000000000020', 'a0000000-0000-0000-0000-000000000020', 'A/B testing email marketing campaigns', 'A/B Testing Emails'),
++('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000021', 'Battery storage capacity analysis', 'Battery Storage'),
++('d0000000-0000-0000-0000-000000000022', 'a0000000-0000-0000-0000-000000000022', 'PCA for dimensionality reduction', 'PCA Explanation'),
++('d0000000-0000-0000-0000-000000000023', 'a0000000-0000-0000-0000-000000000023', 'GANs for synthetic data generation', 'GANs Overview'),
++('d0000000-0000-0000-0000-000000000024', 'a0000000-0000-0000-0000-000000000024', 'Wearable health monitors API integration', 'Wearables API'),
++('d0000000-0000-0000-0000-000000000025', 'a0000000-0000-0000-0000-000000000025', 'Inventory management optimization', 'Inventory Optimization'),
++('d0000000-0000-0000-0000-000000000026', 'a0000000-0000-0000-0000-000000000026', 'Microgrid control systems', 'Microgrid Control'),
++('d0000000-0000-0000-0000-000000000027', 'a0000000-0000-0000-0000-000000000027', 'Cross-validation techniques', 'Cross Validation'),
++('d0000000-0000-0000-0000-000000000028', 'a0000000-0000-0000-0000-000000000028', 'Autoencoders for anomaly detection', 'Autoencoder Anomalies'),
++('d0000000-0000-0000-0000-000000000029', 'a0000000-0000-0000-0000-000000000029', 'Drug discovery pipeline AI', 'AI Drug Discovery'),
++('d0000000-0000-0000-0000-000000000030', 'a0000000-0000-0000-0000-000000000030', 'Personalized recommendation engine', 'Recommendation Engine');
++
++-- ==========================================
++-- 5. FILES SEED DATA (30 Rows)
++-- ==========================================
++INSERT INTO files (file_id, chat_id, user_id, name, size_mb) VALUES
++('e0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'dataset_v1.csv', 1.45),
++('e0000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000002', 'model_weights.pt', 1.99),
++('e0000000-0000-0000-0000-000000000003', 'd0000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000003', 'patient_logs.xlsx', 0.85),
++('e0000000-0000-0000-0000-000000000004', 'd0000000-0000-0000-0000-000000000004', 'a0000000-0000-0000-0000-000000000004', 'sales_q3.csv', 1.10),
++('e0000000-0000-0000-0000-000000000005', 'd0000000-0000-0000-0000-000000000005', 'a0000000-0000-0000-0000-000000000005', 'grid_topology.json', 0.45),
++('e0000000-0000-0000-0000-000000000006', 'd0000000-0000-0000-0000-000000000006', 'a0000000-0000-0000-0000-000000000006', 'regression_data.txt', 0.12),
++('e0000000-0000-0000-0000-000000000007', 'd0000000-0000-0000-0000-000000000007', 'a0000000-0000-0000-0000-000000000007', 'cnn_diagram.png', 1.80),
++('e0000000-0000-0000-0000-000000000008', 'd0000000-0000-0000-0000-000000000008', 'a0000000-0000-0000-0000-000000000008', 'attention_matrix.pdf', 0.65),
++('e0000000-0000-0000-0000-000000000009', 'd0000000-0000-0000-0000-000000000009', 'a0000000-0000-0000-0000-000000000009', 'compliance_policy.docx', 0.30),
++('e0000000-0000-0000-0000-000000000010', 'd0000000-0000-0000-0000-000000000010', 'a0000000-0000-0000-0000-000000000010', 'competitor_prices.csv', 0.95),
++('e0000000-0000-0000-0000-000000000011', 'd0000000-0000-0000-0000-000000000011', 'a0000000-0000-0000-0000-000000000011', 'solar_output.xlsx', 1.55),
++('e0000000-0000-0000-0000-000000000012', 'd0000000-0000-0000-0000-000000000012', 'a0000000-0000-0000-0000-000000000012', 'clusters.json', 0.25),
++('e0000000-0000-0000-0000-000000000013', 'd0000000-0000-0000-0000-000000000013', 'a0000000-0000-0000-0000-000000000013', 'training_corpus.txt', 1.95),
++('e0000000-0000-0000-0000-000000000014', 'd0000000-0000-0000-0000-000000000014', 'a0000000-0000-0000-0000-000000000014', 'xray_sample.jpeg', 1.20),
++('e0000000-0000-0000-0000-000000000015', 'd0000000-0000-0000-0000-000000000015', 'a0000000-0000-0000-0000-000000000015', 'user_activity.csv', 1.75),
++('e0000000-0000-0000-0000-000000000016', 'd0000000-0000-0000-0000-000000000016', 'a0000000-0000-0000-0000-000000000016', 'sensor_readings.csv', 1.90),
++('e0000000-0000-0000-0000-000000000017', 'd0000000-0000-0000-0000-000000000017', 'a0000000-0000-0000-0000-000000000017', 'fraud_labels.csv', 0.50),
++('e0000000-0000-0000-0000-000000000018', 'd0000000-0000-0000-0000-000000000018', 'a0000000-0000-0000-0000-000000000018', 'stock_prices.xlsx', 1.35),
++('e0000000-0000-0000-0000-000000000019', 'd0000000-0000-0000-0000-000000000019', 'a0000000-0000-0000-0000-000000000019', 'telemed_survey.pdf', 0.88),
++('e0000000-0000-0000-0000-000000000020', 'd0000000-0000-0000-0000-000000000020', 'a0000000-0000-0000-0000-000000000020', 'ab_results.json', 0.15),
++('e0000000-0000-0000-0000-000000000021', 'd0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000021', 'battery_specs.pdf', 1.05),
++('e0000000-0000-0000-0000-000000000022', 'd0000000-0000-0000-0000-000000000022', 'a0000000-0000-0000-0000-000000000022', 'features_matrix.csv', 1.66),
++('e0000000-0000-0000-0000-000000000023', 'd0000000-0000-0000-0000-000000000023', 'a0000000-0000-0000-0000-000000000023', 'gan_output_sample.png', 1.40),
++('e0000000-0000-0000-0000-000000000024', 'd0000000-0000-0000-0000-000000000024', 'a0000000-0000-0000-0000-000000000024', 'api_docs.txt', 0.05),
++('e0000000-0000-0000-0000-000000000025', 'd0000000-0000-0000-0000-000000000025', 'a0000000-0000-0000-0000-000000000025', 'warehouse_stock.csv', 1.98),
++('e0000000-0000-0000-0000-000000000026', 'd0000000-0000-0000-0000-000000000026', 'a0000000-0000-0000-0000-000000000026', 'control_logic.py', 0.02),
++('e0000000-0000-0000-0000-000000000027', 'd0000000-0000-0000-0000-000000000027', 'a0000000-0000-0000-0000-000000000027', 'folds_config.json', 0.11),
++('e0000000-0000-0000-0000-000000000028', 'd0000000-0000-0000-0000-000000000028', 'a0000000-0000-0000-0000-000000000028', 'reconstruction_errors.csv', 1.33),
++('e0000000-0000-0000-0000-000000000029', 'd0000000-0000-0000-0000-000000000029', 'a0000000-0000-0000-0000-000000000029', 'molecule_structures.sdf', 1.88),
++('e0000000-0000-0000-0000-000000000030', 'd0000000-0000-0000-0000-000000000030', 'a0000000-0000-0000-0000-000000000030', 'user_embeddings.pt', 2.00);
++
++-- ==========================================
++-- 6. MESSAGES SEED DATA (30 Rows)
++-- ==========================================
++INSERT INTO messages (message_id, chat_id, domain_id, sender, response, response_time, session_phase) VALUES
++('f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 'user', 'What is the main difference between RF and XGBoost?', 0.5, 'start'),
++('f0000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000002', 'bot', 'PyTorch uses dynamic computational graphs, meaning gradients are calculated on the fly.', 1.2, 'middle'),
++('f0000000-0000-0000-0000-000000000003', 'd0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-000000000003', 'user', 'Please check these patient logs for irregularities.', 0.3, 'start'),
++('f0000000-0000-0000-0000-000000000004', 'd0000000-0000-0000-0000-000000000004', 'c0000000-0000-0000-0000-000000000004', 'bot', 'Based on your data, cart abandonment peaks at the shipping cost stage.', 1.8, 'end'),
++('f0000000-0000-0000-0000-000000000005', 'd0000000-0000-0000-0000-000000000005', 'c0000000-0000-0000-0000-000000000005', 'user', 'How do we calculate load balancing across a 3-phase system?', 0.7, 'middle'),
++('f0000000-0000-0000-0000-000000000006', 'd0000000-0000-0000-0000-000000000006', 'c0000000-0000-0000-0000-000000000006', 'bot', 'Linear regression attempts to model the relationship between two variables by fitting a linear equation to observed data.', 2.1, 'start'),
++('f0000000-0000-0000-0000-000000000007', 'd0000000-0000-0000-0000-000000000007', 'c0000000-0000-0000-0000-000000000007', 'user', 'Does pooling reduce spatial dimensions in CNNs?', 0.4, 'end'),
++('f0000000-0000-0000-0000-000000000008', 'd0000000-0000-0000-0000-000000000008', 'c0000000-0000-0000-0000-000000000008', 'bot', 'Yes, transformers heavily rely on self-attention mechanisms to weigh the significance of different words.', 1.5, 'middle'),
++('f0000000-0000-0000-0000-000000000009', 'd0000000-0000-0000-0000-000000000009', 'c0000000-0000-0000-0000-000000000009', 'user', 'What are HIPAA constraints for cloud EHR storage?', 0.6, 'start'),
++('f0000000-0000-0000-0000-000000000010', 'd0000000-0000-0000-0000-000000000010', 'c0000000-0000-0000-0000-000000000010', 'bot', 'Dynamic pricing can increase revenue by 10-15% according to the competitor data you uploaded.', 2.4, 'end'),
++('f0000000-0000-0000-0000-000000000011', 'd0000000-0000-0000-0000-000000000011', 'c0000000-0000-0000-0000-000000000011', 'user', 'Show me the solar integration impact on the main grid.', 0.8, 'middle'),
++('f0000000-0000-0000-0000-000000000012', 'd0000000-0000-0000-0000-000000000012', 'c0000000-0000-0000-0000-000000000012', 'bot', 'K-Means requires you to define K beforehand, which is a major limitation.', 1.1, 'start'),
++('f0000000-0000-0000-0000-000000000013', 'd0000000-0000-0000-0000-000000000013', 'c0000000-0000-0000-0000-000000000013', 'user', 'How many epochs should I use for fine-tuning BERT?', 0.3, 'end'),
++('f0000000-0000-0000-0000-000000000014', 'd0000000-0000-0000-0000-000000000014', 'c0000000-0000-0000-0000-000000000014', 'bot', 'The AI detected a potential anomaly in the lower left quadrant of the X-ray sample.', 2.9, 'middle'),
++('f0000000-0000-0000-0000-000000000015', 'd0000000-0000-0000-0000-000000000015', 'c0000000-0000-0000-0000-000000000015', 'user', 'Which features correlate most with churn?', 0.5, 'start'),
++('f0000000-0000-0000-0000-000000000016', 'd0000000-0000-0000-0000-000000000016', 'c0000000-0000-0000-0000-000000000016', 'bot', 'Smart grid sensors use IoT protocols like MQTT to send high-frequency telemetry data.', 1.7, 'end'),
++('f0000000-0000-0000-0000-000000000017', 'd0000000-0000-0000-0000-000000000017', 'c0000000-0000-0000-0000-000000000017', 'user', 'Can we use SMOTE on this fraud dataset?', 0.6, 'middle'),
++('f0000000-0000-0000-0000-000000000018', 'd0000000-0000-0000-0000-000000000018', 'c0000000-0000-0000-0000-000000000018', 'bot', 'LSTMs handle the vanishing gradient problem better than standard RNNs, making them suited for long sequences.', 1.4, 'start'),
++('f0000000-0000-0000-0000-000000000019', 'd0000000-0000-0000-0000-000000000019', 'c0000000-0000-0000-0000-000000000019', 'user', 'Summarize the telemedicine survey results.', 0.9, 'end'),
++('f0000000-0000-0000-0000-000000000020', 'd0000000-0000-0000-0000-000000000020', 'c0000000-0000-0000-0000-000000000020', 'bot', 'Variant B achieved a 4.2% higher click-through rate, making it statistically significant.', 1.3, 'middle'),
++('f0000000-0000-0000-0000-000000000021', 'd0000000-0000-0000-0000-000000000021', 'c0000000-0000-0000-0000-000000000021', 'user', 'What is the degradation rate of these battery specs over 5 years?', 0.4, 'start'),
++('f0000000-0000-0000-0000-000000000022', 'd0000000-0000-0000-0000-000000000022', 'c0000000-0000-0000-0000-000000000022', 'bot', 'PCA helps by projecting high-dimensional data into a lower-dimensional space while preserving variance.', 1.6, 'end'),
++('f0000000-0000-0000-0000-000000000023', 'd0000000-0000-0000-0000-000000000023', 'c0000000-0000-0000-0000-000000000023', 'user', 'Why is mode collapse happening in my GAN?', 0.5, 'middle'),
++('f0000000-0000-0000-0000-000000000024', 'd0000000-0000-0000-0000-000000000024', 'c0000000-0000-0000-0000-000000000024', 'bot', 'The API rate limit for the health monitor endpoints is 100 requests per minute.', 0.9, 'start'),
++('f0000000-0000-0000-0000-000000000025', 'd0000000-0000-0000-0000-000000000025', 'c0000000-0000-0000-0000-000000000025', 'user', 'Identify overstocked items in the warehouse CSV.', 1.0, 'end'),
++('f0000000-0000-0000-0000-000000000026', 'd0000000-0000-0000-0000-000000000026', 'c0000000-0000-0000-0000-000000000026', 'bot', 'Microgrids can operate independently in island mode during a blackout.', 1.5, 'middle'),
++('f0000000-0000-0000-0000-000000000027', 'd0000000-0000-0000-0000-000000000027', 'c0000000-0000-0000-0000-000000000027', 'user', 'What does k-fold cross validation mean?', 0.3, 'start'),
++('f0000000-0000-0000-0000-000000000028', 'd0000000-0000-0000-0000-000000000028', 'c0000000-0000-0000-0000-000000000028', 'bot', 'Autoencoders detect anomalies by reconstructing inputs; high error signifies an anomaly.', 2.0, 'end'),
++('f0000000-0000-0000-0000-000000000029', 'd0000000-0000-0000-0000-000000000029', 'c0000000-0000-0000-0000-000000000029', 'user', 'Can AI predict binding affinities for these structures?', 0.7, 'middle'),
++('f0000000-0000-0000-0000-000000000030', 'd0000000-0000-0000-0000-000000000030', 'c0000000-0000-0000-0000-000000000030', 'bot', 'By using collaborative filtering, the system maps out user-item embeddings to recommend new products.', 1.8, 'start');
++
++-- ==========================================
++-- 7. FEEDBACK SEED DATA (30 Rows)
++-- ==========================================
++-- ==========================================
++-- 7. FEEDBACK SEED DATA (30 Rows)
++-- (Corrected: Replaced 'g' with '7' for valid UUID Hex)
++-- ==========================================
++INSERT INTO feedback (feedback_id, message_id, rating, comment, correctness, length_type) VALUES
++('77777777-0000-0000-0000-000000000001', 'f0000000-0000-0000-0000-000000000001', 4, 'Very helpful and accurate.', 'correct', 'To the point'),
++('77777777-0000-0000-0000-000000000002', 'f0000000-0000-0000-0000-000000000002', 3, 'Okay, but missing some context.', 'partial', 'short'),
++('77777777-0000-0000-0000-000000000003', 'f0000000-0000-0000-0000-000000000003', 4, 'Nailed it immediately.', 'correct', 'short'),
++('77777777-0000-0000-0000-000000000004', 'f0000000-0000-0000-0000-000000000004', 2, 'Gave me a weird hallucinated metric.', 'Incorrect', 'lengthy'),
++('77777777-0000-0000-0000-000000000005', 'f0000000-0000-0000-0000-000000000005', 4, 'Perfect formula given.', 'correct', 'To the point'),
++('77777777-0000-0000-0000-000000000006', 'f0000000-0000-0000-0000-000000000006', 3, 'A bit too basic.', 'partial', 'short'),
++('77777777-0000-0000-0000-000000000007', 'f0000000-0000-0000-0000-000000000007', 4, 'Answered exactly what I needed.', 'correct', 'To the point'),
++('77777777-0000-0000-0000-000000000008', 'f0000000-0000-0000-0000-000000000008', 4, 'Great summary of transformers.', 'correct', 'lengthy'),
++('77777777-0000-0000-0000-000000000009', 'f0000000-0000-0000-0000-000000000009', 2, 'Missed the latest HIPAA update.', 'Incorrect', 'short'),
++('77777777-0000-0000-0000-000000000010', 'f0000000-0000-0000-0000-000000000010', 4, 'Spot on analysis of the CSV.', 'correct', 'To the point'),
++('77777777-0000-0000-0000-000000000011', 'f0000000-0000-0000-0000-000000000011', 3, 'Useful, but could provide visual output.', 'partial', 'lengthy'),
++('77777777-0000-0000-0000-000000000012', 'f0000000-0000-0000-0000-000000000012', 4, 'Clear explanation of KMeans.', 'correct', 'To the point'),
++('77777777-0000-0000-0000-000000000013', 'f0000000-0000-0000-0000-000000000013', 1, 'Totally wrong parameters suggested.', 'Incorrect', 'lengthy'),
++('77777777-0000-0000-0000-000000000014', 'f0000000-0000-0000-0000-000000000014', 4, 'Identified the issue in the image correctly.', 'correct', 'To the point'),
++('77777777-0000-0000-0000-000000000015', 'f0000000-0000-0000-0000-000000000015', 3, 'Somewhat accurate.', 'partial', 'short'),
++('77777777-0000-0000-0000-000000000016', 'f0000000-0000-0000-0000-000000000016', 4, 'Great technical detail.', 'correct', 'lengthy'),
++('77777777-0000-0000-0000-000000000017', 'f0000000-0000-0000-0000-000000000017', 4, 'Good practical advice on SMOTE.', 'correct', 'To the point'),
++('77777777-0000-0000-0000-000000000018', 'f0000000-0000-0000-0000-000000000018', 3, 'Could have gone deeper into math.', 'partial', 'short'),
++('77777777-0000-0000-0000-000000000019', 'f0000000-0000-0000-0000-000000000019', 4, 'Excellent summary of the document.', 'correct', 'lengthy'),
++('77777777-0000-0000-0000-000000000020', 'f0000000-0000-0000-0000-000000000020', 4, 'Extracted the exact JSON fields needed.', 'correct', 'To the point'),
++('77777777-0000-0000-0000-000000000021', 'f0000000-0000-0000-0000-000000000021', 1, 'Did not read the PDF properly.', 'Incorrect', 'short'),
++('77777777-0000-0000-0000-000000000022', 'f0000000-0000-0000-0000-000000000022', 4, 'Very helpful for my homework.', 'correct', 'lengthy'),
++('77777777-0000-0000-0000-000000000023', 'f0000000-0000-0000-0000-000000000023', 3, 'Gave standard debugging tips, nothing specific.', 'partial', 'To the point'),
++('77777777-0000-0000-0000-000000000024', 'f0000000-0000-0000-0000-000000000024', 4, 'Accurate API details.', 'correct', 'short'),
++('77777777-0000-0000-0000-000000000025', 'f0000000-0000-0000-0000-000000000025', 4, 'Saved me hours of Excel work.', 'correct', 'lengthy'),
++('77777777-0000-0000-0000-000000000026', 'f0000000-0000-0000-0000-000000000026', 2, 'Confused microgrids with macrogrids.', 'Incorrect', 'lengthy'),
++('77777777-0000-0000-0000-000000000027', 'f0000000-0000-0000-0000-000000000027', 4, 'Clear explanation for a newbie.', 'correct', 'To the point'),
++('77777777-0000-0000-0000-000000000028', 'f0000000-0000-0000-0000-000000000028', 3, 'Good high-level overview.', 'partial', 'short'),
++('77777777-0000-0000-0000-000000000029', 'f0000000-0000-0000-0000-000000000029', 4, 'Very promising results on the SDF file.', 'correct', 'lengthy'),
++('77777777-0000-0000-0000-000000000030', 'f0000000-0000-0000-0000-000000000030', 4, 'Perfect code snippet generated.', 'correct', 'To the point');
++
++-- ==========================================
++-- 8. ANALYTICS SUMMARIES SEED DATA (30 Rows)
++-- (Corrected: Replaced 'h' with '8' for valid UUID Hex)
++-- ==========================================
++INSERT INTO analytics_summaries (summary_id, chat_id, dominant_domain_id, avg_rating, total_duration_sec) VALUES
++('88888888-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 4.00, 320.5),
++('88888888-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000002', 3.00, 450.2),
++('88888888-0000-0000-0000-000000000003', 'd0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-000000000003', 4.00, 120.0),
++('88888888-0000-0000-0000-000000000004', 'd0000000-0000-0000-0000-000000000004', 'c0000000-0000-0000-0000-000000000004', 2.00, 890.3),
++('88888888-0000-0000-0000-000000000005', 'd0000000-0000-0000-0000-000000000005', 'c0000000-0000-0000-0000-000000000005', 4.00, 210.8),
++('88888888-0000-0000-0000-000000000006', 'd0000000-0000-0000-0000-000000000006', 'c0000000-0000-0000-0000-000000000006', 3.00, 155.6),
++('88888888-0000-0000-0000-000000000007', 'd0000000-0000-0000-0000-000000000007', 'c0000000-0000-0000-0000-000000000007', 4.00, 312.4),
++('88888888-0000-0000-0000-000000000008', 'd0000000-0000-0000-0000-000000000008', 'c0000000-0000-0000-0000-000000000008', 4.00, 480.9),
++('88888888-0000-0000-0000-000000000009', 'd0000000-0000-0000-0000-000000000009', 'c0000000-0000-0000-0000-000000000009', 2.00, 95.2),
++('88888888-0000-0000-0000-000000000010', 'd0000000-0000-0000-0000-000000000010', 'c0000000-0000-0000-0000-000000000010', 4.00, 620.1),
++('88888888-0000-0000-0000-000000000011', 'd0000000-0000-0000-0000-000000000011', 'c0000000-0000-0000-0000-000000000011', 3.00, 305.5),
++('88888888-0000-0000-0000-000000000012', 'd0000000-0000-0000-0000-000000000012', 'c0000000-0000-0000-0000-000000000012', 4.00, 180.7),
++('88888888-0000-0000-0000-000000000013', 'd0000000-0000-0000-0000-000000000013', 'c0000000-0000-0000-0000-000000000013', 1.00, 750.3),
++('88888888-0000-0000-0000-000000000014', 'd0000000-0000-0000-0000-000000000014', 'c0000000-0000-0000-0000-000000000014', 4.00, 410.8),
++('88888888-0000-0000-0000-000000000015', 'd0000000-0000-0000-0000-000000000015', 'c0000000-0000-0000-0000-000000000015', 3.00, 290.4),
++('88888888-0000-0000-0000-000000000016', 'd0000000-0000-0000-0000-000000000016', 'c0000000-0000-0000-0000-000000000016', 4.00, 500.6),
++('88888888-0000-0000-0000-000000000017', 'd0000000-0000-0000-0000-000000000017', 'c0000000-0000-0000-0000-000000000017', 4.00, 115.2),
++('88888888-0000-0000-0000-000000000018', 'd0000000-0000-0000-0000-000000000018', 'c0000000-0000-0000-0000-000000000018', 3.00, 240.3),
++('88888888-0000-0000-0000-000000000019', 'd0000000-0000-0000-0000-000000000019', 'c0000000-0000-0000-0000-000000000019', 4.00, 880.9),
++('88888888-0000-0000-0000-000000000020', 'd0000000-0000-0000-0000-000000000020', 'c0000000-0000-0000-0000-000000000020', 4.00, 160.4),
++('88888888-0000-0000-0000-000000000021', 'd0000000-0000-0000-0000-000000000021', 'c0000000-0000-0000-0000-000000000021', 1.00, 45.8),
++('88888888-0000-0000-0000-000000000022', 'd0000000-0000-0000-0000-000000000022', 'c0000000-0000-0000-0000-000000000022', 4.00, 520.1),
++('88888888-0000-0000-0000-000000000023', 'd0000000-0000-0000-0000-000000000023', 'c0000000-0000-0000-0000-000000000023', 3.00, 310.6),
++('88888888-0000-0000-0000-000000000024', 'd0000000-0000-0000-0000-000000000024', 'c0000000-0000-0000-0000-000000000024', 4.00, 105.7),
++('88888888-0000-0000-0000-000000000025', 'd0000000-0000-0000-0000-000000000025', 'c0000000-0000-0000-0000-000000000025', 4.00, 715.3),
++('88888888-0000-0000-0000-000000000026', 'd0000000-0000-0000-0000-000000000026', 'c0000000-0000-0000-0000-000000000026', 2.00, 205.9),
++('88888888-0000-0000-0000-000000000027', 'd0000000-0000-0000-0000-000000000027', 'c0000000-0000-0000-0000-000000000027', 4.00, 95.4),
++('88888888-0000-0000-0000-000000000028', 'd0000000-0000-0000-0000-000000000028', 'c0000000-0000-0000-0000-000000000028', 3.00, 280.2),
++('88888888-0000-0000-0000-000000000029', 'd0000000-0000-0000-0000-000000000029', 'c0000000-0000-0000-0000-000000000029', 4.00, 610.7),
++('88888888-0000-0000-0000-000000000030', 'd0000000-0000-0000-0000-000000000030', 'c0000000-0000-0000-0000-000000000030', 4.00, 430.5);
++
++
