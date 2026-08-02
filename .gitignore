@@ -10,7 +10,6 @@ ENV/
 build/
 develop-eggs/
 dist/
-
 lib64/
 parts/
 sdist/
@@ -33,3 +32,9 @@ logs/
 
 # Environment & Secrets
 .env
+
+# Dependencies & Build Artifacts (Root and Subfolders)
+node_modules/
+**/node_modules/
+.next/
+**/.next/

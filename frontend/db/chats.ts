@@ -61,6 +61,9 @@ export const createMessage = async (message: {
   role: "user" | "assistant";
   content: string;
   user_id: string;
+  response_time?: number;
+  session_phase?: "start" | "middle" | "end";
+  domain_id?: string;
 }) => {
   const { data: createdMessage, error } = await supabase
     .from("messages")
@@ -77,6 +80,7 @@ export const createMessage = async (message: {
 export const submitFeedback = async (feedback: {
   chat_id: string;
   user_id: string;
+  message_id?: string;
   rating: number;
   correctness?: string;
   length_type?: string;
@@ -89,6 +93,7 @@ export const submitFeedback = async (feedback: {
       {
         chat_id: feedback.chat_id,
         user_id: feedback.user_id,
+        message_id: feedback.message_id,
         rating: feedback.rating,
         correctness: feedback.correctness || "none",
         length_type: feedback.length_type || "none",

@@ -1,12 +1,40 @@
-.next
-node_modules
-.env.local
-.env
-.DS_Store
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE
+.vscode/
+.idea/
+
+# Database
+*.db
+
+# Logs
 *.log
-*.swp
-*.swo
-.idea
-.vscode/settings.json
-dist
-build
+logs/
+
+# Environment & Secrets
+.env
+
+# Dependencies & Build Artifacts (Root and Subfolders)
+node_modules/
+**/node_modules/
+.next/
+**/.next/
