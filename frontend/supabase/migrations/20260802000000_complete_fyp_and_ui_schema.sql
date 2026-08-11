@@ -101,6 +101,7 @@ ALTER TABLE public.prompts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.presets ENABLE ROW LEVEL SECURITY;
 
 -- Policies for domains
+DROP POLICY IF EXISTS "Users can manage domains for their chats" ON public.domains;
 CREATE POLICY "Users can manage domains for their chats" ON public.domains
   FOR ALL USING (
     EXISTS (
@@ -110,6 +111,7 @@ CREATE POLICY "Users can manage domains for their chats" ON public.domains
   );
 
 -- Policies for analytics_summary
+DROP POLICY IF EXISTS "Users can manage analytics summary for their chats" ON public.analytics_summary;
 CREATE POLICY "Users can manage analytics summary for their chats" ON public.analytics_summary
   FOR ALL USING (
     EXISTS (
@@ -119,14 +121,17 @@ CREATE POLICY "Users can manage analytics summary for their chats" ON public.ana
   );
 
 -- Policies for folders
+DROP POLICY IF EXISTS "Users can manage their own folders" ON public.folders;
 CREATE POLICY "Users can manage their own folders" ON public.folders
   FOR ALL USING (auth.uid() = user_id);
 
 -- Policies for prompts
+DROP POLICY IF EXISTS "Users can manage their own prompts" ON public.prompts;
 CREATE POLICY "Users can manage their own prompts" ON public.prompts
   FOR ALL USING (auth.uid() = user_id);
 
 -- Policies for presets
+DROP POLICY IF EXISTS "Users can manage their own presets" ON public.presets;
 CREATE POLICY "Users can manage their own presets" ON public.presets
   FOR ALL USING (auth.uid() = user_id);
 

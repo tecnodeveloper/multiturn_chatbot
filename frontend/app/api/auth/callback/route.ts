@@ -8,22 +8,44 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (!error) {
-      return NextResponse.redirect(new URL(redirectTo, request.url));
+    if (!error && data?.session) {
+      const response = NextResponse.redirect(new URL(redirectTo, request.url));
+      const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      response.cookies.set("sb-access-token", data.session.access_token, {
+        path: "/",
+        expires,
+        sameSite: "lax",
+        httpOnly: false,
+      });
+      response.cookies.set("sb-refresh-token", data.session.refresh_token, {
+        path: "/",
+        expires,
+        sameSite: "lax",
+        httpOnly: false,
+      });
+      return response;
     }
     
-    console.error("Auth callback exchange error:", {
-      message: error.message,
-      status: error.status,
-      code: code.substring(0, 10) + "..."
+    const errorMessage = error?.message || "Authentication failed";
+    console.error("Auth callback exchange error details:", {
+      message: error?.message,
+      name: error?.name,
+      status: error?.status,
+      code: code ? code.substring(0, 10) + "..." : null
     });
+
+    return NextResponse.redirect(
+      new URL(`/login?message=${encodeURIComponent(errorMessage)}`, request.url),
+    );
   } else {
     console.error("No code found in callback URL");
   }
 
   return NextResponse.redirect(
-    new URL("/login?message=Authentication%20failed", request.url),
+    new URL("/login?message=No%20authorization%20code%20received", request.url),
   );
 }
+
+

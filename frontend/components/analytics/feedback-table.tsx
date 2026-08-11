@@ -57,14 +57,21 @@ export const FeedbackTable: FC<FeedbackTableProps> = ({ data: analyticsData }) =
       
       <div className="overflow-x-auto">
         {feedbackItems.length > 0 ? (
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse table-fixed">
+            <colgroup>
+              <col className="w-[180px]" />
+              <col className="w-[180px]" />
+              <col className="w-auto" />
+              <col className="w-[130px]" />
+              <col className="w-[130px]" />
+            </colgroup>
             <thead>
               <tr className="border-b border-border">
-                <th className="pb-4 pr-6 font-semibold text-sm text-muted-foreground whitespace-nowrap min-w-[150px]">Date/Time</th>
-                <th className="pb-4 pr-6 font-semibold text-sm text-muted-foreground whitespace-nowrap min-w-[160px]">Question Topic</th>
-                <th className="pb-4 pr-6 font-semibold text-sm text-muted-foreground">Response Preview</th>
-                <th className="pb-4 pr-6 font-semibold text-sm text-muted-foreground whitespace-nowrap text-center min-w-[120px]">User Feedback</th>
-                <th className="pb-4 font-semibold text-sm text-muted-foreground whitespace-nowrap text-right min-w-[120px]">Status</th>
+                <th className="pb-4 px-3 font-semibold text-sm text-muted-foreground whitespace-nowrap">Date/Time</th>
+                <th className="pb-4 px-3 font-semibold text-sm text-muted-foreground whitespace-nowrap">Question Topic</th>
+                <th className="pb-4 px-3 font-semibold text-sm text-muted-foreground">Response Preview</th>
+                <th className="pb-4 px-3 font-semibold text-sm text-muted-foreground whitespace-nowrap text-center">User Feedback</th>
+                <th className="pb-4 px-3 font-semibold text-sm text-muted-foreground whitespace-nowrap text-right">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
@@ -74,30 +81,31 @@ export const FeedbackTable: FC<FeedbackTableProps> = ({ data: analyticsData }) =
                   onClick={() => handleRowClick(item)}
                   className="hover:bg-blue-50/50 dark:hover:bg-zinc-800/60 transition-colors group cursor-pointer"
                 >
-                  <td className="py-4 pr-6 text-sm text-muted-foreground whitespace-nowrap font-mono">{item.time}</td>
-                  <td className="py-4 pr-6 text-sm font-medium text-foreground whitespace-nowrap">
+                  <td className="py-4 px-3 text-sm text-muted-foreground whitespace-nowrap font-mono">{item.time}</td>
+                  <td className="py-4 px-3 text-sm font-medium text-foreground whitespace-nowrap">
                     <span className="px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 text-xs font-semibold whitespace-nowrap border border-blue-200/50 dark:border-blue-800/50">
                       {item.topic}
                     </span>
                   </td>
-                  <td className="py-4 pr-6 text-sm text-muted-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    <div className="flex items-center gap-1.5">
-                      <span className="truncate max-w-xs md:max-w-sm lg:max-w-md">"{item.preview}"</span>
+                  <td className="py-4 px-3 text-sm text-muted-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    <div className="flex items-center gap-1.5 overflow-hidden">
+                      <span className="truncate">"{item.preview}"</span>
                       <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 text-blue-500" />
                     </div>
                   </td>
-                  <td className="py-4 pr-6 text-center">
+                  <td className="py-4 px-3 text-center">
                     <div className="flex justify-center">
                       <FeedbackIcon type={item.feedback} />
                     </div>
                   </td>
-                  <td className="py-4 text-right whitespace-nowrap">
+                  <td className="py-4 px-3 text-right whitespace-nowrap">
                     <StatusBadge status={item.status} />
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+
 
         ) : (
           <div className="py-8 text-center text-muted-foreground italic">

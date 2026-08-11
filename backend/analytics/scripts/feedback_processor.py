@@ -62,25 +62,38 @@ def fetch_live_data():
         print(f"Database connection error: {e}")
         return [], [], []
 
+VALID_DOMAINS = [
+    "MachineLearning",
+    "DeepLearning",
+    "HealthcareAI",
+    "PowerSystems",
+    "E-commerceAI",
+    "Other"
+]
+
 def resolve_topic(user_query, raw_cat):
-    if user_query and len(user_query.strip()) < 6:
+    if raw_cat:
+        cat_clean = raw_cat.replace(" ", "")
+        for dom in VALID_DOMAINS:
+            if dom.lower() == cat_clean.lower():
+                return dom
+
+    if not user_query or len(user_query.strip()) < 6:
         return "Other"
-    if raw_cat and raw_cat in ["Machine Learning", "Deep Learning", "Healthcare AI", "Power Systems", "E-commerce AI"]:
-        return raw_cat
-    if not user_query:
-        return "Other"
+
     uq = user_query.lower()
-    if any(k in uq for k in ["deep learning", "cnn", "rnn", "neural", "transformer", "pytorch"]):
-        return "Deep Learning"
-    if any(k in uq for k in ["health", "medical", "hospital", "patient", "clinical"]):
-        return "Healthcare AI"
-    if any(k in uq for k in ["power", "grid", "voltage", "energy", "solar", "battery"]):
-        return "Power Systems"
-    if any(k in uq for k in ["e-commerce", "recommend", "cart", "product", "retail"]):
-        return "E-commerce AI"
-    if any(k in uq for k in ["regression", "classification", "clustering", "svm", "dataset"]):
-        return "Machine Learning"
+    if any(k in uq for k in ["deep learning", "deeplearning", "cnn", "rnn", "neural", "transformer", "pytorch"]):
+        return "DeepLearning"
+    if any(k in uq for k in ["health", "medical", "hospital", "patient", "clinical", "healthcareai"]):
+        return "HealthcareAI"
+    if any(k in uq for k in ["power", "grid", "voltage", "energy", "solar", "battery", "powersystems"]):
+        return "PowerSystems"
+    if any(k in uq for k in ["e-commerce", "ecommerce", "recommend", "cart", "product", "retail", "e-commerceai"]):
+        return "E-commerceAI"
+    if any(k in uq for k in ["machine learning", "machinelearning", "regression", "classification", "clustering", "svm", "dataset"]):
+        return "MachineLearning"
     return "Other"
+
 
 def process_analytics():
 
@@ -258,27 +271,33 @@ def process_analytics():
         })
 
 
-    # 6. Topic Clustering
-    comments = [c for c in df.get('comment', []).dropna() if isinstance(c, str) and len(c.strip()) > 3]
-    topics = []
-    if len(comments) >= 3:
-        try:
-            vectorizer = TfidfVectorizer(stop_words='english')
-            X = vectorizer.fit_transform(comments)
-            num_clusters = min(3, len(comments))
-            kmeans = KMeans(n_clusters=num_clusters, random_state=42, n_init='auto')
-            kmeans.fit(X)
-            order_centroids = kmeans.cluster_centers_.argsort()[:, ::-1]
-            terms = vectorizer.get_feature_names_out()
-            for i in range(num_clusters):
-                top_terms = [terms[ind] for ind in order_centroids[i, :3]]
-                topics.append({
-                    "cluster": i,
-                    "keywords": top_terms,
-                    "count": int(np.sum(kmeans.labels_ == i))
-                })
-        except Exception as e:
-            print(f"Clustering warning: {e}")
+    # 6. Feedback Volume by Project Domain / Topic
+    domain_totals = {
+        "MachineLearning": 0,
+        "DeepLearning": 0,
+        "HealthcareAI": 0,
+        "PowerSystems": 0,
+        "E-commerceAI": 0,
+        "Other": 0
+    }
+
+    for item in recent_feedback:
+        t_name = item.get("topic") or "Other"
+        if t_name in domain_totals:
+            domain_totals[t_name] += 1
+        else:
+            domain_totals["Other"] += 1
+
+    topics = [
+        {
+            "cluster": i,
+            "name": domain,
+            "keywords": [domain],
+            "count": count
+        }
+        for i, (domain, count) in enumerate(domain_totals.items())
+    ]
+
 
     # Return Live Analytics Output
     return {

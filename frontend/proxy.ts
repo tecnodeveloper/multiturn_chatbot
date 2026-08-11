@@ -32,31 +32,34 @@ export async function proxy(request: NextRequest) {
     let user = null;
     let accessToken = undefined;
 
-    // THE SLEDGEHAMMER: Dynamically find the auth cookie and rip the token out manually
-    const authCookie = request.cookies.getAll().find(c => c.name.startsWith('sb-') && c.name.endsWith('-auth-token'));
+    // Find auth cookies (handles chunked cookies or single token)
+    const allCookies = request.cookies.getAll();
+    const sbAccessTokenCookie = allCookies.find(c => c.name === 'sb-access-token');
+    const authCookie = allCookies.find(c => c.name.startsWith('sb-') && c.name.includes('-auth-token'));
     
-    if (authCookie && authCookie.value) {
+    if (sbAccessTokenCookie && sbAccessTokenCookie.value) {
+      accessToken = sbAccessTokenCookie.value;
+    } else if (authCookie && authCookie.value) {
       try {
         const parsed = JSON.parse(authCookie.value);
         if (parsed.access_token) {
-          accessToken = parsed.access_token; // New @supabase/ssr format
+          accessToken = parsed.access_token;
         } else if (Array.isArray(parsed)) {
-          accessToken = parsed[0]; // Old auth-helpers format
+          accessToken = parsed[0];
         }
       } catch {
-        accessToken = authCookie.value; // Fallback if it's just a raw string
+        accessToken = authCookie.value;
       }
     }
 
     if (accessToken) {
-      // Pass the token directly to Supabase, completely bypassing its cookie parser
-      const { data, error } = await supabase.auth.getUser(accessToken);
+      const { data } = await supabase.auth.getUser(accessToken);
       user = data?.user;
     } else {
-      // Fallback to standard behavior if no cookie is found
       const { data } = await supabase.auth.getUser();
       user = data?.user;
     }
+
 
     const url = request.nextUrl.clone();
     const path = url.pathname;

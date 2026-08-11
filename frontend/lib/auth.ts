@@ -3,17 +3,21 @@ import { createBrowserSupabaseClient } from "@/lib/supabase";
 const supabase = createBrowserSupabaseClient();
 
 export async function signInWithGoogle() {
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: `${window.location.origin}/api/auth/callback`,
-    },
+  const response = await fetch("/api/auth/google", {
+    method: "POST",
   });
 
-  if (error) {
-    throw new Error(error.message || "Failed to sign in with Google");
+  const data = await response.json();
+
+  if (!response.ok || data.error) {
+    throw new Error(data.error || "Failed to sign in with Google");
+  }
+
+  if (data.url) {
+    window.location.href = data.url;
   }
 }
+
 
 export async function signInWithEmail(email: string, password: string) {
   const response = await fetch("/api/auth/login", {

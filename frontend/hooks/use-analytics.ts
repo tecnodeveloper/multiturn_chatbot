@@ -35,9 +35,11 @@ export interface AnalyticsData {
 
   topics: Array<{
     cluster: number;
+    name?: string;
     keywords: string[];
     count: number;
   }>;
+
   raw_data_count: number;
 }
 
