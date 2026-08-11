@@ -16,6 +16,7 @@ interface MessageListProps {
   onNewChat: () => void;
   onSuggestionClick: (suggestion: string) => void;
   chatId?: string;
+  onFeedbackSubmitted?: () => void;
 }
 
 const AssistantMessage: FC<{ content: string }> = ({ content }) => {
@@ -27,7 +28,7 @@ const AssistantMessage: FC<{ content: string }> = ({ content }) => {
         AI
       </div>
       <div className="flex flex-col gap-1 max-w-2xl">
-        <div className="relative rounded-2xl rounded-bl-md bg-background border border-border px-4 py-3 shadow-sm text-sm">
+        <div className="relative rounded-2xl rounded-bl-md bg-white dark:bg-[#0e1626] border border-[#e2e8f0] dark:border-slate-800 text-[#0f172a] dark:text-slate-100 px-4 py-3 shadow-sm text-sm">
           <ReactMarkdown className="prose dark:prose-invert max-w-none break-words leading-6 pb-6">
             {content}
           </ReactMarkdown>
@@ -76,7 +77,8 @@ export const MessageList: FC<MessageListProps> = ({
   isSending,
   onNewChat,
   onSuggestionClick,
-  chatId
+  chatId,
+  onFeedbackSubmitted
 }) => {
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -103,7 +105,8 @@ export const MessageList: FC<MessageListProps> = ({
       {messages.map((item, index) => {
         const isAssistant = item.role === "assistant";
         const messageCount = index + 1;
-        const showFeedback = messageCount % 4 === 0;
+        // Trigger mandatory feedback after every 2 turns (2 user + 2 assistant = 4 messages)
+        const showFeedback = isAssistant && messageCount % 4 === 0;
 
         return (
           <div key={`${item.role}-${index}`} className="flex flex-col gap-4">
@@ -111,7 +114,7 @@ export const MessageList: FC<MessageListProps> = ({
               <AssistantMessage content={item.content} />
             ) : (
               <div className="flex gap-3 justify-end">
-                <div className="max-w-2xl rounded-2xl rounded-br-md bg-primary text-primary-foreground px-4 py-3 shadow-sm text-sm">
+                <div className="max-w-2xl rounded-2xl rounded-br-md bg-[#2563eb] text-white px-4 py-3 shadow-sm text-sm">
                   <ReactMarkdown className="prose prose-invert max-w-none break-words leading-6">
                     {item.content}
                   </ReactMarkdown>
@@ -126,7 +129,11 @@ export const MessageList: FC<MessageListProps> = ({
             )}
             
             {showFeedback && chatId && (
-              <FeedbackPanel chatId={chatId} />
+              <FeedbackPanel 
+                chatId={chatId} 
+                messageId={item.id} 
+                onSubmitted={onFeedbackSubmitted}
+              />
             )}
           </div>
         );
@@ -150,3 +157,4 @@ export const MessageList: FC<MessageListProps> = ({
     </div>
   );
 };
+

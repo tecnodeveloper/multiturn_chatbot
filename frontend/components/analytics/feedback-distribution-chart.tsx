@@ -1,13 +1,7 @@
 "use client";
 
 import { FC } from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-} from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { AnalyticsData } from "@/hooks/use-analytics";
 import { useTheme } from "next-themes";
 
@@ -15,25 +9,58 @@ interface FeedbackDistributionChartProps {
   data: AnalyticsData | null;
 }
 
-export const FeedbackDistributionChart: FC<FeedbackDistributionChartProps> = ({ data: analyticsData }) => {
+export const FeedbackDistributionChart: FC<FeedbackDistributionChartProps> = ({
+  data: analyticsData,
+}) => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const correctness = analyticsData?.stats.correctness || {};
-  
-  const chartData = [
-    { name: 'Helpful', value: correctness.correct || 0, color: isDark ? '#3b82f6' : '#a8c686' },
-    { name: 'Not Helpful', value: correctness.incorrect || 0, color: isDark ? '#ef4444' : '#e57373' },
-    { name: 'Partially Helpful', value: correctness.partial || 0, color: isDark ? '#f59e0b' : '#ffb74d' },
-    { name: 'No Feedback', value: correctness.none || 0, color: isDark ? '#374151' : '#e0e0e0' },
-  ].filter(item => item.value > 0);
 
-  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+  const chartData = [
+    {
+      name: "Helpful",
+      value: correctness.correct || 0,
+      color: isDark ? "#3b82f6" : "#a8c686",
+    },
+    {
+      name: "Not Helpful",
+      value: correctness.incorrect || 0,
+      color: isDark ? "#ef4444" : "#e57373",
+    },
+    {
+      name: "Partially Helpful",
+      value: correctness.partial || 0,
+      color: isDark ? "#f59e0b" : "#ffb74d",
+    },
+    {
+      name: "No Feedback",
+      value: correctness.none || 0,
+      color: isDark ? "#374151" : "#e0e0e0",
+    },
+  ].filter((item) => item.value > 0);
+
+  const renderCustomizedLabel = ({
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    percent,
+  }: any) => {
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * (Math.PI / 180));
     const y = cy + radius * Math.sin(-midAngle * (Math.PI / 180));
 
     return (
-      <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" fontSize={12} fontWeight="bold">
+      <text
+        x={x}
+        y={y}
+        fill="white"
+        textAnchor={x > cx ? "start" : "end"}
+        dominantBaseline="central"
+        fontSize={12}
+        fontWeight="bold"
+      >
         {`${(percent * 100).toFixed(0)}%`}
       </text>
     );
@@ -41,8 +68,10 @@ export const FeedbackDistributionChart: FC<FeedbackDistributionChartProps> = ({ 
 
   return (
     <div className="bg-card rounded-2xl shadow-sm p-6 flex flex-col gap-6 h-full border border-border">
-      <h3 className="text-lg font-bold text-foreground">User Feedback Distribution</h3>
-      
+      <h3 className="text-lg font-bold text-foreground">
+        User Feedback Distribution
+      </h3>
+
       <div className="h-[250px] w-full">
         {chartData.length > 0 ? (
           <ResponsiveContainer width="100%" height="100%">
@@ -61,15 +90,15 @@ export const FeedbackDistributionChart: FC<FeedbackDistributionChartProps> = ({ 
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip 
-                contentStyle={{ 
-                  borderRadius: '12px', 
-                  border: 'none', 
-                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                  backgroundColor: isDark ? '#161821' : '#ffffff',
-                  color: isDark ? '#ffffff' : '#111827'
+              <Tooltip
+                contentStyle={{
+                  borderRadius: "12px",
+                  border: "none",
+                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                  backgroundColor: isDark ? "#161821" : "#ffffff",
+                  color: isDark ? "#ffffff" : "#111827",
                 }}
-                formatter={(value: number) => [`${value}%`, 'Percentage']}
+                formatter={(value: any) => [`${value}%`, "Percentage"]}
               />
             </PieChart>
           </ResponsiveContainer>
@@ -83,10 +112,15 @@ export const FeedbackDistributionChart: FC<FeedbackDistributionChartProps> = ({ 
       <div className="grid grid-cols-2 gap-4 mt-auto">
         {chartData.map((item) => (
           <div key={item.name} className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+            <div
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: item.color }}
+            />
             <div className="flex flex-col">
               <span className="text-xs text-muted-foreground">{item.name}</span>
-              <span className="text-sm font-bold text-foreground">{item.value}%</span>
+              <span className="text-sm font-bold text-foreground">
+                {item.value}%
+              </span>
             </div>
           </div>
         ))}

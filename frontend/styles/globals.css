@@ -4,25 +4,26 @@
 
 @layer base {
   :root {
-    --background: 33 27% 86%; /* #e8ddd1 - Beige */
-    --foreground: 222 47% 11%; /* #111827 - Dark Gray */
-    --card: 0 0% 100%; /* #ffffff - Pure White */
+    --background: 210 40% 98%; /* #F8FAFC - Main Body */
+    --sidebar-bg: 210 40% 96%; /* #F1F5F9 - Sidebar */
+    --foreground: 222 47% 11%; /* #0F172A - Primary Text */
+    --card: 0 0% 100%; /* #FFFFFF - White Card */
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215 16% 47%; /* #6b7280 */
-    --accent: 24 20% 45%; /* #8b6f5c - Brown */
-    --accent-foreground: 0 0% 100%;
+    --muted: 210 40% 96%; /* #F1F5F9 */
+    --muted-foreground: 215 16% 47%; /* #64748B - Secondary Text */
+    --accent: 214 95% 93%; /* #DBEAFE - Active Sidebar Item */
+    --accent-foreground: 221 83% 53%; /* #2563EB - Active Text */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
-    --border: 214 32% 91%; /* #e5e7eb */
-    --input: 214 32% 91%;
-    --primary: 24 20% 45%; /* #8b6f5c - Brown */
+    --border: 214 32% 91%; /* #E2E8F0 - Divider / Border */
+    --input: 213 27% 84%; /* #CBD5E1 */
+    --primary: 221 83% 53%; /* #2563EB - Primary Button */
     --primary-foreground: 0 0% 100%;
-    --secondary: 87 36% 65%; /* #a8c686 - Green */
+    --secondary: 210 40% 96%;
     --secondary-foreground: 222 47% 11%;
-    --ring: 24 20% 45%;
+    --ring: 221 83% 53%;
     --radius: 0.75rem;
   }
 

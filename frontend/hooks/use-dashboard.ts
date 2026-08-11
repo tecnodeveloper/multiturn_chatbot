@@ -42,7 +42,24 @@ export function useDashboard() {
   const [attachedFiles, setAttachedFiles] = useState<{record: any, file: File}[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [evaluatedTurns, setEvaluatedTurns] = useState<Record<string, number>>({});
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  const currentChat = chats.find(c => c.id === currentChatId);
+  const assistantCount = currentChat?.messages.filter(m => m.role === "assistant").length || 0;
+  
+  // FR12 & FR13: Lock input every 2 completed turns (every 2 assistant replies) until feedback submitted
+  const lastEvaluated = (currentChatId && evaluatedTurns[currentChatId]) || 0;
+  const isInputLocked = assistantCount > 0 && assistantCount % 2 === 0 && lastEvaluated < assistantCount;
+
+  const handleFeedbackSubmitted = () => {
+    if (currentChatId && assistantCount > 0) {
+      setEvaluatedTurns(prev => ({
+        ...prev,
+        [currentChatId]: assistantCount
+      }));
+    }
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -122,7 +139,7 @@ export function useDashboard() {
   };
 
   const handleSendMessage = async (content: string) => {
-    if (!content.trim() || !user || isSending) return;
+    if (!content.trim() || !user || isSending || isInputLocked) return;
 
     setIsSending(true);
     const userContent = content.trim();
@@ -133,13 +150,13 @@ export function useDashboard() {
 
       if (!chatId) {
         const newChat = await createChat({
-          title: userContent.slice(0, 42),
+          title: "New Chat",
           user_id: user.id,
         });
         chatId = newChat.id;
         activeChat = {
           id: newChat.id,
-          title: newChat.title,
+          title: "New Chat",
           messages: [],
           createdAt: newChat.created_at,
         };
@@ -277,21 +294,26 @@ export function useDashboard() {
         ),
       );
 
-      if (activeChat?.title === "New Chat") {
-        const newTitle = userContent.slice(0, 42);
-        await updateChat(chatId!, { title: newTitle });
-        setChats((prev) =>
-          prev.map((c) => (c.id === chatId ? { ...c, title: newTitle } : c)),
-        );
-      }
+      if (activeChat?.title === "New Chat" || !activeChat?.title) {
+        let conciseTitle = "";
+        const titleMatch = fullContent.match(/<sidebar_title>(.*?)<\/sidebar_title>/i);
+        if (titleMatch && titleMatch[1]?.trim()) {
+          conciseTitle = titleMatch[1].trim();
+        } else {
+          const cleaned = userContent
+            .trim()
+            .replace(/^(can you|please|could you|help me|i want to|how do i|how to)\s+/i, "")
+            .replace(/[?.!]+$/, "");
+          const words = cleaned.split(/\s+/).slice(0, 7).join(" ");
+          conciseTitle = words
+            ? words.charAt(0).toUpperCase() + words.slice(1)
+            : userContent.slice(0, 42);
+        }
 
-      const userMessageCount = [
-        ...(activeChat?.messages || []),
-        userMessage,
-      ].filter((m) => m.role === "user").length;
-      
-      if (userMessageCount === 6) {
-        setShowFeedbackModal(true);
+        await updateChat(chatId!, { title: conciseTitle });
+        setChats((prev) =>
+          prev.map((c) => (c.id === chatId ? { ...c, title: conciseTitle } : c)),
+        );
       }
 
     } catch (error: any) {
@@ -305,7 +327,7 @@ export function useDashboard() {
   };
 
   const handleFileUpload = async (file: File) => {
-    if (!user) return;
+    if (!user || isInputLocked) return;
     setIsUploading(true);
     try {
       let chatId = currentChatId;
@@ -374,6 +396,9 @@ export function useDashboard() {
     setAttachedFiles,
     isUploading,
     showFeedbackModal,
-    setShowFeedbackModal
+    setShowFeedbackModal,
+    isInputLocked,
+    handleFeedbackSubmitted
   };
 }
+

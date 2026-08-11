@@ -59,7 +59,7 @@ export const TopicAccuracyChart: FC<TopicAccuracyChartProps> = ({ data: analytic
                   backgroundColor: isDark ? '#161821' : '#ffffff',
                   color: isDark ? '#ffffff' : '#111827'
                 }}
-                formatter={(value: number) => [value, 'Feedback Count']}
+                formatter={(value: any) => [value, 'Feedback Count']}
               />
               <Bar dataKey="val" fill={isDark ? "#3b82f6" : "#8b6f5c"} radius={[0, 4, 4, 0]} barSize={20}>
                 <LabelList 

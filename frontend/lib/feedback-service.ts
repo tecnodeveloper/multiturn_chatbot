@@ -3,6 +3,7 @@ import { createBrowserSupabaseClient } from "@/lib/supabase";
 export interface FeedbackData {
   chat_id: string;
   user_id: string;
+  message_id?: string;
   rating: number;
   correctness?: string;
   length_type?: string;
@@ -19,6 +20,7 @@ export async function submitFeedback(feedback: FeedbackData) {
       {
         chat_id: feedback.chat_id,
         user_id: feedback.user_id,
+        message_id: feedback.message_id,
         rating: feedback.rating,
         correctness: feedback.correctness || "none",
         length_type: feedback.length_type || "none",
@@ -35,3 +37,4 @@ export async function submitFeedback(feedback: FeedbackData) {
 
   return data;
 }
+

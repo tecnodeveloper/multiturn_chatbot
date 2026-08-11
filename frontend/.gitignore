@@ -32,6 +32,8 @@ logs/
 
 # Environment & Secrets
 .env
+.env*.local
+*.env
 
 # Dependencies & Build Artifacts (Root and Subfolders)
 node_modules/

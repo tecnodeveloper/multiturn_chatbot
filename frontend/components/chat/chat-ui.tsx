@@ -4,9 +4,9 @@ import { FC } from "react";
 import { useChat } from "@/context/chat-context";
 import { MessageList } from "./message-list";
 import { ChatInput } from "./chat-input";
-import { AI_PROVIDERS } from "@/lib/ai-providers";
 import { Button } from "@/components/ui/button";
-import { IconChevronCompactRight, IconAdjustmentsHorizontal } from "@tabler/icons-react";
+import { ChevronRight } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface ChatUIProps {
   sidebarOpen: boolean;
@@ -16,6 +16,8 @@ interface ChatUIProps {
   onNewChat: () => void;
   attachedFiles: any[];
   setAttachedFiles: React.Dispatch<React.SetStateAction<any[]>>;
+  isInputLocked?: boolean;
+  onFeedbackSubmitted?: () => void;
 }
 
 export const ChatUI: FC<ChatUIProps> = ({
@@ -25,15 +27,13 @@ export const ChatUI: FC<ChatUIProps> = ({
   onFileUpload,
   onNewChat,
   attachedFiles,
-  setAttachedFiles
+  setAttachedFiles,
+  isInputLocked = false,
+  onFeedbackSubmitted
 }) => {
   const {
     chats,
     currentChatId,
-    selectedProvider,
-    setSelectedProvider,
-    selectedModel,
-    setSelectedModel,
     isSending,
     setUserInput
   } = useChat();
@@ -44,97 +44,56 @@ export const ChatUI: FC<ChatUIProps> = ({
     setUserInput(suggestion);
   };
 
-  const handleProviderChange = (providerId: string) => {
-    setSelectedProvider(providerId);
-    const provider = AI_PROVIDERS.find(p => p.id === providerId);
-    if (provider && provider.models.length > 0) {
-      setSelectedModel(provider.models[0].id);
-    }
-  };
-
   return (
-    <main className="relative flex min-w-0 flex-1 flex-col bg-background">
-      {/* Sidebar Toggle Button */}
-      <Button
-        className="absolute left-[4px] top-[50%] z-50 size-[32px] cursor-pointer rounded-full border border-border bg-background shadow-md transition-all duration-200 hover:scale-110 hover:bg-muted"
-        style={{
-          transform: `translateY(-50%) rotate(${sidebarOpen ? "180deg" : "0deg"})`,
-        }}
-        variant="ghost"
-        size="icon"
-        onClick={() => setSidebarOpen(prev => !prev)}
-      >
-        <IconChevronCompactRight size={24} />
-      </Button>
+    <main className="relative flex min-w-0 flex-1 flex-col bg-[#f8fafc] dark:bg-[#070a12] font-sans h-full overflow-hidden text-[#0f172a] dark:text-foreground">
+      {/* Sidebar Toggle Floating Button (when sidebar collapsed) */}
+      {!sidebarOpen && (
+        <Button
+          className="absolute left-[8px] top-[14px] z-50 size-[32px] cursor-pointer rounded-full border border-[#cbd5e1] dark:border-slate-800 bg-white dark:bg-slate-900 shadow-md transition-all duration-200 hover:scale-110 hover:bg-[#f1f5f9] dark:hover:bg-slate-800"
+          variant="ghost"
+          size="icon"
+          onClick={() => setSidebarOpen(true)}
+        >
+          <ChevronRight size={24} className="text-[#0f172a] dark:text-slate-300" />
+        </Button>
+      )}
 
-      {/* Header */}
-      <header className="flex max-h-[60px] min-h-[60px] w-full items-center justify-between border-b border-border px-4 md:px-8">
-        <div className="flex-1 overflow-hidden">
-          <h1 className="text-sm font-bold truncate text-center md:text-base">
-            {currentChat?.title || "MultiTurn AI Chat"}
-          </h1>
-        </div>
+      {/* Header: Centered New Chat Title & Top Right Corner Theme Toggle */}
+      <header className="flex max-h-[60px] min-h-[60px] w-full items-center justify-between border-b border-[#e2e8f0] dark:border-slate-800/60 px-6 relative bg-white dark:bg-[#070a12] shrink-0">
+        <div className="w-[80px]" />
+
+        <h1 className="absolute left-1/2 -translate-x-1/2 text-base font-bold text-[#0f172a] dark:text-slate-100 text-center">
+          {currentChat?.title || "New Chat"}
+        </h1>
 
         <div className="flex items-center gap-2">
-          <select
-            value={selectedProvider}
-            onChange={(e) => handleProviderChange(e.target.value)}
-            className="hidden h-9 md:block rounded-md border border-border bg-muted/30 px-2 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all cursor-pointer"
-          >
-            {AI_PROVIDERS.map((provider) => (
-              <option key={provider.id} value={provider.id}>
-                {provider.name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={selectedModel}
-            onChange={(e) => setSelectedModel(e.target.value)}
-            className="h-9 rounded-md border border-border bg-muted/30 px-2 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all cursor-pointer"
-          >
-            {AI_PROVIDERS.find((p) => p.id === selectedProvider)?.models.map(
-              (model) => (
-                <option key={model.id} value={model.id}>
-                  {model.name}
-                </option>
-              ),
-            )}
-          </select>
-          
-          <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground">
-             <IconAdjustmentsHorizontal size={20} />
-          </Button>
+          <ThemeToggle />
         </div>
       </header>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto bg-muted/5 custom-scrollbar">
-        <div className="mx-auto max-w-5xl py-8 px-4">
+      <div className="flex-1 overflow-y-auto bg-[#f8fafc] dark:bg-[#070a12] custom-scrollbar min-h-0">
+        <div className="mx-auto max-w-5xl w-full py-6 px-4">
           <MessageList
             messages={currentChat?.messages || []}
             isSending={isSending}
             onNewChat={onNewChat}
             onSuggestionClick={handleSuggestionClick}
-            chatId={currentChatId}
+            chatId={currentChatId || undefined}
+            onFeedbackSubmitted={onFeedbackSubmitted}
           />
         </div>
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-border bg-background py-4 px-4 md:px-8 lg:py-8">
-        <div className="mx-auto max-w-4xl">
-          <ChatInput
-            onSendMessage={onSendMessage}
-            onFileUpload={onFileUpload}
-            attachedFiles={attachedFiles}
-            setAttachedFiles={setAttachedFiles}
-          />
-          <p className="mt-3 text-center text-[10px] text-muted-foreground/60 md:text-xs">
-            MultiTurn AI can make mistakes. Consider checking important information.
-          </p>
-        </div>
-      </div>
+      <ChatInput
+        onSendMessage={onSendMessage}
+        onFileUpload={onFileUpload}
+        attachedFiles={attachedFiles}
+        setAttachedFiles={setAttachedFiles}
+        isLocked={isInputLocked}
+      />
     </main>
   );
 };
+

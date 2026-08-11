@@ -19,20 +19,23 @@ export function Brand({ className, showText = true, size = "md" }: BrandProps) {
 
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      <Image
-        src="/img/imageLogo.png"
+      <img
+        src="/img/logo/multiturn-title-outlinel.svg"
         alt="MultiTurn AI"
         width={dim.width}
         height={dim.height}
         className="rounded-lg"
-        priority
       />
       {showText && (
         <div className="flex flex-col">
-          <span className="text-lg font-bold text-primary">MultiTurn AI</span>
-          <span className="text-xs text-muted-foreground">
-            Chatbot using Llama 3
+          <span className="text-sm font-bold text-[#0f172a] dark:text-white tracking-tight">
+            MultiTurn <span className="text-[#2563eb] dark:text-[#3b82f6]">AI</span>
           </span>
+          {size !== "sm" && (
+            <span className="text-xs text-[#64748b] dark:text-slate-400">
+              Chatbot using Llama 3
+            </span>
+          )}
         </div>
       )}
     </div>

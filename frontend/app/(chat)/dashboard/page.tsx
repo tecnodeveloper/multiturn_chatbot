@@ -28,6 +28,8 @@ export default function DashboardPage() {
     setAttachedFiles,
     showFeedbackModal,
     setShowFeedbackModal,
+    isInputLocked,
+    handleFeedbackSubmitted
   } = useDashboard();
 
   const handleAction = () => {
@@ -42,17 +44,13 @@ export default function DashboardPage() {
 
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
-      <div
-        className={`transition-all duration-200 ease-in-out ${sidebarOpen ? "w-[320px]" : "w-0"}`}
-      >
-        {sidebarOpen && (
-          <Sidebar
-            onNewChat={handleAction}
-            onDeleteChat={handleDeleteChat}
-            onSelectChat={setCurrentChatId}
-          />
-        )}
-      </div>
+      <Sidebar
+        collapsed={!sidebarOpen}
+        onToggleCollapse={() => setSidebarOpen((prev) => !prev)}
+        onNewChat={handleAction}
+        onDeleteChat={handleDeleteChat}
+        onSelectChat={setCurrentChatId}
+      />
 
       <ChatUI
         sidebarOpen={sidebarOpen}
@@ -62,6 +60,8 @@ export default function DashboardPage() {
         onNewChat={handleNewChat}
         attachedFiles={attachedFiles}
         setAttachedFiles={setAttachedFiles}
+        isInputLocked={isInputLocked}
+        onFeedbackSubmitted={handleFeedbackSubmitted}
       />
 
       {user && currentChatId && (
@@ -87,3 +87,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+
