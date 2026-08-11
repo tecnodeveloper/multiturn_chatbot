@@ -20,13 +20,19 @@ export interface AnalyticsData {
     accuracy: number;
   }>;
   recent_feedback: Array<{
+    id?: string;
     time: string;
     topic: string;
     preview: string;
+    user_query?: string;
+    model_response?: string;
     feedback: "up" | "down" | "none";
     status: string;
     rating: number;
+    correctness?: string;
+    length_type?: string;
   }>;
+
   topics: Array<{
     cluster: number;
     keywords: string[];
@@ -49,6 +55,7 @@ export function useAnalytics() {
         }
         const result = await response.json();
         setData(result);
+        setError(null);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -57,7 +64,11 @@ export function useAnalytics() {
     }
 
     fetchData();
+    // Live auto-refresh polling every 5 seconds for real-time analytics updates
+    const interval = setInterval(fetchData, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   return { data, loading, error };
 }
+

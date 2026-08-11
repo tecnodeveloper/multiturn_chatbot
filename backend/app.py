@@ -28,13 +28,14 @@ FAST_MODEL = "llama-3.1-8b-instant"
 SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
 
-# Primary Project Domains according to PDF specifications
+# Primary Project Domains according to PDF specifications plus 'Other' for general/test messages
 PROJECT_DOMAINS = [
     "Machine Learning",
     "Deep Learning",
     "Healthcare AI",
     "Power Systems",
-    "E-commerce AI"
+    "E-commerce AI",
+    "Other"
 ]
 
 # Initialize Groq client
@@ -53,8 +54,11 @@ def supabase_headers():
 
 def classify_topic(user_message):
     """FR11: Real-time Topic Classification using lightweight Groq LLM or keyword fallback."""
-    if not client or not user_message:
-        return "Machine Learning"
+    if not user_message or len(user_message.strip()) < 5:
+        return "Other"
+
+    if not client:
+        return "Other"
 
     try:
         prompt = (
@@ -63,9 +67,12 @@ def classify_topic(user_message):
             f"2. Deep Learning\n"
             f"3. Healthcare AI\n"
             f"4. Power Systems\n"
-            f"5. E-commerce AI\n\n"
-            f"User Message: \"{user_message}\"\n\n"
-            f"Return ONLY the exact category name from the list above, nothing else."
+            f"5. E-commerce AI\n"
+            f"6. Other\n\n"
+            f"Rules:\n"
+            f"- If the message is casual, short, gibberish (e.g. 'afas', 'test', 'hi'), or does not clearly belong to one of the 5 AI topics, respond with 'Other'.\n"
+            f"- Return ONLY the category name from the list above, nothing else.\n\n"
+            f"User Message: \"{user_message}\""
         )
         completion = client.chat.completions.create(
             messages=[{"role": "user", "content": prompt}],
@@ -77,10 +84,11 @@ def classify_topic(user_message):
         for domain in PROJECT_DOMAINS:
             if domain.lower() in res.lower():
                 return domain
-        return "Machine Learning"
+        return "Other"
     except Exception as e:
         print(f"Topic classification warning: {e}")
-        return "Machine Learning"
+        return "Other"
+
 
 def get_session_messages(chat_id):
     if not SUPABASE_URL or not SUPABASE_KEY:

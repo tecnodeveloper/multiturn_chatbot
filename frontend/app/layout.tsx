@@ -8,9 +8,17 @@ export const metadata: Metadata = {
   description:
     "An intelligent multi-turn conversation interface powered by Llama 3 and multiple AI providers",
   icons: {
-    icon: "/img/TabIconMultiturnAI.png",
+    icon: [
+      { url: "/img/logo/multiturn-mark.svg", type: "image/svg+xml" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/img/TabIconMultiturnAI.png", type: "image/png" },
+    ],
+    shortcut: "/img/logo/multiturn-mark.svg",
+    apple: "/img/TabIconMultiturnAI.png",
   },
 };
+
+
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
