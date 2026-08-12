@@ -5,7 +5,3 @@ groq==0.4.1
 postgrest>=0.17.1
 httpx>=0.27.2
 python-dotenv>=1.0.1
-pandas
-scikit-learn
-numpy
-gunicorn
