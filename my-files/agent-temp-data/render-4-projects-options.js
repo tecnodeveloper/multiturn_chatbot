@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 
 const artifactDir = '/home/rdev/.gemini/antigravity-ide/brain/961d54a7-179c-47c3-8863-f50dc79b2728/';
-const tempDir = '/home/rdev/UniversityData/multiturn_chatbot/my-files/agent-temp-data/screenshots/';
+const tempDir = '/home/rdev/UniversityData/multiturn_chatbot/temp-files-agent/screenshots/';
 
 function getBaseHTML(variantStyle) {
   return `
