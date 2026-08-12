@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Turn AI Chatbot - Presentation Slides</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: var(--font-body);
+      background-color: #080B10;
+      color: #F3F4F6;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+    .slide-container {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: scale(0.96) translateY(20px);
+      padding: 4rem 6rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: radial-gradient(circle at 50% 0%, var(--slide-glow), transparent 70%), #080B10;
+    }
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1) translateY(0);
+    }
+    /* Header Bar */
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 1.25rem;
+    }
+    .badge {
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 0.4rem 1rem;
+      border-radius: 9999px;
+      background: var(--badge-bg);
+      color: var(--accent-color);
+      border: 1px solid var(--badge-border);
+    }
+    .slide-num {
+      font-family: var(--font-title);
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Content Layout */
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1.5rem;
+    }
+    .slide-title {
+      font-family: var(--font-title);
+      font-size: 3.25rem;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #FFFFFF 30%, var(--accent-color) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .slide-subtitle {
+      font-size: 1.25rem;
+      color: #9CA3AF;
+      font-weight: 400;
+      max-width: 900px;
+      line-height: 1.6;
+    }
+
+    /* Card Grids */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 1rem;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 1.25rem;
+      padding: 2rem;
+      backdrop-filter: blur(12px);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .card:hover {
+      border-color: var(--accent-color);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px -10px var(--card-glow);
+    }
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--badge-bg);
+      color: var(--accent-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .card-title {
+      font-family: var(--font-title);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+    .card-desc {
+      font-size: 0.95rem;
+      color: #9CA3AF;
+      line-height: 1.6;
+    }
+    .highlight-box {
+      background: var(--badge-bg);
+      border-left: 4px solid var(--accent-color);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 0.75rem 0.75rem 0;
+      color: #E5E7EB;
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+
+    /* Slide Themes */
+    /* Slide 1: Crimson / Coral (Problem) */
+    .slide-1 {
+      --accent-color: #FF4D4D;
+      --slide-glow: rgba(255, 77, 77, 0.12);
+      --badge-bg: rgba(255, 77, 77, 0.1);
+      --badge-border: rgba(255, 77, 77, 0.25);
+      --card-glow: rgba(255, 77, 77, 0.2);
+    }
+    /* Slide 2: Emerald Cyan (Solution) */
+    .slide-2 {
+      --accent-color: #10B981;
+      --slide-glow: rgba(16, 185, 129, 0.12);
+      --badge-bg: rgba(16, 185, 129, 0.1);
+      --badge-border: rgba(16, 185, 129, 0.25);
+      --card-glow: rgba(16, 185, 129, 0.2);
+    }
+    /* Slide 3: Electric Violet (Features) */
+    .slide-3 {
+      --accent-color: #8B5CF6;
+      --slide-glow: rgba(139, 92, 246, 0.12);
+      --badge-bg: rgba(139, 92, 246, 0.1);
+      --badge-border: rgba(139, 92, 246, 0.25);
+      --card-glow: rgba(139, 92, 246, 0.2);
+    }
+    /* Slide 4: Cyber Blue (Analytics) */
+    .slide-4 {
+      --accent-color: #3B82F6;
+      --slide-glow: rgba(59, 130, 246, 0.12);
+      --badge-bg: rgba(59, 130, 246, 0.1);
+      --badge-border: rgba(59, 130, 246, 0.25);
+      --card-glow: rgba(59, 130, 246, 0.2);
+    }
+
+    /* Footer Navigation Controls */
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 1.25rem;
+    }
+    .footer-brand {
+      font-family: var(--font-title);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.5);
+    }
+    .controls {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    .btn-nav {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #FFFFFF;
+      padding: 0.6rem 1.4rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-family: var(--font-title);
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .btn-nav:hover {
+      background: #FFFFFF;
+      color: #080B10;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="slide-container">
+
+    <!-- SLIDE 1: THE PROBLEM -->
+    <div class="slide slide-1 active" id="slide-1">
+      <div class="slide-header">
+        <span class="badge">Slide 01 — Core Problem</span>
+        <span class="slide-num">01 / 04</span>
+      </div>
+
+      <div class="slide-body">
+        <div>
+          <h1 class="slide-title">The Challenge: LLMs Are Stateless</h1>
+          <p class="slide-subtitle">Traditional Large Language Model APIs process every prompt independently without memory of past queries.</p>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-icon">1</div>
+            <h3 class="card-title">Turn 1: Initial Query</h3>
+            <p class="card-desc">User asks: <em>"Tell me about Shahid Afridi's cricket career."</em><br>LLM responds with his stats, records, and accomplishments.</p>
+          </div>
+
+          <div class="card">
+            <div class="card-icon">2</div>
+            <h3 class="card-title">Turn 2: Contextual Follow-up</h3>
+            <p class="card-desc">User asks: <em>"How many fours did he hit in ODI cricket?"</em><br><strong style="color: #FF4D4D;">Stateless LLM Failure:</strong> The model has no memory of "he" referring to Afridi and fails to answer.</p>
+          </div>
+        </div>
+
+        <div class="highlight-box">
+          <strong>Key Limitation:</strong> Without a multi-turn memory layer, LLMs cannot sustain continuous, human-like multi-turn conversations.
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span class="footer-brand">Multi-Turn AI Chatbot Project — Intro Presentation</span>
+        <div class="controls">
+          <button class="btn-nav" onclick="prevSlide()">Prev</button>
+          <button class="btn-nav" onclick="nextSlide()">Next</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: THE SOLUTION -->
+    <div class="slide slide-2" id="slide-2">
+      <div class="slide-header">
+        <span class="badge">Slide 02 — Architectural Solution</span>
+        <span class="slide-num">02 / 04</span>
+      </div>
+
+      <div class="slide-body">
+        <div>
+          <h1 class="slide-title">The Solution: Dynamic Context Persistence</h1>
+          <p class="slide-subtitle">Our application automatically persists session history and reconstructs context dynamically for every turn.</p>
+        </div>
+
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-icon">DB</div>
+            <h3 class="card-title">1. Persistent Storage</h3>
+            <p class="card-desc">Every prompt and response is logged in real-time to Supabase Cloud PostgreSQL with session IDs.</p>
+          </div>
+
+          <div class="card">
+            <div class="card-icon">CTX</div>
+            <h3 class="card-title">2. Context Assembly</h3>
+            <p class="card-desc">When a new message arrives, the backend fetches the full conversational history from the database.</p>
+          </div>
+
+          <div class="card">
+            <div class="card-icon">AI</div>
+            <h3 class="card-title">3. Model Execution</h3>
+            <p class="card-desc">Prepend past dialog history to Meta LLaMA 3 via Groq API for seamless context-aware responses.</p>
+          </div>
+        </div>
+
+        <div class="highlight-box">
+          <strong>Outcome:</strong> Complete multi-turn conversational intelligence where the AI effortlessly understands pronouns and historical context.
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span class="footer-brand">Multi-Turn AI Chatbot Project — Intro Presentation</span>
+        <div class="controls">
+          <button class="btn-nav" onclick="prevSlide()">Prev</button>
+          <button class="btn-nav" onclick="nextSlide()">Next</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: INTELLIGENT FEATURES -->
+    <div class="slide slide-3" id="slide-3">
+      <div class="slide-header">
+        <span class="badge">Slide 03 — System Features</span>
+        <span class="slide-num">03 / 04</span>
+      </div>
+
+      <div class="slide-body">
+        <div>
+          <h1 class="slide-title">Per-Turn Feedback & Closed-Loop Learning</h1>
+          <p class="slide-subtitle">Combining modern ergonomic UI with real-time human evaluation of AI response quality.</p>
+        </div>
+
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-icon">★</div>
+            <h3 class="card-title">Per-Turn Feedback</h3>
+            <p class="card-desc">Mandatory evaluation modal capturing 1-5 Star Ratings, Correctness, and Output Length preferences.</p>
+          </div>
+
+          <div class="card">
+            <div class="card-icon">🔒</div>
+            <h3 class="card-title">Input Locking Control</h3>
+            <p class="card-desc">Freezes input box during response generation until feedback is provided, guaranteeing quality data.</p>
+          </div>
+
+          <div class="card">
+            <div class="card-icon">🌓</div>
+            <h3 class="card-title">Ergonomic Appearance</h3>
+            <p class="card-desc">Instant Dark Mode & Light Mode theme selector built with Tailwind CSS for optimal developer comfort.</p>
+          </div>
+        </div>
+
+        <div class="highlight-box">
+          <strong>Value:</strong> Continuous human-in-the-loop data feedback enables model accuracy evaluation and fine-tuning.
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span class="footer-brand">Multi-Turn AI Chatbot Project — Intro Presentation</span>
+        <div class="controls">
+          <button class="btn-nav" onclick="prevSlide()">Prev</button>
+          <button class="btn-nav" onclick="nextSlide()">Next</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: ANALYTICS MODULE -->
+    <div class="slide slide-4" id="slide-4">
+      <div class="slide-header">
+        <span class="badge">Slide 04 — Analytics Engine</span>
+        <span class="slide-num">04 / 04</span>
+      </div>
+
+      <div class="slide-body">
+        <div>
+          <h1 class="slide-title">Real-Time Analytics & Topic Intelligence</h1>
+          <p class="slide-subtitle">Transforming raw user feedback into actionable graphical charts and LLM performance metrics.</p>
+        </div>
+
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-icon">🎯</div>
+            <h3 class="card-title">Topic Classification</h3>
+            <p class="card-desc">Real-time classification into 5 AI domains (Machine Learning, Deep Learning, Healthcare AI, Power Systems, E-commerce AI).</p>
+          </div>
+
+          <div class="card">
+            <div class="card-icon">⚡</div>
+            <h3 class="card-title">Latency Tracking</h3>
+            <p class="card-desc">Measures exact response dispatch & completion timestamps in milliseconds per conversational turn.</p>
+          </div>
+
+          <div class="card">
+            <div class="card-icon">📊</div>
+            <h3 class="card-title">Graphical Analytics</h3>
+            <p class="card-desc">Visual graphs mapping rating distributions, accuracy trends across session phases, and response volume.</p>
+          </div>
+        </div>
+
+        <div class="highlight-box">
+          <strong>Summary:</strong> Empowers users and developers with real-time visual insights into AI quality, speed, and topic distribution.
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span class="footer-brand">Multi-Turn AI Chatbot Project — Intro Presentation</span>
+        <div class="controls">
+          <button class="btn-nav" onclick="prevSlide()">Prev</button>
+          <button class="btn-nav" onclick="nextSlide()">Next</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 4;
+
+    function showSlide(num) {
+      if (num < 1) num = 1;
+      if (num > totalSlides) num = totalSlides;
+      currentSlide = num;
+
+      document.querySelectorAll('.slide').forEach((slide, index) => {
+        if (index + 1 === currentSlide) {
+          slide.classList.add('active');
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+    }
+
+    function nextSlide() {
+      showSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+      showSlide(currentSlide - 1);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'Space') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        prevSlide();
+      }
+    });
+  </script>
+</body>
+</html>
