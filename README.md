@@ -10,14 +10,14 @@ The application allows authenticated users to initiate persistent chat sessions,
 
 ## Tech Stack & Architecture Evolution
 
-During development, the core technology stack was upgraded and modernized from initial basic HTML/CSS/monolithic specs to a decoupled enterprise architecture. This transition was undertaken to achieve sub-second model response times, seamless streaming UI components, robust authentication security, and scalable cloud deployment.
+During development, the core technology stack was upgraded and modernized from initial basic HTML/CSS specs to a decoupled architecture. This transition was undertaken to achieve sub-second model response times, seamless streaming UI components, robust authentication security, and scalable execution.
 
 ### Summary of Tech Stack Upgrades
 
 - Frontend Framework: Upgraded from static HTML/CSS to Next.js 16 (App Router with TypeScript and Tailwind CSS) for server-side rendering, dynamic client state management, and modern component architecture.
 - Backend Engine: Developed using Python Flask to provide microservice endpoints for streaming LLaMA 3 inference, response time metrics, and statistical analytics.
 - Conversational AI Engine: Integrated Meta LLaMA 3 (LLaMA-3.3-70B-Versatile and LLaMA-3.1-8B-Instant) via the Groq LLaMA Processing Unit (LPU) Cloud API to overcome local hardware constraints while preserving real-time generation speed.
-- Database & Security: Migrated to Supabase Cloud (PostgreSQL) incorporating Row-Level Security (RLS) policies and integrated Google OAuth 2.0 authentication.
+- Database & Security: Uses Supabase Cloud (PostgreSQL) incorporating Row-Level Security (RLS) policies and integrated Google OAuth 2.0 authentication.
 
 ---
 
@@ -53,6 +53,34 @@ The operational server and analytical processing engines are located inside the 
 
 ---
 
+## Complete Application Endpoints & Routes Reference
+
+### 1. Frontend Page Routes & API Endpoints (Next.js Application - Port 3000)
+
+| Endpoint / Route Name | HTTP Method | URL | Concise Description |
+| :--- | :--- | :--- | :--- |
+| **Login Page** | `GET` | `http://localhost:3000/login` | User login with email or Google OAuth. |
+| **Signup Page** | `GET` | `http://localhost:3000/signup` | New user registration and account creation. |
+| **Password Reset** | `GET` | `http://localhost:3000/reset` | Account recovery and password reset page. |
+| **Main Dashboard** | `GET` | `http://localhost:3000/dashboard` | Main multi-turn AI chatbot chat interface. |
+| **Analytics Dashboard** | `GET` | `http://localhost:3000/analytics` | Visual dashboard for system performance metrics. |
+| **Account Settings** | `GET` | `http://localhost:3000/account` | User profile management and preference settings. |
+| **Projects View** | `GET` | `http://localhost:3000/projects` | System prompt presets and folder management. |
+| **Streaming Chat API** | `POST` | `http://localhost:3000/api/chat` | Streaming AI completion route for chat. |
+| **OAuth Callback API** | `GET` | `http://localhost:3000/api/auth/callback` | Google OAuth authentication redirect callback handler. |
+
+---
+
+### 2. Backend Microservice API Endpoints (Python Flask - Port 5000 & 5001)
+
+| Endpoint Name | HTTP Method | URL | Concise Description |
+| :--- | :--- | :--- | :--- |
+| **Server Health Check** | `GET` | `http://localhost:5000/` | Operational status check for backend server. |
+| **Chat & Classifier API** | `POST` | `http://localhost:5000/api/chat` | Streaming inference, topic classification, message logging. |
+| **Analytics Engine** | `GET` | `http://localhost:5001/api/analytics` | Aggregates feedback metrics for analytics dashboard. |
+
+---
+
 ## Environment Variables Configuration
 
 Both the frontend and backend components rely on environment configuration files to maintain security and operational parameters.
@@ -62,8 +90,8 @@ Both the frontend and backend components rely on environment configuration files
 - NEXT_PUBLIC_SUPABASE_URL: The public URL of your Supabase Cloud instance.
 - NEXT_PUBLIC_SUPABASE_ANON_KEY: The anonymous public key used for client-side database authentication.
 - SUPABASE_SERVICE_ROLE_KEY: The administrative service role key for privileged database queries.
-- NEXT_PUBLIC_APP_URL: The base URL of the deployed frontend application (e.g., http://localhost:3000 or Vercel URL).
-- NEXT_PUBLIC_API_URL: The HTTP URL pointing to the running Python Flask backend server (e.g., http://localhost:5000 or ngrok tunnel URL).
+- NEXT_PUBLIC_APP_URL: The base URL of the running frontend application (http://localhost:3000).
+- NEXT_PUBLIC_API_URL: The HTTP URL pointing to the running Python Flask backend server (http://localhost:5000).
 - GROQ_API_KEY: The authentication API key for accessing Groq LLaMA 3 inference endpoints.
 - SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID: The OAuth 2.0 Client ID generated in Google Cloud Console.
 - SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET: The OAuth 2.0 Client Secret generated in Google Cloud Console.
