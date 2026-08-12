@@ -161,9 +161,9 @@ export const ProfileForm: FC = () => {
   }
 
   return (
-    <div className="w-full max-w-xl mx-auto flex flex-col gap-6 py-4">
+    <div className="w-full max-w-3xl mx-auto flex flex-col gap-6 py-4">
       {/* Header & Avatar Card */}
-      <div className="bg-card/80 backdrop-blur-md rounded-2xl p-6 border border-border/60 shadow-xl flex flex-col items-center gap-4">
+      <div className="bg-card/80 backdrop-blur-md rounded-2xl p-6 border border-border/60 shadow-xl flex flex-col items-center gap-4 w-full">
         <PhotoUpload
           name={formData.fullName || user?.name || "User"}
           imageUrl={formData.avatarUrl}
@@ -173,64 +173,52 @@ export const ProfileForm: FC = () => {
         />
       </div>
 
-      {/* Account Details Section */}
-      <div className="bg-card/80 backdrop-blur-md rounded-2xl p-6 border border-border/60 shadow-xl flex flex-col gap-5">
+      {/* Account Details & Security Section */}
+      <div className="bg-card/80 backdrop-blur-md rounded-2xl p-6 border border-border/60 shadow-xl flex flex-col gap-6 w-full">
         <h3 className="text-sm font-semibold text-muted-foreground tracking-wide uppercase">
           Account Details
         </h3>
 
-        <div className="space-y-2">
-          <Label htmlFor="fullName" className="text-sm font-medium text-foreground">
-            User Display Name
-          </Label>
-          <Input
-            id="fullName"
-            value={formData.fullName}
-            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-            placeholder="Enter display name"
-            className="bg-background/50 border-border focus:ring-2 focus:ring-primary h-11"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="email" className="text-sm font-medium text-foreground">
-              Email Address
+        {/* Name and Email side-by-side on desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
+          <div className="space-y-2">
+            <Label htmlFor="fullName" className="text-sm font-medium text-foreground">
+              Name
             </Label>
-            <span className="text-xs text-muted-foreground flex items-center gap-1">
-              <Lock className="h-3 w-3" /> Locked
-            </span>
-          </div>
-          <div className="relative">
             <Input
-              id="email"
-              value={formData.email}
-              disabled
-              className="bg-muted/40 border-border opacity-80 cursor-not-allowed pr-10 h-11"
+              id="fullName"
+              value={formData.fullName}
+              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+              placeholder="Enter name"
+              className="bg-background/50 border-border focus:ring-2 focus:ring-primary h-11 w-full"
             />
-            <Lock className="absolute right-3 top-3.5 h-4 w-4 text-muted-foreground" />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="email" className="text-sm font-medium text-foreground">
+                Email
+              </Label>
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <Lock className="h-3 w-3" /> Locked
+              </span>
+            </div>
+            <div className="relative w-full">
+              <Input
+                id="email"
+                value={formData.email}
+                disabled
+                className="bg-muted/40 border-border opacity-80 cursor-not-allowed pr-10 h-11 w-full"
+              />
+              <Lock className="absolute right-3 top-3.5 h-4 w-4 text-muted-foreground" />
+            </div>
           </div>
         </div>
 
-        <Button
-          onClick={handleSaveProfile}
-          disabled={saving || uploading}
-          className="mt-2 w-full bg-blue-600 hover:bg-blue-500 text-white font-medium h-11 transition-all"
-        >
-          {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Save Profile Changes
-        </Button>
-      </div>
-
-      {/* Security Section */}
-      <div className="bg-card/80 backdrop-blur-md rounded-2xl p-6 border border-border/60 shadow-xl flex flex-col gap-4">
-        <h3 className="text-sm font-semibold text-muted-foreground tracking-wide uppercase">
-          Security
-        </h3>
-
+        {/* Full-width Change Password Card underneath */}
         <div
           onClick={() => setChangePasswordModalOpen(true)}
-          className="flex items-center justify-between p-4 rounded-xl bg-background/40 hover:bg-background/80 border border-border/40 cursor-pointer transition-all group"
+          className="w-full flex items-center justify-between p-4 rounded-xl bg-background/40 hover:bg-background/80 border border-border/40 cursor-pointer transition-all group"
         >
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
@@ -247,6 +235,16 @@ export const ProfileForm: FC = () => {
           </div>
           <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
         </div>
+
+        {/* Full-width Save Profile Changes Button */}
+        <Button
+          onClick={handleSaveProfile}
+          disabled={saving || uploading}
+          className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium h-11 transition-all"
+        >
+          {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Save Profile Changes
+        </Button>
       </div>
 
       {/* Appearance Section */}
