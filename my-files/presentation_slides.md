@@ -51,3 +51,18 @@
   * **Graphical Analytics:** Live visual graphs mapping rating distributions, phase accuracy trends, and response volume.
 * **Spoken Video Script:**
   > *"Finally, our system includes a dedicated Analytics Engine. Using lightweight Groq LLM inference, every user query is classified in real-time into specific technical domains like Machine Learning or Healthcare AI. Combined with millisecond-accurate response latency tracking, our visual dashboard presents real-time graphs for rating trends, domain distribution, and model throughput."*
+
+---
+
+## Slide 5: End-to-End System Workflow GUI (n8n Node Pipeline)
+* **Theme:** Amber / Gold Accent (n8n Node Flow Architecture)
+* **Slide Title:** End-to-End Pipeline: Login to Logout
+* **Key Visual Elements (n8n Style GUI Diagram):**
+  * **[Node 1: AUTH]** `Google / Email Login`: Authenticates via Supabase Auth, issues JWT session tokens & profile sync.
+  * **[Node 2: ROUTER]** `Dashboard & History`: Fetches chat history, prompt presets, and opens active chat session UI.
+  * **[Node 3: INFERENCE]** `Groq LLaMA 3 API`: Classifies query topic (FR11), prepends history context, streams 70B completions (~0.42s latency).
+  * **[Node 4: QUALITY LOCK]** `Input Lock & Feedback`: Freezes input box, collects mandatory 1-5 Star Ratings & Correctness, unlocks input.
+  * **[Node 5: ANALYTICS]** `Analytics Microservice`: Computes latency deltas & domain distribution metrics for graphical dashboard.
+  * **[Node 6: TERMINATE]** `Logout & State Flush`: Clears JWT cookies, flushes local state, and safely redirects to `/login`.
+* **Spoken Video Script:**
+  > *"To visualize how everything ties together, Slide 5 presents our end-to-end node architecture styled like an n8n workflow pipeline. The process starts at Node 1 with Google OAuth or Email Login, which issues secure JWT tokens. Node 2 routes the user to the Dashboard and loads session history. When a message is sent, Node 3 executes Groq LLaMA 3 inference with topic classification. Node 4 locks the input field until mandatory feedback is submitted. Node 5 streams latency and topic metrics to our Analytics Engine. Finally, Node 6 handles clean session teardown when the user clicks Logout. This modular architecture guarantees security, real-time context retention, and reliable quality tracking from login to logout."*
