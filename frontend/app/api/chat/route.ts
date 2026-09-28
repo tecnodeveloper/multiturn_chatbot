@@ -1,39 +1,30 @@
 import { streamText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
-import { createGroq } from "@ai-sdk/groq";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
 export const runtime = "edge";
 
 export async function POST(req: Request) {
   try {
-    const { messages, provider = "OpenRouter", model: requestedModel, fileContexts } = await req.json();
+    const { messages, provider = "Gemini", model: requestedModel, fileContexts } = await req.json();
 
     let apiKey = "";
     let baseURL = "";
     let model = requestedModel || "";
     let aiProvider: any;
 
-    if (provider === "Groq") {
-      apiKey = process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY || "";
-      const groq = createGroq({
+    if (provider === "Gemini" || provider === "Google") {
+      apiKey =
+        process.env.GEMINI_API_KEY ||
+        process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
+        process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
+        "";
+      const google = createGoogleGenerativeAI({
         apiKey: apiKey,
       });
-      aiProvider = groq;
-      // If model is missing or doesn't look like a Groq/Mixtral model, use default
-      if (!model || (!model.startsWith("llama") && !model.startsWith("mixtral"))) {
-        model = "llama-3.3-70b-versatile";
-      }
-    } else if (provider === "OpenRouter") {
-      apiKey = process.env.OPENROUTER_API_KEY || process.env.NEXT_PUBLIC_OPENROUTER_API_KEY || "";
-      baseURL = "https://openrouter.ai/api/v1";
-      const openai = createOpenAI({
-        apiKey: apiKey,
-        baseURL: baseURL,
-      });
-      aiProvider = openai;
-      // Fallback to free router if model is empty, not formatted for OpenRouter, or deprecated
-      if (!model || !model.includes("/") || model.includes("gemini-2.0-flash-exp")) {
-        model = "openrouter/free";
+      aiProvider = google;
+      if (!model || !model.startsWith("gemini")) {
+        model = "gemini-3.5-flash";
       }
     } else if (provider === "Ollama") {
       apiKey = "ollama";
@@ -43,24 +34,26 @@ export async function POST(req: Request) {
         baseURL: baseURL,
       });
       aiProvider = openai;
-      // If model has a slash or looks like a Groq model ID, use Ollama default
-      if (!model || model.includes("/") || model.includes("-versatile") || model.includes("-8192")) {
+      if (!model || model.includes("/") || model.startsWith("gemini")) {
         model = "llama3:latest";
       }
-    } else if (provider === "OpenAI") {
-      apiKey = process.env.OPENAI_API_KEY || process.env.NEXT_PUBLIC_OPENAI_API_KEY || "";
-      const openai = createOpenAI({
+    } else {
+      // Default fallback to Gemini
+      apiKey =
+        process.env.GEMINI_API_KEY ||
+        process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
+        process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
+        "";
+      const google = createGoogleGenerativeAI({
         apiKey: apiKey,
       });
-      aiProvider = openai;
-      if (!model) {
-        model = "gpt-4o-mini";
-      }
+      aiProvider = google;
+      model = "gemini-3.5-flash";
     }
 
     if (!apiKey && provider !== "Ollama") {
       return new Response(
-        JSON.stringify({ error: `${provider} API key not found` }),
+        JSON.stringify({ error: `${provider} API key not found. Please verify GEMINI_API_KEY in frontend/.env.local` }),
         { status: 400 },
       );
     }

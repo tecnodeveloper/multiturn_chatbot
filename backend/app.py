@@ -21,9 +21,10 @@ app.secret_key = os.urandom(24)
 CORS(app)
 
 # Configuration
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_GENERATIVE_AI_API_KEY") or os.getenv("NEXT_PUBLIC_GEMINI_API_KEY") or ""
 GROQ_API_KEY = os.getenv("GROQ_API_KEY") or os.getenv("NEXT_PUBLIC_GROQ_API_KEY") or ""
-MODEL = "llama-3.3-70b-versatile"
-FAST_MODEL = "llama-3.1-8b-instant"
+MODEL = "gemini-3.5-flash"
+FAST_MODEL = "gemini-3.5-flash"
 
 # Supabase Configuration
 SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
@@ -39,10 +40,13 @@ PROJECT_DOMAINS = [
     "Other"
 ]
 
-# Initialize Groq client
+# Initialize Groq client (optional fallback)
 client = None
 if GROQ_API_KEY:
-    client = Groq(api_key=GROQ_API_KEY)
+    try:
+        client = Groq(api_key=GROQ_API_KEY)
+    except Exception:
+        pass
 
 # Supabase Helper functions
 def supabase_headers():
@@ -54,41 +58,70 @@ def supabase_headers():
     }
 
 def classify_topic(user_message):
-    """FR11: Real-time Topic Classification using lightweight Groq LLM or keyword fallback."""
+    """FR11: Real-time Topic Classification using lightweight Gemini / Groq LLM or keyword fallback."""
     if not user_message or len(user_message.strip()) < 5:
         return "Other"
 
-    if not client:
-        return "Other"
+    # Fast domain keyword heuristics
+    uq = user_message.lower()
+    if any(k in uq for k in ["deep learning", "deeplearning", "cnn", "rnn", "transformer", "pytorch"]):
+        return "DeepLearning"
+    if any(k in uq for k in ["health", "medical", "hospital", "patient", "clinical", "healthcare"]):
+        return "HealthcareAI"
+    if any(k in uq for k in ["power", "grid", "voltage", "energy", "solar", "battery"]):
+        return "PowerSystems"
+    if any(k in uq for k in ["e-commerce", "ecommerce", "recommend", "cart", "product", "retail"]):
+        return "E-commerceAI"
+    if any(k in uq for k in ["machine learning", "machinelearning", "regression", "classification", "clustering"]):
+        return "MachineLearning"
 
-    try:
-        prompt = (
-            f"Classify the following user message into EXACTLY ONE of these categories:\n"
-            f"1. MachineLearning\n"
-            f"2. DeepLearning\n"
-            f"3. HealthcareAI\n"
-            f"4. PowerSystems\n"
-            f"5. E-commerceAI\n"
-            f"6. Other\n\n"
-            f"Rules:\n"
-            f"- If the message is casual, short, gibberish (e.g. 'afas', 'test', 'hi'), or does not clearly belong to one of the 5 AI topics, respond with 'Other'.\n"
-            f"- Return ONLY the exact category name from the list above, nothing else.\n\n"
-            f"User Message: \"{user_message}\""
-        )
-        completion = client.chat.completions.create(
-            messages=[{"role": "user", "content": prompt}],
-            model=FAST_MODEL,
-            temperature=0.0,
-            max_tokens=30
-        )
-        res = completion.choices[0].message.content.strip().replace(" ", "")
-        for domain in PROJECT_DOMAINS:
-            if domain.lower() in res.lower():
-                return domain
-        return "Other"
-    except Exception as e:
-        print(f"Topic classification warning: {e}")
-        return "Other"
+    prompt = (
+        f"Classify the following user message into EXACTLY ONE of these categories:\n"
+        f"1. MachineLearning\n"
+        f"2. DeepLearning\n"
+        f"3. HealthcareAI\n"
+        f"4. PowerSystems\n"
+        f"5. E-commerceAI\n"
+        f"6. Other\n\n"
+        f"Rules:\n"
+        f"- If the message is casual, short, gibberish, or does not clearly belong to one of the 5 AI topics, respond with 'Other'.\n"
+        f"- Return ONLY the exact category name from the list above, nothing else.\n\n"
+        f"User Message: \"{user_message}\""
+    )
+
+    if GEMINI_API_KEY:
+        try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{FAST_MODEL}:generateContent?key={GEMINI_API_KEY}"
+            payload = {
+                "contents": [{"parts": [{"text": prompt}]}],
+                "generationConfig": {"temperature": 0.0, "maxOutputTokens": 20}
+            }
+            res = requests.post(url, json=payload, headers={"Content-Type": "application/json", "Authorization": f"Bearer {GEMINI_API_KEY}"}, timeout=5)
+            if res.status_code == 200:
+                data = res.json()
+                text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+                for domain in PROJECT_DOMAINS:
+                    if domain.lower() in text.lower():
+                        return domain
+        except Exception as e:
+            print(f"Gemini topic classification warning: {e}")
+
+    if client:
+        try:
+            completion = client.chat.completions.create(
+                messages=[{"role": "user", "content": prompt}],
+                model="llama-3.1-8b-instant",
+                temperature=0.0,
+                max_tokens=30
+            )
+            res = completion.choices[0].message.content.strip().replace(" ", "")
+            for domain in PROJECT_DOMAINS:
+                if domain.lower() in res.lower():
+                    return domain
+        except Exception as e:
+            print(f"Groq topic classification warning: {e}")
+
+    return "Other"
 
 
 
@@ -119,7 +152,6 @@ def save_message(chat_id, user_id, role, content, response_time=None, topic_labe
         res = requests.post(url, headers=supabase_headers(), json=data)
         if res.status_code in (200, 201):
             msg_data = res.json()
-            # If topic label provided and we have created message, optionally log domain
             if topic_label and isinstance(msg_data, list) and len(msg_data) > 0:
                 domain_url = f"{SUPABASE_URL}/rest/v1/domains"
                 requests.post(domain_url, headers=supabase_headers(), json={
@@ -144,7 +176,7 @@ def update_session_title(chat_id, title):
 # Routes
 @app.route('/')
 def index():
-    return "Multi-turn LLaMA 3 Chatbot Backend (Groq & Analytics Enabled)"
+    return "Multi-turn Chatbot Backend (Gemini & Analytics Enabled)"
 
 @app.route('/api/analytics', methods=['GET'])
 def get_analytics():
@@ -166,8 +198,8 @@ def chat():
     if not user_message or not session_id or not user_id:
         return jsonify({"error": "Missing message, session_id (chat_id), or user_id"}), 400
 
-    if not client:
-        return jsonify({"error": "Groq API key not found. Please set GROQ_API_KEY environment variable."}), 500
+    if not GEMINI_API_KEY and not client:
+        return jsonify({"error": "No AI API key found. Please set GEMINI_API_KEY environment variable."}), 500
     
     # FR10: Track exact dispatch timestamp
     start_time = time.time()
@@ -183,22 +215,61 @@ def chat():
     
     def generate():
         try:
-            completion = client.chat.completions.create(
-                model=requested_model,
-                messages=messages,
-                temperature=0.7,
-                max_tokens=1024,
-                top_p=1,
-                stream=True
-            )
-            
             full_response = ""
-            for chunk in completion:
-                content = chunk.choices[0].delta.content or ""
-                if content:
-                    full_response += content
-                    yield content
-            
+            if GEMINI_API_KEY:
+                gemini_model = requested_model if requested_model.startswith("gemini") else "gemini-1.5-flash"
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{gemini_model}:streamGenerateContent?key={GEMINI_API_KEY}&alt=sse"
+                
+                # Convert messages format to Gemini contents
+                contents = []
+                for m in messages:
+                    role = "user" if m.get("role") == "user" else "model"
+                    contents.append({"role": role, "parts": [{"text": m.get("content", "")}]})
+                if not contents:
+                    contents = [{"role": "user", "parts": [{"text": user_message}]}]
+
+                payload = {
+                    "contents": contents,
+                    "generationConfig": {
+                        "temperature": 0.7,
+                        "maxOutputTokens": 2048
+                    }
+                }
+                headers = {"Content-Type": "application/json", "Authorization": f"Bearer {GEMINI_API_KEY}"}
+                
+                with requests.post(url, json=payload, headers=headers, stream=True, timeout=30) as r:
+                    for line in r.iter_lines():
+                        if line:
+                            decoded = line.decode('utf-8')
+                            if decoded.startswith("data: "):
+                                json_str = decoded[6:]
+                                try:
+                                    chunk_json = json.loads(json_str)
+                                    candidates = chunk_json.get("candidates", [])
+                                    if candidates:
+                                        parts = candidates[0].get("content", {}).get("parts", [])
+                                        for p in parts:
+                                            chunk_text = p.get("text", "")
+                                            if chunk_text:
+                                                full_response += chunk_text
+                                                yield chunk_text
+                                except Exception:
+                                    continue
+            elif client:
+                completion = client.chat.completions.create(
+                    model=requested_model,
+                    messages=messages,
+                    temperature=0.7,
+                    max_tokens=1024,
+                    top_p=1,
+                    stream=True
+                )
+                for chunk in completion:
+                    content = chunk.choices[0].delta.content or ""
+                    if content:
+                        full_response += content
+                        yield content
+
             # FR10: Calculate explicit response duration delta
             end_time = time.time()
             response_time_seconds = round(end_time - start_time, 3)

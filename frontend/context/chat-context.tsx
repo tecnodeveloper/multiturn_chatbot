@@ -48,8 +48,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [chats, setChats] = useState<Chat[]>([]);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
-  const [selectedProvider, setSelectedProviderState] = useState("OpenRouter");
-  const [selectedModel, setSelectedModelState] = useState("openrouter/free");
+  const [selectedProvider, setSelectedProviderState] = useState("Gemini");
+  const [selectedModel, setSelectedModelState] = useState("gemini-3.5-flash");
   const [searchTerm, setSearchTerm] = useState("");
   const [contentType, setContentType] = useState<ContentType>("chats");
   const [userInput, setUserInput] = useState("");
@@ -61,11 +61,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     try {
       const savedProvider = localStorage.getItem("multiturn_provider");
       const savedModel = localStorage.getItem("multiturn_model");
-      if (savedProvider && savedProvider !== "Ollama") {
+      if (savedProvider === "Gemini" || savedProvider === "Ollama") {
         setSelectedProviderState(savedProvider);
+      } else {
+        setSelectedProviderState("Gemini");
       }
-      if (savedModel && savedModel !== "llama3" && !savedModel.includes("gemini-2.0-flash-exp")) {
+      if (savedModel && (savedModel.startsWith("gemini-") || savedModel.startsWith("llama"))) {
         setSelectedModelState(savedModel);
+      } else {
+        setSelectedModelState("gemini-3.5-flash");
       }
     } catch (_) {}
   }, []);

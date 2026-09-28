@@ -8,7 +8,6 @@ import {
   Search, 
   Trash2, 
   LogOut, 
-  Folder, 
   MessageSquare, 
   LayoutGrid, 
   Settings, 
@@ -58,15 +57,13 @@ export const Sidebar: FC<SidebarProps> = ({
     setSearchTerm,
   } = useChat();
   const { user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<"projects" | "chats" | "templates" | "settings" | "analytics">("chats");
+  const [activeTab, setActiveTab] = useState<"chats" | "templates" | "settings" | "analytics">("chats");
 
   // Inline Title Editing State
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
 
-  const effectiveActiveTab = pathname === "/projects"
-    ? "projects"
-    : pathname === "/analytics"
+  const effectiveActiveTab = pathname === "/analytics"
     ? "analytics"
     : pathname === "/account"
     ? "settings"
@@ -76,9 +73,7 @@ export const Sidebar: FC<SidebarProps> = ({
 
   const handleNavClick = (id: string) => {
     setActiveTab(id as any);
-    if (id === "projects") {
-      router.push("/projects");
-    } else if (id === "chats") {
+    if (id === "chats") {
       router.push("/dashboard");
     } else if (id === "analytics") {
       router.push("/analytics");
@@ -120,7 +115,6 @@ export const Sidebar: FC<SidebarProps> = ({
   );
 
   const NAV_ITEMS = [
-    { id: "projects", label: "My projects", icon: <Folder className="h-4 w-4 shrink-0" /> },
     { id: "chats", label: "Chats", icon: <MessageSquare className="h-4 w-4 shrink-0" /> },
     { id: "templates", label: "Templates", icon: <LayoutGrid className="h-4 w-4 shrink-0" /> },
     { id: "analytics", label: "Analytics", icon: <BarChart3 className="h-4 w-4 shrink-0" /> },

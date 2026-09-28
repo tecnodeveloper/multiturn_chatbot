@@ -43,8 +43,8 @@ export const TemplateFormModal: FC<TemplateFormModalProps> = ({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<TemplateCategory>("General assistant");
-  const [provider, setProvider] = useState("Groq");
-  const [model, setModel] = useState("llama-3.3-70b-versatile");
+  const [provider, setProvider] = useState("Gemini");
+  const [model, setModel] = useState("gemini-3.5-flash");
   const [systemPrompt, setSystemPrompt] = useState("");
   const [starterPrompt, setStarterPrompt] = useState("");
   const [selectedCriteria, setSelectedCriteria] = useState<EvaluationCriterion[]>([
@@ -69,8 +69,8 @@ export const TemplateFormModal: FC<TemplateFormModalProps> = ({
       setName("");
       setDescription("");
       setCategory("General assistant");
-      setProvider("Groq");
-      setModel("llama-3.3-70b-versatile");
+      setProvider("Gemini");
+      setModel("gemini-3.5-flash");
       setSystemPrompt("");
       setStarterPrompt("");
       setSelectedCriteria(["Accuracy", "Helpfulness"]);

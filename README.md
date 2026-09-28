@@ -28,7 +28,7 @@ The repository is structured into two primary operational sub-modules:
 
 ### 1. Frontend Web Module (`frontend/`)
 Built with Next.js 16, TypeScript, and Tailwind CSS. It manages:
-- Client-side routing, page layouts (`/login`, `/signup`, `/dashboard`, `/analytics`, `/account`, `/projects`).
+- Client-side routing, page layouts (`/login`, `/signup`, `/dashboard`, `/analytics`, `/account`).
 - Multi-turn conversational user interface with incremental SSE stream processing.
 - Input control state locking during generation until feedback submission.
 - User authentication state management and profile persistence.
@@ -116,7 +116,6 @@ The analytics processing engine will be operational on `http://localhost:5001`.
 | **Main Dashboard** | `GET` | `http://localhost:3000/dashboard` | Main multi-turn AI chatbot chat interface. |
 | **Analytics Dashboard** | `GET` | `http://localhost:3000/analytics` | Visual dashboard for system performance metrics. |
 | **Account Settings** | `GET` | `http://localhost:3000/account` | User profile management and preference settings. |
-| **Projects View** | `GET` | `http://localhost:3000/projects` | System prompt presets and folder management. |
 | **Streaming Chat API** | `POST` | `http://localhost:3000/api/chat` | Streaming AI completion route for chat. |
 | **OAuth Callback API** | `GET` | `http://localhost:3000/api/auth/callback` | Google OAuth authentication redirect callback handler. |
 
