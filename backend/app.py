@@ -2,9 +2,9 @@
 Multi-turn LLaMA 3 Chatbot using Groq API and Supabase Persistence
 FR10: Response Time Tracking & FR11: Real-time Topic Classification
 """
-from flask import Flask, render_template, request, jsonify, session, Response, stream_with_context
+# pyrefly: ignore [missing-import]
+from flask import Flask, request, jsonify, session, Response, stream_with_context
 from flask_cors import CORS
-from groq import Groq
 import json
 from datetime import datetime
 import time
@@ -135,7 +135,7 @@ def get_session_messages(chat_id):
         return messages
     return []
 
-def save_message(chat_id, user_id, role, content, response_time=None, topic_label=None):
+def save_message(chat_id, user_id, role, content, response_time=None, topic_label=None, session_phase=None):
     if not SUPABASE_URL or not SUPABASE_KEY:
         return None
     url = f"{SUPABASE_URL}/rest/v1/messages"
@@ -147,6 +147,8 @@ def save_message(chat_id, user_id, role, content, response_time=None, topic_labe
     }
     if response_time is not None:
         data["response_time"] = response_time
+    if session_phase is not None:
+        data["session_phase"] = session_phase
     
     try:
         res = requests.post(url, headers=supabase_headers(), json=data)
@@ -187,6 +189,20 @@ def get_analytics():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/templates', methods=['GET'])
+def get_templates():
+    """Return the 5 project-domain template identifiers.
+    Full template data (system prompts, starter prompts, etc.) lives in the
+    frontend template-service.ts as the single source of truth."""
+    templates = [
+        {"id": "system-ml",         "name": "Machine Learning Assistant",  "category": "Machine Learning"},
+        {"id": "system-dl",         "name": "Deep Learning Specialist",    "category": "Deep Learning"},
+        {"id": "system-healthcare", "name": "Healthcare AI Advisor",       "category": "Healthcare AI"},
+        {"id": "system-power",      "name": "Power Systems Engineer",      "category": "Power Systems"},
+        {"id": "system-ecommerce",  "name": "E-commerce AI Strategist",    "category": "E-commerce AI"},
+    ]
+    return jsonify(templates)
+
 @app.route('/api/chat', methods=['POST'])
 def chat():
     data = request.json
@@ -207,11 +223,15 @@ def chat():
     # FR11: Perform real-time topic classification
     topic_label = classify_topic(user_message)
 
-    # Save user message
-    save_message(session_id, user_id, 'user', user_message, topic_label=topic_label)
-    
     # Get conversation history
     messages = get_session_messages(session_id)
+    
+    # FR16: Calculate session phase (start: turns 1-2, middle: turns 3-5, end: turns 6+)
+    turn_count = (len(messages) // 2) + 1
+    session_phase = "start" if turn_count <= 2 else "middle" if turn_count <= 5 else "end"
+
+    # Save user message with session phase
+    save_message(session_id, user_id, 'user', user_message, topic_label=topic_label, session_phase=session_phase)
     
     def generate():
         try:
@@ -235,26 +255,49 @@ def chat():
                         "maxOutputTokens": 2048
                     }
                 }
-                headers = {"Content-Type": "application/json", "Authorization": f"Bearer {GEMINI_API_KEY}"}
+                headers = {"Content-Type": "application/json"}
                 
-                with requests.post(url, json=payload, headers=headers, stream=True, timeout=30) as r:
-                    for line in r.iter_lines():
-                        if line:
-                            decoded = line.decode('utf-8')
-                            if decoded.startswith("data: "):
-                                json_str = decoded[6:]
-                                try:
-                                    chunk_json = json.loads(json_str)
-                                    candidates = chunk_json.get("candidates", [])
-                                    if candidates:
-                                        parts = candidates[0].get("content", {}).get("parts", [])
-                                        for p in parts:
-                                            chunk_text = p.get("text", "")
-                                            if chunk_text:
-                                                full_response += chunk_text
-                                                yield chunk_text
-                                except Exception:
-                                    continue
+                try:
+                    with requests.post(url, json=payload, headers=headers, stream=True, timeout=20) as r:
+                        if r.status_code != 200:
+                            err_msg = ""
+                            try:
+                                err_data = r.json()
+                                err_msg = err_data.get("error", {}).get("message", r.text)
+                            except Exception:
+                                err_msg = r.text
+                            error_output = f"Error {r.status_code}: Gemini API call failed - {err_msg}"
+                            yield error_output
+                            save_message(session_id, user_id, 'assistant', error_output, response_time=round(time.time() - start_time, 3), topic_label=topic_label, session_phase=session_phase)
+                            return
+
+                        for line in r.iter_lines():
+                            if line:
+                                decoded = line.decode('utf-8')
+                                if decoded.startswith("data: "):
+                                    json_str = decoded[6:]
+                                    try:
+                                        chunk_json = json.loads(json_str)
+                                        candidates = chunk_json.get("candidates", [])
+                                        if candidates:
+                                            parts = candidates[0].get("content", {}).get("parts", [])
+                                            for p in parts:
+                                                chunk_text = p.get("text", "")
+                                                if chunk_text:
+                                                    full_response += chunk_text
+                                                    yield chunk_text
+                                    except Exception:
+                                        continue
+                except requests.exceptions.Timeout:
+                    timeout_msg = "Error 404: Gemini API request timed out after 20 seconds. No response received."
+                    yield timeout_msg
+                    save_message(session_id, user_id, 'assistant', timeout_msg, response_time=20.0, topic_label=topic_label, session_phase=session_phase)
+                    return
+                except requests.exceptions.RequestException as re:
+                    err_msg = f"Error 404: Gemini API connection error - {str(re)}"
+                    yield err_msg
+                    save_message(session_id, user_id, 'assistant', err_msg, response_time=round(time.time() - start_time, 3), topic_label=topic_label, session_phase=session_phase)
+                    return
             elif client:
                 completion = client.chat.completions.create(
                     model=requested_model,
@@ -274,8 +317,8 @@ def chat():
             end_time = time.time()
             response_time_seconds = round(end_time - start_time, 3)
 
-            # Save full response to Supabase after streaming finishes
-            save_message(session_id, user_id, 'assistant', full_response, response_time=response_time_seconds, topic_label=topic_label)
+            # Save full response to Supabase after streaming finishes (FR10 & FR16)
+            save_message(session_id, user_id, 'assistant', full_response, response_time=response_time_seconds, topic_label=topic_label, session_phase=session_phase)
             
             # Update chat title if needed
             if SUPABASE_URL and SUPABASE_KEY:
@@ -288,7 +331,9 @@ def chat():
                         update_session_title(session_id, title)
                 
         except Exception as e:
-            yield f"Error: {str(e)}"
+            err_text = f"Error 404: {str(e)}"
+            yield err_text
+            save_message(session_id, user_id, 'assistant', err_text, response_time=round(time.time() - start_time, 3), topic_label=topic_label, session_phase=session_phase)
 
     return Response(stream_with_context(generate()), mimetype='text/plain')
 

@@ -5,12 +5,15 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 export const runtime = "edge";
 
 export async function POST(req: Request) {
+  let requestedModel = "";
   try {
-    const { messages, provider = "Gemini", model: requestedModel, fileContexts } = await req.json();
+    const body = await req.json();
+    requestedModel = body.model || "";
+    const { messages, provider = "Gemini", fileContexts } = body;
 
     let apiKey = "";
     let baseURL = "";
-    let model = requestedModel || "";
+    let model = requestedModel;
     let aiProvider: any;
 
     if (provider === "Gemini" || provider === "Google") {
@@ -74,14 +77,27 @@ export async function POST(req: Request) {
         content: m.content,
       })),
       temperature: 0.7,
+      maxRetries: 0,
+      abortSignal: req.signal,
     });
-
 
     return result.toTextStreamResponse();
   } catch (error: any) {
     console.error("Chat API Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
+    const is404 =
+      error?.status === 404 ||
+      error?.statusCode === 404 ||
+      error?.message?.includes("404") ||
+      error?.message?.toLowerCase().includes("not found");
+    const statusCode = is404 ? 404 : (error?.status || 500);
+
+    const errorMessage = is404
+      ? `Error 404: Gemini API model '${requestedModel || "default"}' was not found or failed to respond (404 Not Found).`
+      : (error?.message || "Error: Failed to generate AI response");
+
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status: statusCode,
+      headers: { "Content-Type": "application/json" },
     });
   }
 }

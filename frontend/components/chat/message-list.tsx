@@ -5,7 +5,7 @@ import { Message } from "@/context/chat-context";
 import { useAuth } from "@/context/auth-context";
 import { EmptyChatState } from "./empty-chat-state";
 import { Button } from "@/components/ui/button";
-import { Copy, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Copy, ThumbsUp, ThumbsDown, AlertTriangle, AlertCircle } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { FeedbackPanel } from "../feedback/feedback-panel";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -21,6 +21,33 @@ interface MessageListProps {
 
 const AssistantMessage: FC<{ content: string }> = ({ content }) => {
   const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
+  const isError = content.startsWith("⚠️") || content.includes("Error 404") || content.includes("Error 503") || content.startsWith("Error:");
+
+  if (isError) {
+    return (
+      <div className="flex gap-3 justify-start group">
+        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-destructive/15 text-destructive text-xs font-semibold flex-shrink-0 shadow-sm border border-destructive/20">
+          <AlertTriangle className="h-4 w-4" />
+        </div>
+        <div className="flex flex-col gap-1 max-w-2xl w-full">
+          <div className="rounded-2xl rounded-tl-sm bg-destructive/10 dark:bg-destructive/15 border border-destructive/30 px-4 py-3.5 shadow-sm text-[14px]">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-destructive/20 text-destructive border border-destructive/30">
+                <AlertCircle className="h-3.5 w-3.5" />
+                API Error
+              </span>
+              <span className="text-xs text-muted-foreground font-mono">Status 404 / 503 Timeout</span>
+            </div>
+            <div className="text-foreground dark:text-foreground text-[14px] leading-6 space-y-2">
+              <ReactMarkdown className="prose dark:prose-invert max-w-none break-words text-[14px] leading-6">
+                {content}
+              </ReactMarkdown>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex gap-3 justify-start group">

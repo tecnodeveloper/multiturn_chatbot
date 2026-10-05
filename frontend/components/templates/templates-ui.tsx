@@ -37,7 +37,6 @@ export const TemplatesUI: FC<TemplatesUIProps> = ({
   const {
     setSelectedProvider,
     setSelectedModel,
-    setUserInput,
     setCurrentChatId,
     setChats,
     chats,
@@ -172,8 +171,13 @@ export const TemplatesUI: FC<TemplatesUIProps> = ({
       setSelectedProvider(template.provider);
       setSelectedModel(template.model);
 
-      // 3. Pre-fill starter prompt into user input
-      setUserInput(template.starterPrompt || "");
+      // 3. Store the starter prompt as a pending auto-send message
+      // The dashboard will detect this and send it to the AI automatically
+      if (template.starterPrompt) {
+        try {
+          localStorage.setItem("multiturn_pending_message", template.starterPrompt);
+        } catch (_) {}
+      }
 
       // 4. Persist active system prompt for this conversation
       if (template.systemPrompt) {

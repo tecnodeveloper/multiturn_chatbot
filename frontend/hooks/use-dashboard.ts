@@ -44,6 +44,7 @@ export function useDashboard() {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [evaluatedTurns, setEvaluatedTurns] = useState<Record<string, number>>({});
   const abortControllerRef = useRef<AbortController | null>(null);
+  const pendingMessageSentRef = useRef(false);
 
   const currentChat = chats.find(c => c.id === currentChatId);
   const assistantCount = currentChat?.messages.filter(m => m.role === "assistant").length || 0;
@@ -105,9 +106,33 @@ export function useDashboard() {
     loadData();
   }, [user]);
 
+  // Auto-send pending template message when dashboard loads after template selection
+  useEffect(() => {
+    if (pendingMessageSentRef.current) return;
+    if (!user || !currentChatId || isSending) return;
+
+    try {
+      const pendingMessage = localStorage.getItem("multiturn_pending_message");
+      if (pendingMessage) {
+        localStorage.removeItem("multiturn_pending_message");
+        pendingMessageSentRef.current = true;
+        // Small delay to ensure UI has rendered the new chat
+        setTimeout(() => {
+          handleSendMessage(pendingMessage);
+        }, 300);
+      }
+    } catch (_) {}
+  }, [user, currentChatId, isSending]);
+
   const handleNewChat = async () => {
     if (!user) return;
     try {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("multiturn_pending_message");
+        localStorage.removeItem("multiturn_system_prompt");
+      }
+      pendingMessageSentRef.current = true;
+
       const newChat = await createChat({ title: "New Chat", user_id: user.id });
       const nextChat = {
         id: newChat.id,
@@ -116,7 +141,7 @@ export function useDashboard() {
         createdAt: newChat.created_at,
       };
 
-      setChats([nextChat, ...chats]);
+      setChats((prev) => [nextChat, ...prev]);
       setCurrentChatId(newChat.id);
     } catch (error) {
       toast.error("Failed to create new chat");
@@ -144,6 +169,11 @@ export function useDashboard() {
     setIsSending(true);
     const userContent = content.trim();
     let chatId = currentChatId;
+    const startTime = Date.now();
+    let assistantId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 11);
+    let timeoutId: NodeJS.Timeout | null = null;
+    let isTimedOut = false;
+    let sessionPhase: "start" | "middle" | "end" = "start";
 
     try {
       let activeChat = chats.find(c => c.id === chatId);
@@ -163,6 +193,11 @@ export function useDashboard() {
         setChats([activeChat, ...chats]);
         setCurrentChatId(chatId);
       }
+
+      // FR16: Calculate session phase (start: turns 1-2, middle: turns 3-5, end: turns 6+)
+      const currentMsgCount = (activeChat?.messages || []).length;
+      const turnIndex = Math.floor(currentMsgCount / 2) + 1;
+      sessionPhase = turnIndex <= 2 ? "start" : turnIndex <= 5 ? "middle" : "end";
 
       // Convert attached images to base64 for the AI
       const imageAttachments = attachedFiles.filter(af => af.file.type.startsWith("image/"));
@@ -192,6 +227,7 @@ export function useDashboard() {
         role: "user",
         content: displayContent, 
         user_id: user.id,
+        session_phase: sessionPhase,
       });
 
       const userMessage: Message = {
@@ -210,7 +246,19 @@ export function useDashboard() {
       const controller = new AbortController();
       abortControllerRef.current = controller;
 
+      // 20-second timeout: abort if no response or taking longer than 20s
+      timeoutId = setTimeout(() => {
+        isTimedOut = true;
+        controller.abort("TIMEOUT_20S");
+      }, 20000);
+
       const systemPrompt = typeof window !== "undefined" ? localStorage.getItem("multiturn_system_prompt") : null;
+      // Immediately clear so it only applies to this initiated chat session and does NOT leak into new chats
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("multiturn_system_prompt");
+        localStorage.removeItem("multiturn_pending_message");
+      }
+
       const outboundMessages: any[] = [...(activeChat?.messages || []), { ...userMessage, content: messageContent }];
       if (systemPrompt && !outboundMessages.some((m: any) => m.role === "system")) {
         outboundMessages.unshift({ role: "system", content: systemPrompt });
@@ -228,13 +276,18 @@ export function useDashboard() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to get AI response");
+        let errorMsg = "Failed to get AI response";
+        try {
+          const errorData = await response.json();
+          errorMsg = errorData.error || `Error ${response.status}: Failed to get AI response`;
+        } catch {
+          errorMsg = `Error ${response.status}: Failed to get AI response`;
+        }
+        throw new Error(errorMsg);
       }
 
       if (!response.body) throw new Error("No response body");
 
-      const assistantId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 11);
       const assistantMessage: Message = {
         id: assistantId,
         role: "assistant",
@@ -272,11 +325,22 @@ export function useDashboard() {
         controller.signal,
       );
 
+      // If fullContent is empty, the model failed during stream (e.g. 503 high demand or 404 Not Found)
+      if (!fullContent || fullContent.trim().length === 0) {
+        throw new Error("Error 404: Gemini API failed to return a response. The model endpoint is unavailable, experiencing high demand (503), or timed out after 20 seconds.");
+      }
+
+      // FR10: Calculate explicit response duration delta
+      const endTime = Date.now();
+      const responseTime = Math.round(((endTime - startTime) / 1000) * 1000) / 1000;
+
       const savedAssistantMsg = await createMessage({
         chat_id: chatId!,
         role: "assistant",
         content: fullContent,
         user_id: user.id,
+        response_time: responseTime,
+        session_phase: sessionPhase,
       });
 
       setAttachedFiles([]);
@@ -323,22 +387,61 @@ export function useDashboard() {
       }
 
     } catch (error: any) {
-      if (error.name !== "AbortError") {
-        toast.error(error.message || "Failed to send message");
-      }
-      
-      // If there was an error, remove the empty assistant message so it doesn't linger
+      const isTimeout = isTimedOut || (error?.name === "AbortError" && isTimedOut);
+      const is503 =
+        error?.message?.includes("503") ||
+        error?.message?.toLowerCase().includes("high demand") ||
+        error?.message?.toLowerCase().includes("unavailable");
+      const is404 =
+        isTimeout ||
+        error?.message?.includes("404") ||
+        error?.message?.toLowerCase().includes("not found") ||
+        error?.message?.toLowerCase().includes("timed out");
+
+      const errorMessage = isTimeout
+        ? "Error 404: Gemini API request timed out after 20 seconds. The API failed to respond."
+        : is503
+        ? "Error 503: Gemini model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again shortly."
+        : (error.message || "Error 404: Gemini API response failed.");
+
+      toast.error(errorMessage);
+
+      // Don't put user in an infinite waiting loop! Show the error message clearly in the chat
+      const errorContent = `⚠️ **${errorMessage}**\n\n*The response could not be retrieved. Please check your Gemini API key in \`frontend/.env.local\`, verify your network connection, or try selecting another model.*`;
+      const errorMsgId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 11);
+
       setChats((prev) =>
         prev.map((c) =>
           c.id === chatId
             ? {
                 ...c,
-                messages: c.messages.filter((m) => m.content !== "" || m.role !== "assistant"),
+                messages: [
+                  ...c.messages.filter((m) => m.content !== "" && m.id !== assistantId),
+                  {
+                    id: errorMsgId,
+                    role: "assistant",
+                    content: errorContent,
+                    timestamp: new Date().toISOString(),
+                  },
+                ],
               }
             : c
         )
       );
+
+      // FR10 & FR16: Log the failed attempt duration and session phase
+      const durationSeconds = Math.round(((Date.now() - startTime) / 1000) * 1000) / 1000;
+      createMessage({
+        chat_id: chatId!,
+        role: "assistant",
+        content: errorContent,
+        user_id: user.id,
+        response_time: durationSeconds,
+        session_phase: sessionPhase,
+      }).catch(console.error);
+
     } finally {
+      if (timeoutId) clearTimeout(timeoutId);
       setIsSending(false);
       abortControllerRef.current = null;
     }

@@ -3,11 +3,11 @@ export type TemplateCategory =
   | "My templates"
   | "System templates"
   | "Favorites"
-  | "Customer support"
-  | "Coding"
-  | "Research"
-  | "Evaluation"
-  | "General assistant";
+  | "Machine Learning"
+  | "Deep Learning"
+  | "Healthcare AI"
+  | "Power Systems"
+  | "E-commerce AI";
 
 export type EvaluationCriterion =
   | "Accuracy"
@@ -53,119 +53,160 @@ export const ALL_EVALUATION_CRITERIA: EvaluationCriterion[] = [
 ];
 
 export const TEMPLATE_CATEGORIES: TemplateCategory[] = [
-  "Customer support",
-  "Coding",
-  "Research",
-  "Evaluation",
-  "General assistant",
+  "Machine Learning",
+  "Deep Learning",
+  "Healthcare AI",
+  "Power Systems",
+  "E-commerce AI",
 ];
 
 const INITIAL_SYSTEM_TEMPLATES: Template[] = [
   {
-    id: "system-1",
-    name: "Customer support evaluation",
-    description: "Evaluate AI responses in realistic customer support situations for empathy, accuracy, and brand voice.",
-    category: "Customer support",
+    id: "system-ml",
+    name: "Machine Learning Assistant",
+    description:
+      "Expert assistant for classical ML workflows — feature engineering, model selection, hyperparameter tuning, evaluation metrics, and deployment pipelines.",
+    category: "Machine Learning",
     provider: "Gemini",
     model: "gemini-3.5-flash",
-    systemPrompt: "You are a professional customer support specialist for an e-commerce platform. Provide empathetic, helpful, and solution-oriented answers while strictly adhering to company return, warranty, and shipping policies.",
-    starterPrompt: "A customer says their order arrived damaged. How should you respond?",
-    evaluationCriteria: ["Accuracy", "Helpfulness", "Correctness", "Response length"],
-    tags: ["support", "evaluation", "ecommerce"],
+    systemPrompt:
+      "You are a senior Machine Learning engineer and educator. " +
+      "Help users with end-to-end ML workflows including data preprocessing, feature engineering, exploratory data analysis, " +
+      "model selection (regression, classification, clustering, dimensionality reduction), hyperparameter tuning (grid search, Bayesian optimization), " +
+      "cross-validation strategies, evaluation metrics (precision, recall, F1, AUC-ROC, RMSE, R²), and production deployment best practices. " +
+      "Always explain the reasoning behind algorithm choices, discuss trade-offs (bias-variance, interpretability vs. performance), " +
+      "and provide concrete Python code examples using scikit-learn, pandas, and NumPy. " +
+      "When suggesting approaches, consider dataset size, feature types, class imbalance, and computational constraints. " +
+      "Format responses with clear headings, bullet points, and code blocks.",
+    starterPrompt:
+      "I have a tabular dataset with 50k rows and 30 mixed features (numerical + categorical) for a binary classification task with 8% positive class. Walk me through the complete pipeline from preprocessing to model evaluation.",
+    evaluationCriteria: ["Accuracy", "Helpfulness", "Correctness", "Instruction following"],
+    tags: ["scikit-learn", "classification", "regression", "clustering", "feature-engineering", "model-selection"],
     isFavorite: true,
     isSystemTemplate: true,
-    usageCount: 28,
-    createdAt: "2026-08-01T10:00:00Z",
-    updatedAt: "2026-08-01T10:00:00Z",
+    usageCount: 0,
+    createdAt: "2026-09-01T10:00:00Z",
+    updatedAt: "2026-09-01T10:00:00Z",
   },
   {
-    id: "system-2",
-    name: "Coding assistant",
-    description: "Software engineering assistant specialized in debugging, refactoring, and producing clean, idiomatic code.",
-    category: "Coding",
+    id: "system-dl",
+    name: "Deep Learning Specialist",
+    description:
+      "Advanced deep learning assistant for neural network architecture design, training optimization, and state-of-the-art model implementation.",
+    category: "Deep Learning",
     provider: "Gemini",
     model: "gemini-3.5-flash",
-    systemPrompt: "You are an expert senior software engineer. Write clean, idiomatic, type-safe code with clear explanatory comments. Prioritize performance, edge-case coverage, and security best practices.",
-    starterPrompt: "Review this TypeScript function for potential memory leaks and edge case failures.",
-    evaluationCriteria: ["Accuracy", "Correctness", "Instruction following"],
-    tags: ["typescript", "debugging", "coding"],
-    isFavorite: false,
-    isSystemTemplate: true,
-    usageCount: 42,
-    createdAt: "2026-08-02T10:00:00Z",
-    updatedAt: "2026-08-02T10:00:00Z",
-  },
-  {
-    id: "system-3",
-    name: "Factual accuracy evaluation",
-    description: "Rigorous test scenario to measure hallucination resistance and factual precision across domain queries.",
-    category: "Evaluation",
-    provider: "Gemini",
-    model: "gemini-3.5-flash",
-    systemPrompt: "You are a factual verification assistant. State only verified facts. If information is uncertain, disputed, or unknown, explicitly state your uncertainty rather than guessing.",
-    starterPrompt: "Explain the timeline of discovery for gravitational waves and verify the key research teams involved.",
-    evaluationCriteria: ["Accuracy", "Correctness", "Relevance"],
-    tags: ["evaluation", "hallucination", "accuracy"],
+    systemPrompt:
+      "You are an expert Deep Learning researcher and practitioner. " +
+      "Assist users with neural network architecture design (CNNs, RNNs, LSTMs, GRUs, Transformers, GANs, VAEs, Diffusion Models), " +
+      "training strategies (learning rate schedules, warm-up, gradient clipping, mixed-precision training), " +
+      "regularization techniques (dropout, weight decay, data augmentation, early stopping, batch/layer/group normalization), " +
+      "loss function selection, optimizer comparisons (SGD, Adam, AdamW, LAMB), and transfer learning workflows. " +
+      "Provide practical PyTorch and TensorFlow/Keras code examples. " +
+      "Explain backpropagation, vanishing/exploding gradients, attention mechanisms, and positional encodings clearly. " +
+      "When debugging training issues, systematically consider learning rate, batch size, architecture bottlenecks, and data quality. " +
+      "Always discuss computational requirements, GPU memory optimization, and distributed training when relevant.",
+    starterPrompt:
+      "I want to build a Vision Transformer (ViT) from scratch for medical image classification. Explain the architecture and provide a PyTorch implementation with training loop.",
+    evaluationCriteria: ["Accuracy", "Correctness", "Instruction following", "Relevance"],
+    tags: ["pytorch", "tensorflow", "CNN", "transformer", "RNN", "training-optimization"],
     isFavorite: true,
     isSystemTemplate: true,
-    usageCount: 35,
-    createdAt: "2026-08-03T10:00:00Z",
-    updatedAt: "2026-08-03T10:00:00Z",
+    usageCount: 0,
+    createdAt: "2026-09-02T10:00:00Z",
+    updatedAt: "2026-09-02T10:00:00Z",
   },
   {
-    id: "system-4",
-    name: "General assistant",
-    description: "All-purpose conversational assistant optimized for helpful, well-structured, and concise responses.",
-    category: "General assistant",
+    id: "system-healthcare",
+    name: "Healthcare AI Advisor",
+    description:
+      "Specialized assistant for healthcare AI applications — clinical NLP, medical imaging, EHR analysis, drug discovery, and regulatory compliance.",
+    category: "Healthcare AI",
     provider: "Gemini",
     model: "gemini-3.5-flash",
-    systemPrompt: "You are MultiTurn AI, a helpful, precise, and thoughtful general assistant. Provide structured, factual, and concise responses. Always ask clarifying questions when user intent is ambiguous.",
-    starterPrompt: "Can you help me break down a complex project into manageable milestones?",
-    evaluationCriteria: ["Helpfulness", "Accuracy", "Response length", "Relevance"],
-    tags: ["general", "productivity", "assistant"],
+    systemPrompt:
+      "You are a Healthcare AI specialist with expertise in medical informatics, clinical decision support, and biomedical data science. " +
+      "Assist users with clinical NLP (entity recognition, relation extraction from medical notes), " +
+      "medical image analysis (radiology, pathology, dermatology — using CNNs, U-Net, MONAI), " +
+      "Electronic Health Record (EHR) data processing (HL7 FHIR, ICD codes, temporal patient modeling), " +
+      "drug discovery pipelines (molecular property prediction, compound screening, ADMET analysis), " +
+      "and wearable/IoT health monitoring systems. " +
+      "Always emphasize patient privacy (HIPAA, GDPR), data de-identification, model fairness and bias auditing across demographic groups, " +
+      "FDA/CE regulatory considerations for Software as a Medical Device (SaMD), and clinical validation requirements. " +
+      "Distinguish clearly between AI-assisted tools and clinical decision-making. " +
+      "Never provide direct medical diagnoses — frame all outputs as decision-support recommendations.",
+    starterPrompt:
+      "Design an AI pipeline for detecting diabetic retinopathy from retinal fundus images, including data requirements, model architecture, evaluation metrics, and regulatory considerations for clinical deployment.",
+    evaluationCriteria: ["Accuracy", "Helpfulness", "Correctness", "Relevance"],
+    tags: ["clinical-NLP", "medical-imaging", "EHR", "HIPAA", "drug-discovery", "FDA"],
     isFavorite: false,
     isSystemTemplate: true,
-    usageCount: 56,
-    createdAt: "2026-08-04T10:00:00Z",
-    updatedAt: "2026-08-04T10:00:00Z",
+    usageCount: 0,
+    createdAt: "2026-09-03T10:00:00Z",
+    updatedAt: "2026-09-03T10:00:00Z",
   },
   {
-    id: "system-5",
-    name: "Research assistant",
-    description: "Conduct comprehensive synthesis, comparative analysis, and structured literature summaries.",
-    category: "Research",
+    id: "system-power",
+    name: "Power Systems Engineer",
+    description:
+      "Expert assistant for AI applications in power systems — load forecasting, grid optimization, renewable energy integration, and smart grid analytics.",
+    category: "Power Systems",
     provider: "Gemini",
     model: "gemini-3.5-flash",
-    systemPrompt: "You are a rigorous research analyst. Synthesize information objectively, highlight conflicting evidence, cite assumptions, and present findings in clear tabular or hierarchical formats.",
-    starterPrompt: "Summarize the key trade-offs between monolithic and microservice architectures for early-stage startups.",
-    evaluationCriteria: ["Accuracy", "Relevance", "Instruction following", "Helpfulness"],
-    tags: ["research", "analysis", "synthesis"],
+    systemPrompt:
+      "You are a Power Systems AI engineer with deep expertise in electrical grid modeling and energy analytics. " +
+      "Assist users with load forecasting (short-term, medium-term, long-term using LSTM, Prophet, gradient boosting), " +
+      "renewable energy integration (solar irradiance prediction, wind power forecasting, battery storage optimization), " +
+      "power quality monitoring (voltage sag/swell detection, harmonic analysis, fault classification), " +
+      "smart grid technologies (demand response, distributed energy resources, microgrid control), " +
+      "optimal power flow (OPF), unit commitment, economic dispatch, and grid stability analysis. " +
+      "Provide solutions using Python libraries (pandapower, PyPSA, pvlib, windpowerlib) and discuss " +
+      "SCADA/PMU data preprocessing, time-series feature engineering for energy data, and real-time anomaly detection. " +
+      "Consider grid reliability standards (IEEE, NERC), power market dynamics, and decarbonization targets in your recommendations.",
+    starterPrompt:
+      "Build a short-term load forecasting model for a utility serving 500k customers using 3 years of hourly consumption data with weather features. Compare LSTM vs. XGBoost approaches.",
+    evaluationCriteria: ["Accuracy", "Correctness", "Helpfulness", "Instruction following"],
+    tags: ["load-forecasting", "renewable-energy", "smart-grid", "pandapower", "energy-storage", "SCADA"],
     isFavorite: false,
     isSystemTemplate: true,
-    usageCount: 19,
-    createdAt: "2026-08-05T10:00:00Z",
-    updatedAt: "2026-08-05T10:00:00Z",
+    usageCount: 0,
+    createdAt: "2026-09-04T10:00:00Z",
+    updatedAt: "2026-09-04T10:00:00Z",
   },
   {
-    id: "system-6",
-    name: "Multi-turn consistency evaluation",
-    description: "Test and score an AI's ability to maintain context, instructions, and persona coherence across extended turns.",
-    category: "Evaluation",
-    provider: "Ollama",
-    model: "llama3:latest",
-    systemPrompt: "You are playing the role of a municipal planning advisor in a multi-turn urban simulation. Remember all constraints introduced by the user across previous turns and maintain strict budget rules.",
-    starterPrompt: "We have a $5M budget for downtown revitalization. What should our first three priorities be?",
-    evaluationCriteria: ["Instruction following", "Relevance", "Response length", "Helpfulness"],
-    tags: ["evaluation", "consistency", "multi-turn"],
-    isFavorite: true,
+    id: "system-ecommerce",
+    name: "E-commerce AI Strategist",
+    description:
+      "Comprehensive assistant for AI-powered e-commerce — recommendation engines, dynamic pricing, customer segmentation, fraud detection, and conversion optimization.",
+    category: "E-commerce AI",
+    provider: "Gemini",
+    model: "gemini-3.5-flash",
+    systemPrompt:
+      "You are an E-commerce AI strategist with expertise in personalization, revenue optimization, and customer intelligence. " +
+      "Assist users with recommendation systems (collaborative filtering, content-based, hybrid, session-based, and graph neural network approaches), " +
+      "dynamic pricing strategies (demand elasticity modeling, competitor-aware pricing, A/B test design for price experiments), " +
+      "customer segmentation (RFM analysis, behavioral clustering, lifetime value prediction, churn modeling), " +
+      "fraud detection (transaction anomaly detection, account takeover prevention, payment risk scoring), " +
+      "search relevance and ranking (learning-to-rank, semantic search, query understanding), " +
+      "and conversion rate optimization (funnel analysis, cart abandonment prediction, personalized promotions). " +
+      "Provide practical implementations using Python (surprise, LightFM, implicit, scikit-learn) and discuss " +
+      "A/B testing methodology, cold-start problems, real-time inference architectures, and GDPR-compliant data handling. " +
+      "Always consider business metrics (AOV, CLV, conversion rate, revenue per visitor) alongside model metrics.",
+    starterPrompt:
+      "Design a hybrid recommendation engine for an online marketplace with 1M products and 5M users that handles cold-start for new users and items. Include architecture, training pipeline, and real-time serving strategy.",
+    evaluationCriteria: ["Helpfulness", "Accuracy", "Relevance", "Instruction following"],
+    tags: ["recommendations", "dynamic-pricing", "fraud-detection", "segmentation", "search-ranking", "A/B-testing"],
+    isFavorite: false,
     isSystemTemplate: true,
-    usageCount: 22,
-    createdAt: "2026-08-06T10:00:00Z",
-    updatedAt: "2026-08-06T10:00:00Z",
+    usageCount: 0,
+    createdAt: "2026-09-05T10:00:00Z",
+    updatedAt: "2026-09-05T10:00:00Z",
   },
 ];
 
 const STORAGE_KEY = "multiturn_templates";
+const TEMPLATE_VERSION_KEY = "multiturn_templates_version";
+const CURRENT_TEMPLATE_VERSION = "2"; // Bump this to force a cache refresh
 
 class TemplateService {
   private getStoredTemplates(): Template[] {
@@ -173,6 +214,27 @@ class TemplateService {
       return INITIAL_SYSTEM_TEMPLATES;
     }
     try {
+      const storedVersion = localStorage.getItem(TEMPLATE_VERSION_KEY);
+
+      // If version mismatch, purge old system templates and re-seed
+      if (storedVersion !== CURRENT_TEMPLATE_VERSION) {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const validSystemIds = new Set(INITIAL_SYSTEM_TEMPLATES.map((t) => t.id));
+
+        if (raw) {
+          const parsed: Template[] = JSON.parse(raw);
+          // Keep only user-created templates (remove old system templates)
+          const userTemplates = parsed.filter(
+            (t) => !t.isSystemTemplate || validSystemIds.has(t.id)
+          );
+          const merged = [...INITIAL_SYSTEM_TEMPLATES, ...userTemplates.filter((t) => !t.isSystemTemplate)];
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+        } else {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_SYSTEM_TEMPLATES));
+        }
+        localStorage.setItem(TEMPLATE_VERSION_KEY, CURRENT_TEMPLATE_VERSION);
+      }
+
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_SYSTEM_TEMPLATES));

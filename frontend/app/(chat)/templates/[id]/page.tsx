@@ -23,7 +23,6 @@ export default function TemplateDetailPage() {
   const {
     setSelectedProvider,
     setSelectedModel,
-    setUserInput,
     setCurrentChatId,
     setChats,
     chats,
@@ -60,7 +59,13 @@ export default function TemplateDetailPage() {
       await templateService.incrementUsage(template.id);
       setSelectedProvider(template.provider);
       setSelectedModel(template.model);
-      setUserInput(template.starterPrompt || "");
+
+      // Store the starter prompt as a pending auto-send message
+      if (template.starterPrompt) {
+        try {
+          localStorage.setItem("multiturn_pending_message", template.starterPrompt);
+        } catch (_) {}
+      }
 
       // Persist active system prompt for this conversation
       if (template.systemPrompt) {

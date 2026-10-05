@@ -42,7 +42,7 @@ export const TemplateFormModal: FC<TemplateFormModalProps> = ({
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState<TemplateCategory>("General assistant");
+  const [category, setCategory] = useState<TemplateCategory>("Machine Learning");
   const [provider, setProvider] = useState("Gemini");
   const [model, setModel] = useState("gemini-3.5-flash");
   const [systemPrompt, setSystemPrompt] = useState("");
@@ -68,7 +68,7 @@ export const TemplateFormModal: FC<TemplateFormModalProps> = ({
     } else {
       setName("");
       setDescription("");
-      setCategory("General assistant");
+      setCategory("Machine Learning");
       setProvider("Gemini");
       setModel("gemini-3.5-flash");
       setSystemPrompt("");
@@ -163,7 +163,7 @@ export const TemplateFormModal: FC<TemplateFormModalProps> = ({
                 id="template-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Customer support evaluation"
+                placeholder="e.g. Machine Learning Assistant"
                 className="h-9 text-[12.5px] bg-background border-border text-foreground focus-visible:ring-1 focus-visible:ring-[#f5a623]/40 rounded-xl"
                 required
               />
