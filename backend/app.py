@@ -1,6 +1,5 @@
 """
-Multi-turn LLaMA 3 Chatbot using Groq API and Supabase Persistence
-FR10: Response Time Tracking & FR11: Real-time Topic Classification
+Multi-turn Chatbot using gemini api key and Supabase Persistence
 """
 # pyrefly: ignore [missing-import]
 from flask import Flask, request, jsonify, session, Response, stream_with_context
@@ -22,7 +21,6 @@ CORS(app)
 
 # Configuration
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_GENERATIVE_AI_API_KEY") or os.getenv("NEXT_PUBLIC_GEMINI_API_KEY") or ""
-GROQ_API_KEY = os.getenv("GROQ_API_KEY") or os.getenv("NEXT_PUBLIC_GROQ_API_KEY") or ""
 MODEL = "gemini-3.5-flash"
 FAST_MODEL = "gemini-3.5-flash"
 
@@ -40,14 +38,6 @@ PROJECT_DOMAINS = [
     "Other"
 ]
 
-# Initialize Groq client (optional fallback)
-client = None
-if GROQ_API_KEY:
-    try:
-        client = Groq(api_key=GROQ_API_KEY)
-    except Exception:
-        pass
-
 # Supabase Helper functions
 def supabase_headers():
     return {
@@ -58,7 +48,7 @@ def supabase_headers():
     }
 
 def classify_topic(user_message):
-    """FR11: Real-time Topic Classification using lightweight Gemini / Groq LLM or keyword fallback."""
+    """FR11: Real-time Topic Classification using lightweight Gemini LLM or keyword fallback."""
     if not user_message or len(user_message.strip()) < 5:
         return "Other"
 
@@ -105,21 +95,6 @@ def classify_topic(user_message):
                         return domain
         except Exception as e:
             print(f"Gemini topic classification warning: {e}")
-
-    if client:
-        try:
-            completion = client.chat.completions.create(
-                messages=[{"role": "user", "content": prompt}],
-                model="llama-3.1-8b-instant",
-                temperature=0.0,
-                max_tokens=30
-            )
-            res = completion.choices[0].message.content.strip().replace(" ", "")
-            for domain in PROJECT_DOMAINS:
-                if domain.lower() in res.lower():
-                    return domain
-        except Exception as e:
-            print(f"Groq topic classification warning: {e}")
 
     return "Other"
 
@@ -214,7 +189,7 @@ def chat():
     if not user_message or not session_id or not user_id:
         return jsonify({"error": "Missing message, session_id (chat_id), or user_id"}), 400
 
-    if not GEMINI_API_KEY and not client:
+    if not GEMINI_API_KEY:
         return jsonify({"error": "No AI API key found. Please set GEMINI_API_KEY environment variable."}), 500
     
     # FR10: Track exact dispatch timestamp
@@ -236,82 +211,67 @@ def chat():
     def generate():
         try:
             full_response = ""
-            if GEMINI_API_KEY:
-                gemini_model = requested_model if requested_model.startswith("gemini") else "gemini-1.5-flash"
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/{gemini_model}:streamGenerateContent?key={GEMINI_API_KEY}&alt=sse"
-                
-                # Convert messages format to Gemini contents
-                contents = []
-                for m in messages:
-                    role = "user" if m.get("role") == "user" else "model"
-                    contents.append({"role": role, "parts": [{"text": m.get("content", "")}]})
-                if not contents:
-                    contents = [{"role": "user", "parts": [{"text": user_message}]}]
+            gemini_model = requested_model if requested_model.startswith("gemini") else MODEL
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{gemini_model}:streamGenerateContent?key={GEMINI_API_KEY}&alt=sse"
+            
+            # Convert messages format to Gemini contents
+            contents = []
+            for m in messages:
+                role = "user" if m.get("role") == "user" else "model"
+                contents.append({"role": role, "parts": [{"text": m.get("content", "")}]})
+            if not contents:
+                contents = [{"role": "user", "parts": [{"text": user_message}]}]
 
-                payload = {
-                    "contents": contents,
-                    "generationConfig": {
-                        "temperature": 0.7,
-                        "maxOutputTokens": 2048
-                    }
+            payload = {
+                "contents": contents,
+                "generationConfig": {
+                    "temperature": 0.7,
+                    "maxOutputTokens": 2048
                 }
-                headers = {"Content-Type": "application/json"}
-                
-                try:
-                    with requests.post(url, json=payload, headers=headers, stream=True, timeout=20) as r:
-                        if r.status_code != 200:
-                            err_msg = ""
-                            try:
-                                err_data = r.json()
-                                err_msg = err_data.get("error", {}).get("message", r.text)
-                            except Exception:
-                                err_msg = r.text
-                            error_output = f"Error {r.status_code}: Gemini API call failed - {err_msg}"
-                            yield error_output
-                            save_message(session_id, user_id, 'assistant', error_output, response_time=round(time.time() - start_time, 3), topic_label=topic_label, session_phase=session_phase)
-                            return
+            }
+            headers = {"Content-Type": "application/json"}
+            
+            try:
+                with requests.post(url, json=payload, headers=headers, stream=True, timeout=20) as r:
+                    if r.status_code != 200:
+                        err_msg = ""
+                        try:
+                            err_data = r.json()
+                            err_msg = err_data.get("error", {}).get("message", r.text)
+                        except Exception:
+                            err_msg = r.text
+                        error_output = f"Error {r.status_code}: Gemini API call failed - {err_msg}"
+                        yield error_output
+                        save_message(session_id, user_id, 'assistant', error_output, response_time=round(time.time() - start_time, 3), topic_label=topic_label, session_phase=session_phase)
+                        return
 
-                        for line in r.iter_lines():
-                            if line:
-                                decoded = line.decode('utf-8')
-                                if decoded.startswith("data: "):
-                                    json_str = decoded[6:]
-                                    try:
-                                        chunk_json = json.loads(json_str)
-                                        candidates = chunk_json.get("candidates", [])
-                                        if candidates:
-                                            parts = candidates[0].get("content", {}).get("parts", [])
-                                            for p in parts:
-                                                chunk_text = p.get("text", "")
-                                                if chunk_text:
-                                                    full_response += chunk_text
-                                                    yield chunk_text
-                                    except Exception:
-                                        continue
-                except requests.exceptions.Timeout:
-                    timeout_msg = "Error 404: Gemini API request timed out after 20 seconds. No response received."
-                    yield timeout_msg
-                    save_message(session_id, user_id, 'assistant', timeout_msg, response_time=20.0, topic_label=topic_label, session_phase=session_phase)
-                    return
-                except requests.exceptions.RequestException as re:
-                    err_msg = f"Error 404: Gemini API connection error - {str(re)}"
-                    yield err_msg
-                    save_message(session_id, user_id, 'assistant', err_msg, response_time=round(time.time() - start_time, 3), topic_label=topic_label, session_phase=session_phase)
-                    return
-            elif client:
-                completion = client.chat.completions.create(
-                    model=requested_model,
-                    messages=messages,
-                    temperature=0.7,
-                    max_tokens=1024,
-                    top_p=1,
-                    stream=True
-                )
-                for chunk in completion:
-                    content = chunk.choices[0].delta.content or ""
-                    if content:
-                        full_response += content
-                        yield content
+                    for line in r.iter_lines():
+                        if line:
+                            decoded = line.decode('utf-8')
+                            if decoded.startswith("data: "):
+                                json_str = decoded[6:]
+                                try:
+                                    chunk_json = json.loads(json_str)
+                                    candidates = chunk_json.get("candidates", [])
+                                    if candidates:
+                                        parts = candidates[0].get("content", {}).get("parts", [])
+                                        for p in parts:
+                                            chunk_text = p.get("text", "")
+                                            if chunk_text:
+                                                full_response += chunk_text
+                                                yield chunk_text
+                                except Exception:
+                                    continue
+            except requests.exceptions.Timeout:
+                timeout_msg = "Error 404: Gemini API request timed out after 20 seconds. No response received."
+                yield timeout_msg
+                save_message(session_id, user_id, 'assistant', timeout_msg, response_time=20.0, topic_label=topic_label, session_phase=session_phase)
+                return
+            except requests.exceptions.RequestException as re:
+                err_msg = f"Error 404: Gemini API connection error - {str(re)}"
+                yield err_msg
+                save_message(session_id, user_id, 'assistant', err_msg, response_time=round(time.time() - start_time, 3), topic_label=topic_label, session_phase=session_phase)
+                return
 
             # FR10: Calculate explicit response duration delta
             end_time = time.time()

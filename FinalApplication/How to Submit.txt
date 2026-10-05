@@ -1,7 +1,0 @@
-Copy all 3 files (final application Phase 1, 2 and 3 combined, FRreport, and presentation in
-a single folder and then (zip or rar) and submit within due date on VULMS.
-
-All these 3 files work requirements are given in this folder.
-1. Phase 3 requirements file
-2. FRTemplate file
-3.SamplePresentation file
