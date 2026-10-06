@@ -42,20 +42,49 @@ export async function GET(req: Request) {
       "Content-Type": "application/json",
     };
 
-    let feedbackUrl = `${supabaseUrl}/rest/v1/feedback?select=*`;
-    let messagesUrl = `${supabaseUrl}/rest/v1/messages?select=*`;
-    let domainsUrl = `${supabaseUrl}/rest/v1/domains?select=*`;
-
-    if (userId) {
-      feedbackUrl += `&user_id=eq.${userId}`;
-      messagesUrl += `&user_id=eq.${userId}`;
+    if (!userId) {
+      return NextResponse.json(
+        {
+          error: "Missing user_id",
+          message: "Please log in to view your personalized analytics.",
+        },
+        { status: 400 }
+      );
     }
+
+    const feedbackUrl = `${supabaseUrl}/rest/v1/feedback?select=*&user_id=eq.${userId}`;
+    const messagesUrl = `${supabaseUrl}/rest/v1/messages?select=*&user_id=eq.${userId}&order=created_at.asc`;
+    const domainsUrl = `${supabaseUrl}/rest/v1/domains?select=*`;
 
     const [fRes, mRes, dRes] = await Promise.all([
       fetch(feedbackUrl, { headers, cache: "no-store" }).catch(() => null),
       fetch(messagesUrl, { headers, cache: "no-store" }).catch(() => null),
       fetch(domainsUrl, { headers, cache: "no-store" }).catch(() => null),
     ]);
+
+    // Check if database queries failed due to permission or server errors (e.g. 403 Forbidden, 500, network error)
+    if (!fRes || !mRes || !fRes.ok || !mRes.ok) {
+      let errDetails = "Database service permission or connection issue";
+      try {
+        if (fRes && !fRes.ok) {
+          const body = await fRes.json();
+          if (body?.message) errDetails = body.message;
+        } else if (mRes && !mRes.ok) {
+          const body = await mRes.json();
+          if (body?.message) errDetails = body.message;
+        }
+      } catch {}
+
+      return NextResponse.json(
+        {
+          error: errDetails,
+          message: "Don't worry - the analytics module is currently not working. It's on our side, not yours.",
+          code: 404,
+          isServerError: true,
+        },
+        { status: 500 }
+      );
+    }
 
     let feedbackData: any[] = fRes && fRes.ok ? await fRes.json() : [];
     const messagesData: any[] = mRes && mRes.ok ? await mRes.json() : [];
@@ -229,12 +258,25 @@ export async function GET(req: Request) {
 
       let userMsg: any = null;
       if (cid && messagesByChat[cid]) {
-        const users = messagesByChat[cid].filter((m) => m.role === "user");
-        if (users.length > 0) userMsg = users[users.length - 1];
+        const chatMsgs = messagesByChat[cid];
+        if (asstMsg && asstMsg.created_at) {
+          const asstTime = new Date(asstMsg.created_at).getTime();
+          // Find the user prompt asked immediately before this assistant response
+          const precedingUsers = chatMsgs.filter(
+            (m) => m.role === "user" && new Date(m.created_at || 0).getTime() <= asstTime
+          );
+          if (precedingUsers.length > 0) {
+            userMsg = precedingUsers[precedingUsers.length - 1];
+          }
+        }
+        if (!userMsg) {
+          const users = chatMsgs.filter((m) => m.role === "user");
+          if (users.length > 0) userMsg = users[0];
+        }
       }
 
       const modelResponse = asstMsg?.content || row.comment || "AI response recorded";
-      const userQuery = userMsg?.content || `User inquiry on ${row.category || "AI Topic"}`;
+      const userQuery = userMsg?.content || (row.category ? `Question on ${row.category}` : "Chat prompt");
       const previewText = modelResponse.trim().replace(/\s+/g, " ");
       const preview = previewText.length > 65 ? previewText.slice(0, 65) + "..." : previewText;
 

@@ -18,13 +18,5 @@ dependencies = [
     "numpy",
 ]
 
-[build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools]
-packages = ["analytics"]
-
 [tool.uv]
-# UV configuration
-# UV uses required-version, not python-version
+package = false

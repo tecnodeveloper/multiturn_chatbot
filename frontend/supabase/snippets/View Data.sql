@@ -1,3 +1,10 @@
-SELECT id, chat_id, role, content, response_time, session_phase, created_at 
-FROM public.messages 
-ORDER BY created_at DESC;
+SELECT
+  grantee,
+  table_schema,
+  table_name,
+  privilege_type
+FROM information_schema.role_table_grants
+WHERE grantee = 'service_role'
+  AND table_schema = 'public'
+  AND table_name IN ('feedback', 'messages')
+ORDER BY table_name, privilege_type;

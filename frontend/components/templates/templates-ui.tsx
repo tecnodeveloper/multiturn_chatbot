@@ -4,12 +4,11 @@ import { FC, useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Template,
-  TemplateCategory,
   CreateTemplateInput,
   templateService,
 } from "@/lib/template-service";
 import { TemplateCard } from "./template-card";
-import { TemplateToolbar, ScopeFilter } from "./template-toolbar";
+import { TemplateToolbar } from "./template-toolbar";
 import { TemplateEmptyState } from "./template-empty-state";
 import { TemplateFormModal } from "./template-form-modal";
 import { TemplateDetailModal } from "./template-detail-modal";
@@ -45,10 +44,8 @@ export const TemplatesUI: FC<TemplatesUIProps> = ({
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Filter States
+  // Search Filter State
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedScope, setSelectedScope] = useState<ScopeFilter>("All");
-  const [selectedCategory, setSelectedCategory] = useState<TemplateCategory | null>(null);
 
   // Modal States
   const [isFormModalOpen, setIsFormModalOpen] = useState(initialAction === "create");
@@ -75,30 +72,16 @@ export const TemplatesUI: FC<TemplatesUIProps> = ({
     loadTemplates();
   }, []);
 
-  // Filtered Templates
+  // Filtered Templates by Search Query
   const filteredTemplates = useMemo(() => {
+    if (!searchQuery.trim()) return templates;
+    const q = searchQuery.toLowerCase().trim();
     return templates.filter((template) => {
-      // 1. Scope Filter
-      if (selectedScope === "My templates" && template.isSystemTemplate) return false;
-      if (selectedScope === "System templates" && !template.isSystemTemplate) return false;
-      if (selectedScope === "Favorites" && !template.isFavorite) return false;
-
-      // 2. Category Filter
-      if (selectedCategory && template.category !== selectedCategory) return false;
-
-      // 3. Search Query Filter
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase().trim();
-        const matchesName = template.name.toLowerCase().includes(q);
-        const matchesDesc = template.description.toLowerCase().includes(q);
-        const matchesCat = template.category.toLowerCase().includes(q);
-        const matchesTag = template.tags?.some((t) => t.toLowerCase().includes(q));
-        if (!matchesName && !matchesDesc && !matchesCat && !matchesTag) return false;
-      }
-
-      return true;
+      const matchesName = template.name.toLowerCase().includes(q);
+      const matchesDesc = (template.description || "").toLowerCase().includes(q);
+      return matchesName || matchesDesc;
     });
-  }, [templates, selectedScope, selectedCategory, searchQuery]);
+  }, [templates, searchQuery]);
 
   // Handlers
   const handleOpenCreate = () => {
@@ -260,29 +243,25 @@ export const TemplatesUI: FC<TemplatesUIProps> = ({
       {/* Main Content Body - full-width scroll container so scrollbar sits flush against viewport edge */}
       <div className="flex-1 w-full overflow-y-auto">
         <div className="max-w-7xl mx-auto w-full px-6 sm:px-8 py-6 sm:py-8 space-y-6">
-          {/* Search & Filter Toolbar */}
+          {/* Search Toolbar */}
           <TemplateToolbar
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
-            selectedScope={selectedScope}
-            onScopeChange={setSelectedScope}
-            selectedCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
             totalCount={filteredTemplates.length}
           />
 
           {/* Content State */}
           {loading ? (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6 pt-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div
                   key={i}
-                  className="h-[220px] rounded-2xl border border-border bg-card/60 animate-pulse p-5"
+                  className="h-[360px] rounded-2xl border border-border bg-card/60 animate-pulse"
                 />
               ))}
             </div>
           ) : filteredTemplates.length > 0 ? (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6 pt-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
               {filteredTemplates.map((template) => (
                 <TemplateCard
                   key={template.id}
@@ -301,11 +280,7 @@ export const TemplatesUI: FC<TemplatesUIProps> = ({
           ) : (
             <TemplateEmptyState
               type="search"
-              onClearFilters={() => {
-                setSearchQuery("");
-                setSelectedScope("All");
-                setSelectedCategory(null);
-              }}
+              onClearFilters={() => setSearchQuery("")}
             />
           )}
         </div>
