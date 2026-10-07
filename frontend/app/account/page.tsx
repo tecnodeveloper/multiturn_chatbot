@@ -1,21 +1,21 @@
 "use client";
 
-import { FC } from "react";
-import { AccountHeader } from "@/components/account/header";
-import { ProfileForm } from "@/components/account/profile-form";
+import { FC, useState } from "react";
+import { useRouter } from "next/navigation";
+import { AccountModal } from "@/components/account/account-modal";
 
 const AccountPage: FC = () => {
+  const router = useRouter();
+  const [isOpen, setIsOpen] = useState(true);
+
+  const handleClose = () => {
+    setIsOpen(false);
+    router.push("/dashboard");
+  };
+
   return (
-    <div className="min-h-screen bg-background flex flex-col font-sans">
-      <div className="bg-card/80 dark:bg-[#070a12]/80 backdrop-blur-md border-b border-border/70 sticky top-0 z-40">
-        <div className="px-4 sm:px-8 max-w-[1600px] mx-auto w-full">
-          <AccountHeader />
-        </div>
-      </div>
-      
-      <main className="flex-1 p-6 md:p-8 max-w-[1600px] mx-auto w-full flex flex-col items-center">
-        <ProfileForm />
-      </main>
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center font-sans">
+      <AccountModal isOpen={isOpen} onClose={handleClose} />
     </div>
   );
 };

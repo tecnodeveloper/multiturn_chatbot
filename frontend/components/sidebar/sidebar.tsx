@@ -24,6 +24,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Brand } from "@/components/ui/brand";
 import { updateChat } from "@/db";
 import Link from "next/link";
+import { AccountModal } from "@/components/account/account-modal";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,6 +59,7 @@ export const Sidebar: FC<SidebarProps> = ({
   } = useChat();
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<"chats" | "templates" | "settings" | "analytics">("chats");
+  const [accountModalOpen, setAccountModalOpen] = useState(false);
 
   // Inline Title Editing State
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
@@ -65,7 +67,7 @@ export const Sidebar: FC<SidebarProps> = ({
 
   const effectiveActiveTab = pathname === "/analytics"
     ? "analytics"
-    : pathname === "/account"
+    : pathname === "/account" || accountModalOpen
     ? "settings"
     : pathname.startsWith("/templates")
     ? "templates"
@@ -80,7 +82,7 @@ export const Sidebar: FC<SidebarProps> = ({
     } else if (id === "templates") {
       router.push("/templates");
     } else if (id === "settings") {
-      router.push("/account");
+      setAccountModalOpen(true);
     }
   };
 
@@ -317,43 +319,49 @@ export const Sidebar: FC<SidebarProps> = ({
 
       {/* User Profile Footer */}
       <div className="border-t border-border p-3 bg-background/50 dark:bg-card/40">
-        <Link href="/account" className="block">
-          <div className={`flex items-center gap-2.5 rounded-xl p-2 hover:bg-muted/50 transition-colors cursor-pointer group ${collapsed ? "justify-center" : ""}`}>
-            <Avatar className="h-8 w-8 border border-border shrink-0">
-              <AvatarImage src={user?.avatar} />
-              <AvatarFallback className="bg-[#f5a623]/15 text-[#f5a623] text-xs font-medium">
-                {user?.name
-                  ? user.name.charAt(0).toUpperCase()
-                  : user?.email?.charAt(0).toUpperCase() || "S"}
-              </AvatarFallback>
-            </Avatar>
-            {!collapsed && (
-              <>
-                <div className="flex flex-1 flex-col overflow-hidden">
-                  <span className="truncate text-[12.5px] font-medium text-foreground leading-tight">
-                    {user?.name || "salman"}
-                  </span>
-                  <span className="truncate text-[11px] font-normal text-muted-foreground leading-tight">
-                    {user?.email || "salman@gmail.com"}
-                  </span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive shrink-0"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    logout();
-                  }}
-                >
-                  <LogOut className="h-3.5 w-3.5" />
-                </Button>
-              </>
-            )}
-          </div>
-        </Link>
+        <div
+          onClick={() => setAccountModalOpen(true)}
+          className={`flex items-center gap-2.5 rounded-xl p-2 hover:bg-muted/50 transition-colors cursor-pointer group ${collapsed ? "justify-center" : ""}`}
+        >
+          <Avatar className="h-8 w-8 border border-border shrink-0">
+            <AvatarImage src={user?.avatar} />
+            <AvatarFallback className="bg-[#f5a623]/15 text-[#f5a623] text-xs font-medium">
+              {user?.name
+                ? user.name.charAt(0).toUpperCase()
+                : user?.email?.charAt(0).toUpperCase() || "S"}
+            </AvatarFallback>
+          </Avatar>
+          {!collapsed && (
+            <>
+              <div className="flex flex-1 flex-col overflow-hidden">
+                <span className="truncate text-[12.5px] font-medium text-foreground leading-tight">
+                  {user?.name || "salman"}
+                </span>
+                <span className="truncate text-[11px] font-normal text-muted-foreground leading-tight">
+                  {user?.email || "salman@gmail.com"}
+                </span>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive shrink-0"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  logout();
+                }}
+              >
+                <LogOut className="h-3.5 w-3.5" />
+              </Button>
+            </>
+          )}
+        </div>
       </div>
+
+      <AccountModal
+        isOpen={accountModalOpen}
+        onClose={() => setAccountModalOpen(false)}
+      />
     </div>
   );
 };
