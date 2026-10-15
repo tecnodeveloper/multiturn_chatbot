@@ -165,15 +165,7 @@ export default function LoginPage() {
               Sign Up
             </Link>
           </div>
-          <div className="text-gray-500">
-            Forgot your password?{" "}
-            <Link
-              href="/reset"
-              className="text-gray-300 hover:text-white underline"
-            >
-              Reset
-            </Link>
-          </div>
+
         </div>
       </div>
     </div>
