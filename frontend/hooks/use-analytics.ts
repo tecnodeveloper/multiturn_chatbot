@@ -44,11 +44,17 @@ export interface AnalyticsData {
   raw_data_count: number;
 }
 
-export function useAnalytics() {
+export function useAnalytics(options?: {
+  sessionId?: string | null;
+  mode?: "this_session" | "all_sessions";
+}) {
   const { user, isLoading: authLoading } = useAuth();
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const mode = options?.mode || "all_sessions";
+  const sessionId = options?.sessionId;
 
   const fetchData = async () => {
     if (authLoading) return;
@@ -58,7 +64,8 @@ export function useAnalytics() {
     }
 
     try {
-      const userQuery = `?user_id=${user.id}`;
+      const sessionParam = mode === "this_session" && sessionId ? `&session_id=${sessionId}` : "";
+      const userQuery = `?user_id=${user.id}${sessionParam}`;
       let response = await fetch(`/api/analytics${userQuery}`);
       
       if (!response.ok) {
@@ -101,7 +108,7 @@ export function useAnalytics() {
     // Live auto-refresh polling every 5 seconds for real-time analytics updates
     const interval = setInterval(fetchData, 5000);
     return () => clearInterval(interval);
-  }, [user?.id, authLoading]);
+  }, [user?.id, authLoading, mode, sessionId]);
 
   return { data, loading, error, refetch: fetchData };
 }

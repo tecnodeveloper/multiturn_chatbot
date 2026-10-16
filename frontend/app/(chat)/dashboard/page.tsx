@@ -29,7 +29,8 @@ export default function DashboardPage() {
     showFeedbackModal,
     setShowFeedbackModal,
     isInputLocked,
-    handleFeedbackSubmitted
+    handleFeedbackSubmitted,
+    evaluatedMessageIds
   } = useDashboard();
 
   const handleAction = () => {
@@ -62,6 +63,7 @@ export default function DashboardPage() {
         setAttachedFiles={setAttachedFiles}
         isInputLocked={isInputLocked}
         onFeedbackSubmitted={handleFeedbackSubmitted}
+        evaluatedMessageIds={evaluatedMessageIds}
       />
 
       {user && currentChatId && (

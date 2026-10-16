@@ -35,19 +35,24 @@ def get_supabase_headers():
         "Content-Type": "application/json"
     }
 
-def fetch_live_data():
+def fetch_live_data(user_id=None, session_id=None):
     """Fetch live feedback, messages, and domain classifications from Supabase."""
     if not SUPABASE_URL or not SUPABASE_KEY:
         print("Warning: Missing Supabase credentials.")
         return [], [], []
 
     try:
+        user_filter = f"&user_id=eq.{user_id}" if user_id else ""
+        session_filter = f"&chat_id=eq.{session_id}" if session_id and session_id != "all" else ""
+
         # 1. Fetch Feedback
-        f_res = requests.get(f"{SUPABASE_URL}/rest/v1/feedback?select=*", headers=get_supabase_headers(), timeout=5)
+        f_url = f"{SUPABASE_URL}/rest/v1/feedback?select=*{user_filter}{session_filter}"
+        f_res = requests.get(f_url, headers=get_supabase_headers(), timeout=5)
         feedback_list = f_res.json() if f_res.status_code == 200 and isinstance(f_res.json(), list) else []
 
         # 2. Fetch Messages
-        m_res = requests.get(f"{SUPABASE_URL}/rest/v1/messages?select=*", headers=get_supabase_headers(), timeout=5)
+        m_url = f"{SUPABASE_URL}/rest/v1/messages?select=*{user_filter}{session_filter}&order=created_at.asc"
+        m_res = requests.get(m_url, headers=get_supabase_headers(), timeout=5)
         messages_list = m_res.json() if m_res.status_code == 200 and isinstance(m_res.json(), list) else []
 
         # 3. Fetch Domains
@@ -92,8 +97,8 @@ def resolve_topic(user_query, raw_cat):
     return "Other"
 
 
-def process_analytics():
-    feedback_data, messages_data, domains_data = fetch_live_data()
+def process_analytics(user_id=None, session_id=None):
+    feedback_data, messages_data, domains_data = fetch_live_data(user_id=user_id, session_id=session_id)
     
     # Map domain categories per chat
     chat_domains = {}

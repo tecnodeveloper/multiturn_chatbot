@@ -10,7 +10,6 @@ import {
   LogOut, 
   MessageSquare, 
   LayoutGrid, 
-  Settings, 
   BarChart3, 
   Edit,
   PanelLeft,
@@ -24,7 +23,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Brand } from "@/components/ui/brand";
 import { updateChat } from "@/db";
 import Link from "next/link";
-import { AccountModal } from "@/components/account/account-modal";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,8 +57,7 @@ export const Sidebar: FC<SidebarProps> = ({
     setSearchTerm,
   } = useChat();
   const { user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<"chats" | "templates" | "settings" | "analytics">("chats");
-  const [accountModalOpen, setAccountModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"chats" | "templates" | "analytics">("chats");
 
   // Inline Title Editing State
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
@@ -67,8 +65,6 @@ export const Sidebar: FC<SidebarProps> = ({
 
   const effectiveActiveTab = pathname === "/analytics"
     ? "analytics"
-    : pathname === "/account" || accountModalOpen
-    ? "settings"
     : pathname.startsWith("/templates")
     ? "templates"
     : activeTab;
@@ -81,8 +77,6 @@ export const Sidebar: FC<SidebarProps> = ({
       router.push("/analytics");
     } else if (id === "templates") {
       router.push("/templates");
-    } else if (id === "settings") {
-      setAccountModalOpen(true);
     }
   };
 
@@ -120,7 +114,6 @@ export const Sidebar: FC<SidebarProps> = ({
     { id: "chats", label: "Chats", icon: <MessageSquare className="h-4 w-4 shrink-0" /> },
     { id: "templates", label: "Templates", icon: <LayoutGrid className="h-4 w-4 shrink-0" /> },
     { id: "analytics", label: "Analytics", icon: <BarChart3 className="h-4 w-4 shrink-0" /> },
-    { id: "settings", label: "Settings", icon: <Settings className="h-4 w-4 shrink-0" /> },
   ];
 
   return (
@@ -319,8 +312,7 @@ export const Sidebar: FC<SidebarProps> = ({
 
       {/* User Profile Footer */}
       <div className="border-t border-border p-3 bg-background/50 dark:bg-card/40">
-        <div
-          onClick={() => setAccountModalOpen(true)}
+        <Link href="/account"
           className={`flex items-center gap-2.5 rounded-xl p-2 hover:bg-muted/50 transition-colors cursor-pointer group ${collapsed ? "justify-center" : ""}`}
         >
           <Avatar className="h-8 w-8 border border-border shrink-0">
@@ -355,13 +347,8 @@ export const Sidebar: FC<SidebarProps> = ({
               </Button>
             </>
           )}
-        </div>
+        </Link>
       </div>
-
-      <AccountModal
-        isOpen={accountModalOpen}
-        onClose={() => setAccountModalOpen(false)}
-      />
     </div>
   );
 };

@@ -22,7 +22,8 @@ import {
   deletePreset,
   createFolder,
   updateFolder,
-  deleteFolder
+  deleteFolder,
+  getUserFeedback
 } from "@/db";
 import { consumeReadableStream } from "@/lib/consume-stream";
 import { convertFileToBase64 } from "@/lib/utils";
@@ -42,23 +43,27 @@ export function useDashboard() {
   const [attachedFiles, setAttachedFiles] = useState<{record: any, file: File}[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [evaluatedTurns, setEvaluatedTurns] = useState<Record<string, number>>({});
+  const [evaluatedMessageIds, setEvaluatedMessageIds] = useState<Set<string>>(new Set());
   const abortControllerRef = useRef<AbortController | null>(null);
   const pendingMessageSentRef = useRef(false);
 
   const currentChat = chats.find(c => c.id === currentChatId);
-  const assistantCount = currentChat?.messages.filter(m => m.role === "assistant").length || 0;
-  
-  // FR12 & FR13: Lock input every 2 completed turns (every 2 assistant replies) until feedback submitted
-  const lastEvaluated = (currentChatId && evaluatedTurns[currentChatId]) || 0;
-  const isInputLocked = assistantCount > 0 && assistantCount % 2 === 0 && lastEvaluated < assistantCount;
+  const assistantMessages = currentChat?.messages.filter(m => m.role === "assistant") || [];
+  const latestAssistantMsg = assistantMessages[assistantMessages.length - 1];
 
-  const handleFeedbackSubmitted = () => {
-    if (currentChatId && assistantCount > 0) {
-      setEvaluatedTurns(prev => ({
-        ...prev,
-        [currentChatId]: assistantCount
-      }));
+  // Mandatory feedback evaluation appears after every user message response.
+  // The user cannot submit another message until the required evaluation is completed.
+  const hasUnevaluated = assistantMessages.some(m => Boolean(m.id && !evaluatedMessageIds.has(m.id)));
+  const isInputLocked = assistantMessages.length > 0 && hasUnevaluated && !isSending;
+
+  const handleFeedbackSubmitted = (messageId?: string) => {
+    const targetId = messageId || latestAssistantMsg?.id;
+    if (targetId) {
+      setEvaluatedMessageIds(prev => {
+        const next = new Set(prev);
+        next.add(targetId);
+        return next;
+      });
     }
   };
 
@@ -66,12 +71,21 @@ export function useDashboard() {
     const loadData = async () => {
       if (!user) return;
       try {
-        const [fetchedChats, fetchedPrompts, fetchedPresets, fetchedFolders] = await Promise.all([
+        const [fetchedChats, fetchedPrompts, fetchedPresets, fetchedFolders, userFeedback] = await Promise.all([
           getChats(),
           getPrompts(),
           getPresets(),
-          getFolders()
+          getFolders(),
+          getUserFeedback(user.id),
         ]);
+
+        const evaluatedIds = new Set<string>();
+        if (userFeedback && Array.isArray(userFeedback)) {
+          userFeedback.forEach((f: any) => {
+            if (f.message_id) evaluatedIds.add(f.message_id);
+          });
+        }
+        setEvaluatedMessageIds(evaluatedIds);
 
         const chatsWithMessages = await Promise.all(
           fetchedChats.map(async (chat: any) => {
@@ -431,7 +445,7 @@ export function useDashboard() {
 
       // FR10 & FR16: Log the failed attempt duration and session phase
       const durationSeconds = Math.round(((Date.now() - startTime) / 1000) * 1000) / 1000;
-      createMessage({
+      const savedErrorMsg = await createMessage({
         chat_id: chatId!,
         role: "assistant",
         content: errorContent,
@@ -439,6 +453,21 @@ export function useDashboard() {
         response_time: durationSeconds,
         session_phase: sessionPhase,
       }).catch(console.error);
+
+      if (savedErrorMsg && savedErrorMsg.id) {
+        setChats((prev) =>
+          prev.map((c) =>
+            c.id === chatId
+              ? {
+                  ...c,
+                  messages: c.messages.map((m) =>
+                    m.id === errorMsgId ? { ...m, id: savedErrorMsg.id } : m
+                  ),
+                }
+              : c
+          )
+        );
+      }
 
     } finally {
       if (timeoutId) clearTimeout(timeoutId);
@@ -519,7 +548,8 @@ export function useDashboard() {
     showFeedbackModal,
     setShowFeedbackModal,
     isInputLocked,
-    handleFeedbackSubmitted
+    handleFeedbackSubmitted,
+    evaluatedMessageIds
   };
 }
 

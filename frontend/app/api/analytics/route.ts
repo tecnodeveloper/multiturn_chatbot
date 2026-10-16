@@ -32,6 +32,7 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("user_id");
+    const sessionId = searchParams.get("session_id") || searchParams.get("chat_id");
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "http://localhost:54321";
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
@@ -52,8 +53,9 @@ export async function GET(req: Request) {
       );
     }
 
-    const feedbackUrl = `${supabaseUrl}/rest/v1/feedback?select=*&user_id=eq.${userId}`;
-    const messagesUrl = `${supabaseUrl}/rest/v1/messages?select=*&user_id=eq.${userId}&order=created_at.asc`;
+    const sessionFilter = sessionId && sessionId !== "all" ? `&chat_id=eq.${sessionId}` : "";
+    const feedbackUrl = `${supabaseUrl}/rest/v1/feedback?select=*&user_id=eq.${userId}${sessionFilter}`;
+    const messagesUrl = `${supabaseUrl}/rest/v1/messages?select=*&user_id=eq.${userId}${sessionFilter}&order=created_at.asc`;
     const domainsUrl = `${supabaseUrl}/rest/v1/domains?select=*`;
 
     const [fRes, mRes, dRes] = await Promise.all([

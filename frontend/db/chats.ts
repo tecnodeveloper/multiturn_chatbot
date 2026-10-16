@@ -107,3 +107,30 @@ export const submitFeedback = async (feedback: {
   if (error) throw new Error(error.message);
   return data;
 };
+
+export const getUserFeedback = async (userId: string) => {
+  const { data, error } = await supabase
+    .from("feedback")
+    .select("*")
+    .eq("user_id", userId);
+
+  if (error) {
+    console.warn("Failed to load user feedback:", error.message);
+    return [];
+  }
+  return data || [];
+};
+
+export const getFeedbackByChatId = async (chatId: string) => {
+  const { data, error } = await supabase
+    .from("feedback")
+    .select("*")
+    .eq("chat_id", chatId);
+
+  if (error) {
+    console.warn("Failed to load chat feedback:", error.message);
+    return [];
+  }
+  return data || [];
+};
+

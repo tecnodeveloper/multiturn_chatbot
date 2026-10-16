@@ -101,7 +101,7 @@ export const ChatInput: FC<ChatInputProps> = ({
           </Button>
         </form>
         <p className="mt-3 text-center text-[11px] text-muted-foreground font-normal">
-          MultiTurn AI enforces evaluation quality checks every 2 chat turns.
+          MultiTurn AI enforces mandatory evaluation after every response.
         </p>
       </div>
     </div>

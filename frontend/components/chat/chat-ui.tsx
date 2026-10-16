@@ -26,7 +26,8 @@ interface ChatUIProps {
   attachedFiles: any[];
   setAttachedFiles: React.Dispatch<React.SetStateAction<any[]>>;
   isInputLocked?: boolean;
-  onFeedbackSubmitted?: () => void;
+  onFeedbackSubmitted?: (messageId?: string) => void;
+  evaluatedMessageIds?: Set<string>;
 }
 
 export const ChatUI: FC<ChatUIProps> = ({
@@ -38,7 +39,8 @@ export const ChatUI: FC<ChatUIProps> = ({
   attachedFiles,
   setAttachedFiles,
   isInputLocked = false,
-  onFeedbackSubmitted
+  onFeedbackSubmitted,
+  evaluatedMessageIds
 }) => {
   const {
     chats,
@@ -161,6 +163,7 @@ export const ChatUI: FC<ChatUIProps> = ({
             onSuggestionClick={handleSuggestionClick}
             chatId={currentChatId || undefined}
             onFeedbackSubmitted={onFeedbackSubmitted}
+            evaluatedMessageIds={evaluatedMessageIds}
           />
         </div>
       </div>

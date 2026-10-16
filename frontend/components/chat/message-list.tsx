@@ -16,7 +16,8 @@ interface MessageListProps {
   onNewChat: () => void;
   onSuggestionClick: (suggestion: string) => void;
   chatId?: string;
-  onFeedbackSubmitted?: () => void;
+  onFeedbackSubmitted?: (messageId?: string) => void;
+  evaluatedMessageIds?: Set<string>;
 }
 
 const AssistantMessage: FC<{ content: string }> = ({ content }) => {
@@ -113,7 +114,8 @@ export const MessageList: FC<MessageListProps> = ({
   onNewChat,
   onSuggestionClick,
   chatId,
-  onFeedbackSubmitted
+  onFeedbackSubmitted,
+  evaluatedMessageIds
 }) => {
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -139,12 +141,12 @@ export const MessageList: FC<MessageListProps> = ({
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
       {messages.map((item, index) => {
         const isAssistant = item.role === "assistant";
-        const messageCount = index + 1;
-        // Trigger mandatory feedback after every 2 turns (2 user + 2 assistant = 4 messages)
-        const showFeedback = isAssistant && messageCount % 4 === 0;
+        // Mandatory feedback evaluation appears after every assistant response
+        const showFeedback = isAssistant && Boolean(chatId);
+        const isEvaluated = Boolean(item.id && evaluatedMessageIds?.has(item.id));
 
         return (
-          <div key={`${item.role}-${index}`} className="flex flex-col gap-4">
+          <div key={`${item.role}-${item.id || index}`} className="flex flex-col gap-4">
             {isAssistant ? (
               <AssistantMessage content={item.content} />
             ) : (
@@ -167,6 +169,7 @@ export const MessageList: FC<MessageListProps> = ({
               <FeedbackPanel 
                 chatId={chatId} 
                 messageId={item.id} 
+                initialSubmitted={isEvaluated}
                 onSubmitted={onFeedbackSubmitted}
               />
             )}

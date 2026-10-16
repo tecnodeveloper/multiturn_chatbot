@@ -10,16 +10,22 @@ import { useAuth } from "@/context/auth-context";
 interface FeedbackPanelProps {
   chatId: string;
   messageId?: string;
-  onSubmitted?: () => void;
+  onSubmitted?: (messageId?: string) => void;
+  initialSubmitted?: boolean;
 }
 
-export const FeedbackPanel: FC<FeedbackPanelProps> = ({ chatId, messageId, onSubmitted }) => {
+export const FeedbackPanel: FC<FeedbackPanelProps> = ({ chatId, messageId, onSubmitted, initialSubmitted = false }) => {
   const { user } = useAuth();
   const [rating, setRating] = useState<number>(0);
   const [correctness, setCorrectness] = useState<string>("");
   const [lengthType, setLengthType] = useState<string>("");
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(initialSubmitted);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Sync if initialSubmitted changes
+  if (initialSubmitted && !isSubmitted) {
+    setIsSubmitted(true);
+  }
 
   const fourScaleRatings = [
     { value: 1, label: "1 - Poor / inaccurate" },
@@ -52,7 +58,7 @@ export const FeedbackPanel: FC<FeedbackPanelProps> = ({ chatId, messageId, onSub
       setIsSubmitted(true);
       toast.success("Feedback submitted! Chat input unlocked.");
       if (onSubmitted) {
-        onSubmitted();
+        onSubmitted(messageId);
       }
     } catch (error) {
       console.error("Feedback error:", error);
@@ -81,7 +87,7 @@ export const FeedbackPanel: FC<FeedbackPanelProps> = ({ chatId, messageId, onSub
         <div className="flex items-center gap-2">
           <ShieldAlert className="h-4 w-4 text-[#f5a623]" />
           <h3 className="text-sm font-medium text-foreground">
-            Mandatory evaluation (required every 2 turns)
+            Mandatory evaluation (required after each response)
           </h3>
         </div>
         <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-[#f5a623] text-[#0f1117] uppercase tracking-wider">

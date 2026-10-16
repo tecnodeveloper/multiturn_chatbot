@@ -159,7 +159,9 @@ def index():
 def get_analytics():
     try:
         from analytics.scripts.feedback_processor import process_analytics
-        data = process_analytics()
+        user_id = request.args.get('user_id')
+        session_id = request.args.get('session_id') or request.args.get('chat_id')
+        data = process_analytics(user_id=user_id, session_id=session_id)
         return jsonify(data)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
