@@ -1,8 +1,8 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useState, useEffect, useCallback } from "react";
 import { AnalyticsHeader } from "@/components/analytics/header";
-import { NavigationTabs, AnalyticsTabId } from "@/components/analytics/navigation-tabs";
+import { NavigationTabs, AnalyticsTabId, ANALYTICS_TABS } from "@/components/analytics/navigation-tabs";
 import { OverviewStats } from "@/components/analytics/overview-stats";
 import { AccuracyTrendChart } from "@/components/analytics/accuracy-trend-chart";
 import { FeedbackDistributionChart } from "@/components/analytics/feedback-distribution-chart";
@@ -10,6 +10,7 @@ import { TopicAccuracyChart } from "@/components/analytics/topic-accuracy-chart"
 import { ResponseVolumeChart } from "@/components/analytics/response-volume-chart";
 import { FeedbackTable } from "@/components/analytics/feedback-table";
 import { PerformanceInsights } from "@/components/analytics/performance-insights";
+import { AnalyticsTablesModule } from "@/components/analytics/tables/analytics-tables-module";
 import { ModulePlaceholder } from "@/components/analytics/module-placeholder";
 import { BackendOfflineView } from "@/components/analytics/backend-offline-view";
 import { AnalyticsErrorView } from "@/components/analytics/analytics-error-view";
@@ -18,8 +19,20 @@ import { Sidebar } from "@/components/sidebar/sidebar";
 import { useChat } from "@/context/chat-context";
 import { useDashboard } from "@/hooks/use-dashboard";
 
-const AnalyticsPage: FC = () => {
-  const [activeTab, setActiveTab] = useState<AnalyticsTabId>("overview");
+interface AnalyticsPageProps {
+  initialTab?: AnalyticsTabId;
+}
+
+const AnalyticsPage: FC<AnalyticsPageProps> = ({ initialTab }) => {
+  const [activeTab, setActiveTab] = useState<AnalyticsTabId>(() => {
+    if (initialTab) return initialTab;
+    if (typeof window !== "undefined") {
+      const param = new URLSearchParams(window.location.search).get("tab") as AnalyticsTabId;
+      if (param && ANALYTICS_TABS.some((t) => t.id === param)) return param;
+    }
+    return "overview";
+  });
+
   const [viewMode, setViewMode] = useState<"this_session" | "all_sessions">("all_sessions");
   const { chats, currentChatId, setCurrentChatId } = useChat();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -43,6 +56,32 @@ const AnalyticsPage: FC = () => {
     mode: viewMode,
     sessionId: activeSessionId,
   });
+
+  // URL synchronization & browser history handling (back / forward / direct navigation)
+  const handleTabChange = useCallback((tab: AnalyticsTabId) => {
+    setActiveTab(tab);
+    if (typeof window !== "undefined") {
+      const url = tab === "overview" ? "/analytics" : `/analytics?tab=${tab}`;
+      window.history.pushState(null, "", url);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const onPopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get("tab") as AnalyticsTabId;
+      if (tabParam && ANALYTICS_TABS.some((t) => t.id === tabParam)) {
+        setActiveTab(tabParam);
+      } else {
+        setActiveTab(initialTab || "overview");
+      }
+    };
+
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [initialTab]);
 
   const isBackendOffline = backendHealth === "unhealthy";
   const isInitialLoading = loading && !data && !isBackendOffline;
@@ -71,7 +110,7 @@ const AnalyticsPage: FC = () => {
         {/* Horizontal Navigation Shell (5 tabs: Overview, Tables, Graphs, Sessions, Topics) */}
         <NavigationTabs
           activeTab={activeTab}
-          onTabChange={setActiveTab}
+          onTabChange={handleTabChange}
           disabled={isBackendOffline}
         />
 
@@ -91,11 +130,18 @@ const AnalyticsPage: FC = () => {
               errorCode="500"
               onRetry={refetch}
             />
+          ) : activeTab === "tables" ? (
+            /* Tables Module (Phase 3 — FR19) */
+            <AnalyticsTablesModule
+              data={data}
+              isLoading={isInitialLoading}
+              onBackToOverview={() => handleTabChange("overview")}
+            />
           ) : activeTab !== "overview" ? (
-            /* Polished Placeholder for Upcoming Modules (Step 2 Planned) */
+            /* Polished Placeholder for Upcoming Modules (Graphs, Sessions, Topics) */
             <ModulePlaceholder
               tab={activeTab}
-              onBackToOverview={() => setActiveTab("overview")}
+              onBackToOverview={() => handleTabChange("overview")}
             />
           ) : (
             /* Overview Tab: Fully Functional with Verified Real Data Only */

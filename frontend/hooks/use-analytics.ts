@@ -3,6 +3,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/context/auth-context";
 
+import { AnalyticsTablesPayload } from "@/types/analytics-tables";
+
+export * from "@/types/analytics-tables";
+
 export interface AnalyticsData {
   summary: {
     total_feedback: number;
@@ -42,6 +46,7 @@ export interface AnalyticsData {
   }>;
 
   raw_data_count: number;
+  tables?: AnalyticsTablesPayload;
 }
 
 export type BackendHealthStatus = "checking" | "healthy" | "unhealthy";
