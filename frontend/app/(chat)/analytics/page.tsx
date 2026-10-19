@@ -11,6 +11,7 @@ import { ResponseVolumeChart } from "@/components/analytics/response-volume-char
 import { FeedbackTable } from "@/components/analytics/feedback-table";
 import { PerformanceInsights } from "@/components/analytics/performance-insights";
 import { AnalyticsTablesModule } from "@/components/analytics/tables/analytics-tables-module";
+import { AnalyticsGraphsModule } from "@/components/analytics/graphs/analytics-graphs-module";
 import { ModulePlaceholder } from "@/components/analytics/module-placeholder";
 import { BackendOfflineView } from "@/components/analytics/backend-offline-view";
 import { AnalyticsErrorView } from "@/components/analytics/analytics-error-view";
@@ -137,8 +138,15 @@ const AnalyticsPage: FC<AnalyticsPageProps> = ({ initialTab }) => {
               isLoading={isInitialLoading}
               onBackToOverview={() => handleTabChange("overview")}
             />
+          ) : activeTab === "graphs" ? (
+            /* Graphs Module (Phase 3 — FR20) */
+            <AnalyticsGraphsModule
+              data={data}
+              isLoading={isInitialLoading}
+              onBackToOverview={() => handleTabChange("overview")}
+            />
           ) : activeTab !== "overview" ? (
-            /* Polished Placeholder for Upcoming Modules (Graphs, Sessions, Topics) */
+            /* Polished Placeholder for Upcoming Modules (Sessions, Topics) */
             <ModulePlaceholder
               tab={activeTab}
               onBackToOverview={() => handleTabChange("overview")}

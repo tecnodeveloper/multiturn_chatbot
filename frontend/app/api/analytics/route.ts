@@ -129,6 +129,40 @@ export async function GET(req: Request) {
       "Other",
     ];
 
+    const TOPIC_COLORS: Record<string, string> = {
+      "Machine Learning": "#3b82f6",
+      "Deep Learning": "#8b5cf6",
+      "Healthcare AI": "#10b981",
+      "Power Systems": "#f59e0b",
+      "E-commerce AI": "#ec4899",
+      Other: "#71717a",
+    };
+
+    const RATING_COLORS: Record<number, string> = {
+      4: "#10b981",
+      3: "#f5a623",
+      2: "#f59e0b",
+      1: "#ef4444",
+    };
+
+    const LENGTH_COLORS: Record<string, string> = {
+      short: "#3b82f6",
+      to_the_point: "#f5a623",
+      lengthy: "#8b5cf6",
+    };
+
+    // Lookup maps for messages
+    const messagesById: Record<string, any> = {};
+    const messagesByChat: Record<string, any[]> = {};
+
+    for (const m of messagesData) {
+      if (m.id) messagesById[m.id] = m;
+      if (m.chat_id) {
+        if (!messagesByChat[m.chat_id]) messagesByChat[m.chat_id] = [];
+        messagesByChat[m.chat_id].push(m);
+      }
+    }
+
     // Genuine assistant messages count in selected scope
     const assistantMessages = messagesData.filter((m: any) => m.role === "assistant");
     const assistantCount = assistantMessages.length;
@@ -209,6 +243,51 @@ export async function GET(req: Request) {
       population: "All assistant messages with recorded latency in active scope",
       metrics: responseTimeMetrics,
     };
+
+    // Build Graph 5: Response Time Trend points chronologically from valid assistant messages
+    const responseTimeTrend: Array<{
+      id: string;
+      chat_id: string;
+      session_title: string;
+      timestamp: string;
+      formatted_time: string;
+      turn_index: number;
+      response_time: number;
+      topic: string;
+    }> = [];
+
+    for (const m of assistantMessages) {
+      if (typeof m.response_time === "number" && !isNaN(m.response_time) && m.response_time > 0) {
+        const chatMsgs = messagesByChat[m.chat_id] || [];
+        const msgIdx = chatMsgs.findIndex((msg: any) => msg.id === m.id);
+        const turnIdx = msgIdx >= 0 ? Math.floor(msgIdx / 2) + 1 : 1;
+        const asstTime = new Date(m.created_at || 0).getTime();
+        const precedingUsers = chatMsgs.filter(
+          (msg: any) => msg.role === "user" && new Date(msg.created_at || 0).getTime() <= asstTime
+        );
+        const userQuery = precedingUsers.length > 0 ? precedingUsers[precedingUsers.length - 1].content || "" : "";
+        const rawTopic = resolveTopic(userQuery, chatDomains[m.chat_id]);
+        const topic = DOMAIN_MAP[rawTopic] || "Other";
+
+        responseTimeTrend.push({
+          id: m.id,
+          chat_id: m.chat_id,
+          session_title: chatsById[m.chat_id] || (m.chat_id ? `Session ${m.chat_id.slice(0, 8)}` : "Chat Session"),
+          timestamp: m.created_at || new Date().toISOString(),
+          formatted_time: m.created_at
+            ? new Date(m.created_at).toLocaleString([], {
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : "Recent",
+          turn_index: turnIdx,
+          response_time: Number(m.response_time.toFixed(2)),
+          topic,
+        });
+      }
+    }
 
     // Strict rule: No synthetic feedback generation. Genuine stored data only.
     if (!feedbackData || feedbackData.length === 0) {
@@ -303,6 +382,43 @@ export async function GET(req: Request) {
           rating_distribution: emptyRatingDistribution,
           length_preference: emptyLengthPreference,
         },
+        graphs: {
+          topic_distribution: STANDARD_DOMAINS.map((dom) => ({
+            topic: dom,
+            count: 0,
+            percentage: 0.0,
+            color: TOPIC_COLORS[dom] || "#71717a",
+          })),
+          accuracy_by_topic: STANDARD_DOMAINS.map((dom) => ({
+            topic: dom,
+            accuracy: 0.0,
+            total_evaluated: 0,
+            correct: 0,
+            partial: 0,
+            incorrect: 0,
+          })),
+          phase_accuracy: [
+            { phase: "Start" as const, label: "Start", turns_range: "Turns 1–2", accuracy: null, total_evaluated: 0, correct: 0, partial: 0, incorrect: 0 },
+            { phase: "Middle" as const, label: "Middle", turns_range: "Turns 3–5", accuracy: null, total_evaluated: 0, correct: 0, partial: 0, incorrect: 0 },
+            { phase: "End" as const, label: "End", turns_range: "Turns 6+", accuracy: null, total_evaluated: 0, correct: 0, partial: 0, incorrect: 0 },
+          ],
+          reply_correctness: [],
+          response_time_trend: responseTimeTrend,
+          rating_distribution: [
+            { rating: 1, label: "Poor", count: 0, percentage: 0.0, color: RATING_COLORS[1] },
+            { rating: 2, label: "Fair", count: 0, percentage: 0.0, color: RATING_COLORS[2] },
+            { rating: 3, label: "Good", count: 0, percentage: 0.0, color: RATING_COLORS[3] },
+            { rating: 4, label: "Excellent", count: 0, percentage: 0.0, color: RATING_COLORS[4] },
+          ],
+          length_preference: [
+            { type: "Short" as const, raw_type: "short" as const, count: 0, percentage: 0.0, avg_rating: null, color: LENGTH_COLORS.short },
+            { type: "To the Point" as const, raw_type: "to_the_point" as const, count: 0, percentage: 0.0, avg_rating: null, color: LENGTH_COLORS.to_the_point },
+            { type: "Lengthy" as const, raw_type: "lengthy" as const, count: 0, percentage: 0.0, avg_rating: null, color: LENGTH_COLORS.lengthy },
+          ],
+          total_evaluations: 0,
+          total_measured_responses: responseTimeTrend.length,
+          average_latency: rtAvg,
+        },
       });
     }
 
@@ -377,18 +493,6 @@ export async function GET(req: Request) {
         accuracy,
       };
     });
-
-    // Lookup maps for messages
-    const messagesById: Record<string, any> = {};
-    const messagesByChat: Record<string, any[]> = {};
-
-    for (const m of messagesData) {
-      if (m.id) messagesById[m.id] = m;
-      if (m.chat_id) {
-        if (!messagesByChat[m.chat_id]) messagesByChat[m.chat_id] = [];
-        messagesByChat[m.chat_id].push(m);
-      }
-    }
 
     // 5. Aggregate Topic Counts across ALL genuine feedback records
     const topicCounts: Record<string, number> = {};
@@ -700,6 +804,113 @@ export async function GET(req: Request) {
       count: topicCounts[dom] || 0,
     }));
 
+    // ==========================================
+    // FR20: BUILD THE SEVEN ANALYTICAL GRAPHS
+    // ==========================================
+
+    // Graph 1: Topic Distribution
+    const graphsTopicDistribution = STANDARD_DOMAINS.map((dom) => {
+      const cnt = topicStats[dom]?.total || 0;
+      const pct = totalCount > 0 ? Number(((cnt / totalCount) * 100).toFixed(1)) : 0.0;
+      return {
+        topic: dom,
+        count: cnt,
+        percentage: pct,
+        color: TOPIC_COLORS[dom] || "#71717a",
+      };
+    });
+
+    // Graph 2: Accuracy per Topic
+    const graphsAccuracyByTopic = STANDARD_DOMAINS.map((dom) => {
+      const s = topicStats[dom] || { total: 0, correct: 0, partial: 0, incorrect: 0 };
+      const accuracy = s.total > 0 ? Number((((s.correct + s.partial) / s.total) * 100).toFixed(1)) : 0.0;
+      return {
+        topic: dom,
+        accuracy,
+        total_evaluated: s.total,
+        correct: s.correct,
+        partial: s.partial,
+        incorrect: s.incorrect,
+      };
+    });
+
+    // Graph 3: Accuracy vs Session Phase (Start -> Middle -> End)
+    const graphsPhaseAccuracy = phaseConfig.map((p) => {
+      const s = phaseStats[p.phase];
+      const accuracy = s.total > 0 ? Number((((s.correct + s.partial) / s.total) * 100).toFixed(1)) : null;
+      return {
+        phase: p.phase,
+        label: p.label,
+        turns_range: p.range,
+        accuracy,
+        total_evaluated: s.total,
+        correct: s.correct,
+        partial: s.partial,
+        incorrect: s.incorrect,
+      };
+    });
+
+    // Graph 4: Correctness per Reply (Chronological order)
+    const graphsReplyCorrectness = [...allReplyCorrectness]
+      .reverse()
+      .map((r, i) => ({
+        id: r.id,
+        index: i + 1,
+        timestamp: r.timestamp,
+        formatted_time: r.formatted_time,
+        chat_id: r.chat_id,
+        session_title: r.session_title,
+        topic: r.topic,
+        rating: r.rating,
+        status: r.status,
+        correctness: r.correctness,
+        preview: r.preview,
+        user_query: r.user_query,
+        assistant_response: r.assistant_response,
+        response_time: r.response_time,
+      }));
+
+    // Graph 6: Rating Distribution (1–4 Scale)
+    const graphsRatingDistribution = [1, 2, 3, 4].map((r) => {
+      const cnt = ratingCounts[String(r)] || 0;
+      const pct = ratingTotal > 0 ? Number(((cnt / ratingTotal) * 100).toFixed(1)) : 0.0;
+      return {
+        rating: r,
+        label: ratingLabels[r],
+        count: cnt,
+        percentage: pct,
+        color: RATING_COLORS[r],
+      };
+    });
+
+    // Graph 7: Length Preference
+    const graphsLengthPreference = lengthConfig.map((l) => {
+      const s = lengthStats[l.raw];
+      const pct = totalLengthValid > 0 ? Number(((s.count / totalLengthValid) * 100).toFixed(1)) : 0.0;
+      const avgRating = s.ratingCount > 0 ? Number((s.ratingSum / s.ratingCount).toFixed(2)) : null;
+      return {
+        type: l.type,
+        raw_type: l.raw,
+        count: s.count,
+        percentage: pct,
+        avg_rating: avgRating,
+        color: LENGTH_COLORS[l.raw],
+      };
+    });
+
+    const graphsPayload = {
+      topic_distribution: graphsTopicDistribution,
+      accuracy_by_topic: graphsAccuracyByTopic,
+      phase_accuracy: graphsPhaseAccuracy,
+      reply_correctness: graphsReplyCorrectness,
+      response_time_trend: responseTimeTrend,
+      rating_distribution: graphsRatingDistribution,
+      length_preference: graphsLengthPreference,
+      total_evaluations: totalCount,
+      total_measured_responses: responseTimeTrend.length,
+      average_latency: rtAvg,
+    };
+
     return NextResponse.json({
       summary: {
         total_feedback: totalCount,
@@ -723,6 +934,7 @@ export async function GET(req: Request) {
         rating_distribution: tableRatingDistribution,
         length_preference: tableLengthPreference,
       },
+      graphs: graphsPayload,
     });
   } catch (error: any) {
     console.error("Analytics API Route Error:", error);
