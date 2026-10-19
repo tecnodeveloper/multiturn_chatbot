@@ -13,6 +13,7 @@ import { PerformanceInsights } from "@/components/analytics/performance-insights
 import { AnalyticsTablesModule } from "@/components/analytics/tables/analytics-tables-module";
 import { AnalyticsGraphsModule } from "@/components/analytics/graphs/analytics-graphs-module";
 import { AnalyticsSessionsModule } from "@/components/analytics/sessions/analytics-sessions-module";
+import { AnalyticsTopicsModule } from "@/components/analytics/topics/analytics-topics-module";
 import { ModulePlaceholder } from "@/components/analytics/module-placeholder";
 import { BackendOfflineView } from "@/components/analytics/backend-offline-view";
 import { AnalyticsErrorView } from "@/components/analytics/analytics-error-view";
@@ -74,6 +75,10 @@ const AnalyticsPage: FC<AnalyticsPageProps> = ({ initialTab, initialSessionId })
 
     const onPopState = () => {
       const pathname = window.location.pathname;
+      if (pathname.includes("/analytics/topics")) {
+        setActiveTab("topics");
+        return;
+      }
       if (pathname.includes("/analytics/sessions")) {
         setActiveTab("sessions");
         return;
@@ -169,8 +174,16 @@ const AnalyticsPage: FC<AnalyticsPageProps> = ({ initialTab, initialSessionId })
               onRefresh={refetch}
               initialSessionId={initialSessionId}
             />
+          ) : activeTab === "topics" ? (
+            /* Topics Module (Phase 3 — FR15, FR17, FR20, FR21) */
+            <AnalyticsTopicsModule
+              data={data}
+              isLoading={isInitialLoading}
+              onBackToOverview={() => handleTabChange("overview")}
+              onRefresh={refetch}
+            />
           ) : activeTab !== "overview" ? (
-            /* Polished Placeholder for Upcoming Modules (Topics) */
+            /* Polished Placeholder for Upcoming Modules */
             <ModulePlaceholder
               tab={activeTab}
               onBackToOverview={() => handleTabChange("overview")}

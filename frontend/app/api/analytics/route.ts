@@ -1299,6 +1299,189 @@ export async function GET(req: Request) {
       average_latency: rtAvg,
     };
 
+    // ==========================================
+    // TOPICS MODULE PAYLOAD (FR15, FR17, FR20, FR21)
+    // ==========================================
+    const topicMessageCounts: Record<string, number> = {};
+    for (const dom of STANDARD_DOMAINS) {
+      topicMessageCounts[dom] = 0;
+    }
+    for (const m of assistantMessages) {
+      const chatMsgs = messagesByChat[m.chat_id] || [];
+      const asstTime = new Date(m.created_at || 0).getTime();
+      const precedingUsers = chatMsgs.filter(
+        (msg: any) => msg.role === "user" && new Date(msg.created_at || 0).getTime() <= asstTime
+      );
+      const userQuery = precedingUsers.length > 0 ? precedingUsers[precedingUsers.length - 1].content || "" : "";
+      const rawTopic = resolveTopic(userQuery, chatDomains[m.chat_id]);
+      const topic = DOMAIN_MAP[rawTopic] || "Other";
+      if (topicMessageCounts[topic] !== undefined) {
+        topicMessageCounts[topic] += 1;
+      } else {
+        topicMessageCounts["Other"] += 1;
+      }
+    }
+
+    const topicFeedbackRatings: Record<string, { sum: number; count: number }> = {};
+    for (const dom of STANDARD_DOMAINS) {
+      topicFeedbackRatings[dom] = { sum: 0, count: 0 };
+    }
+    for (const row of sortedFeedback) {
+      const cid = row.chat_id;
+      let userMsg: any = null;
+      if (cid && messagesByChat[cid]) {
+        const chatMsgs = messagesByChat[cid];
+        const users = chatMsgs.filter((m: any) => m.role === "user");
+        if (users.length > 0) userMsg = users[users.length - 1];
+      }
+      const userQuery = userMsg?.content || (row.category ? `Question on ${row.category}` : "");
+      const rawResolved = resolveTopic(userQuery, row.category || chatDomains[cid]);
+      const topic = DOMAIN_MAP[rawResolved] || "Other";
+      const r = Number(row.rating);
+      if (!isNaN(r) && r >= 1 && r <= 4) {
+        if (topicFeedbackRatings[topic]) {
+          topicFeedbackRatings[topic].sum += r;
+          topicFeedbackRatings[topic].count += 1;
+        } else {
+          topicFeedbackRatings["Other"].sum += r;
+          topicFeedbackRatings["Other"].count += 1;
+        }
+      }
+    }
+
+    const topicMetricsList = STANDARD_DOMAINS.map((dom) => {
+      const s = topicStats[dom] || { total: 0, correct: 0, partial: 0, incorrect: 0 };
+      const totalAi = topicMessageCounts[dom] || 0;
+      const totalEval = s.total;
+      const strictAcc = totalEval > 0 ? Number(((s.correct / totalEval) * 100).toFixed(1)) : null;
+      const help = totalEval > 0 ? Number((((s.correct + s.partial) / totalEval) * 100).toFixed(1)) : null;
+      const rStat = topicFeedbackRatings[dom];
+      const avgR = rStat && rStat.count > 0 ? Number((rStat.sum / rStat.count).toFixed(2)) : null;
+      const coverage = totalAi > 0 ? Number(((totalEval / totalAi) * 100).toFixed(1)) : 0.0;
+
+      return {
+        topic: dom,
+        total_ai_responses: totalAi,
+        evaluated_responses: totalEval,
+        correct: s.correct,
+        partial: s.partial,
+        incorrect: s.incorrect,
+        strict_accuracy: strictAcc,
+        helpfulness: help,
+        average_rating: avgR,
+        feedback_coverage: coverage,
+        color: TOPIC_COLORS[dom] || "#71717a",
+      };
+    });
+
+    const activeTopicsCount = topicMetricsList.filter((t) => t.total_ai_responses > 0 || t.evaluated_responses > 0).length;
+    const totalAiSum = assistantMessages.length;
+    const totalEvalSum = totalCount;
+    let sumCorrect = 0;
+    let sumPartial = 0;
+    for (const dom of STANDARD_DOMAINS) {
+      sumCorrect += topicStats[dom]?.correct || 0;
+      sumPartial += topicStats[dom]?.partial || 0;
+    }
+    const overallStrict = totalEvalSum > 0 ? Number(((sumCorrect / totalEvalSum) * 100).toFixed(1)) : null;
+    const overallHelp = totalEvalSum > 0 ? Number((((sumCorrect + sumPartial) / totalEvalSum) * 100).toFixed(1)) : null;
+    const overallCoverage = totalAiSum > 0 ? Number(((totalEvalSum / totalAiSum) * 100).toFixed(1)) : 0.0;
+
+    const topicsDistribution = STANDARD_DOMAINS.map((dom) => {
+      const cnt = topicMessageCounts[dom] || 0;
+      const pct = totalAiSum > 0 ? Number(((cnt / totalAiSum) * 100).toFixed(1)) : 0.0;
+      return {
+        topic: dom,
+        count: cnt,
+        percentage: pct,
+        color: TOPIC_COLORS[dom] || "#71717a",
+      };
+    });
+
+    const topicsAccuracyComparison = STANDARD_DOMAINS.map((dom) => {
+      const item = topicMetricsList.find((t) => t.topic === dom);
+      return {
+        topic: dom,
+        strict_accuracy: item?.strict_accuracy ?? null,
+        helpfulness: item?.helpfulness ?? null,
+        total_evaluated: item?.evaluated_responses ?? 0,
+        total_ai_responses: item?.total_ai_responses ?? 0,
+        color: TOPIC_COLORS[dom] || "#71717a",
+      };
+    });
+
+    // Generate dynamic topic insights
+    const topicInsights: any[] = [];
+    const evaluatedTopics = topicMetricsList.filter((t) => t.evaluated_responses > 0 && t.strict_accuracy !== null);
+    if (evaluatedTopics.length > 0) {
+      const sortedByStrict = [...evaluatedTopics].sort((a, b) => (b.strict_accuracy || 0) - (a.strict_accuracy || 0));
+      const highest = sortedByStrict[0];
+      topicInsights.push({
+        id: "highest-accuracy-topic",
+        type: "success",
+        title: `Highest Accuracy: ${highest.topic}`,
+        description: `${highest.topic} leads in strict correctness with ${highest.strict_accuracy}% (${highest.correct}/${highest.evaluated_responses} evaluated replies marked correct).`,
+        metric_label: "Strict Accuracy",
+        metric_value: `${highest.strict_accuracy}%`,
+      });
+
+      if (sortedByStrict.length > 1) {
+        const lowest = sortedByStrict[sortedByStrict.length - 1];
+        if ((lowest.strict_accuracy || 0) < (highest.strict_accuracy || 0)) {
+          topicInsights.push({
+            id: "lowest-accuracy-topic",
+            type: "warning",
+            title: `Opportunity for Improvement: ${lowest.topic}`,
+            description: `${lowest.topic} recorded the lowest strict accuracy at ${lowest.strict_accuracy}% across ${lowest.evaluated_responses} evaluated turns.`,
+            metric_label: "Strict Accuracy",
+            metric_value: `${lowest.strict_accuracy}%`,
+          });
+        }
+      }
+    }
+
+    const topicsWithAi = [...topicMetricsList].filter((t) => t.total_ai_responses > 0).sort((a, b) => b.total_ai_responses - a.total_ai_responses);
+    if (topicsWithAi.length > 0) {
+      const mostDiscussed = topicsWithAi[0];
+      topicInsights.push({
+        id: "most-discussed-topic",
+        type: "info",
+        title: `Most Discussed: ${mostDiscussed.topic}`,
+        description: `${mostDiscussed.topic} accounts for ${mostDiscussed.total_ai_responses} of ${totalAiSum} AI responses (${totalAiSum > 0 ? ((mostDiscussed.total_ai_responses / totalAiSum) * 100).toFixed(1) : 0}% of all responses).`,
+        metric_label: "Volume",
+        metric_value: `${mostDiscussed.total_ai_responses} replies`,
+      });
+    }
+
+    const unEvaluatedActiveTopics = topicMetricsList.filter((t) => t.total_ai_responses > 0 && t.evaluated_responses === 0);
+    if (unEvaluatedActiveTopics.length > 0) {
+      const names = unEvaluatedActiveTopics.map((t) => t.topic).join(", ");
+      topicInsights.push({
+        id: "insufficient-evaluations",
+        type: "neutral",
+        title: "Topics Pending Feedback (FR17)",
+        description: `${unEvaluatedActiveTopics.length} topic${unEvaluatedActiveTopics.length > 1 ? "s" : ""} (${names}) have assistant responses but no submitted evaluations yet.`,
+        metric_label: "Pending",
+        metric_value: `${unEvaluatedActiveTopics.length} topics`,
+      });
+    }
+
+    const topicsPayload = {
+      kpis: {
+        topics_identified: activeTopicsCount,
+        total_ai_responses: totalAiSum,
+        total_evaluated_responses: totalEvalSum,
+        overall_strict_accuracy: overallStrict,
+        overall_helpfulness: overallHelp,
+        overall_average_rating: avgRating,
+        overall_feedback_coverage: overallCoverage,
+      },
+      topics: topicMetricsList,
+      distribution: topicsDistribution,
+      accuracy_comparison: topicsAccuracyComparison,
+      insights: topicInsights,
+    };
+
     return NextResponse.json({
       summary: {
         total_feedback: totalCount,
@@ -1324,6 +1507,7 @@ export async function GET(req: Request) {
       },
       graphs: graphsPayload,
       sessions: sessionsPayload,
+      topics_module: topicsPayload,
     });
   } catch (error: any) {
     console.error("Analytics API Route Error:", error);

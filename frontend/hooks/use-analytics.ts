@@ -6,10 +6,12 @@ import { useAuth } from "@/context/auth-context";
 import { AnalyticsTablesPayload } from "@/types/analytics-tables";
 import { AnalyticsGraphsPayload } from "@/types/analytics-graphs";
 import { AnalyticsSessionsPayload } from "@/types/analytics-sessions";
+import { AnalyticsTopicsPayload } from "@/types/analytics-topics";
 
 export * from "@/types/analytics-tables";
 export * from "@/types/analytics-graphs";
 export * from "@/types/analytics-sessions";
+export * from "@/types/analytics-topics";
 
 export interface AnalyticsData {
   summary: {
@@ -53,6 +55,7 @@ export interface AnalyticsData {
   tables?: AnalyticsTablesPayload;
   graphs?: AnalyticsGraphsPayload;
   sessions?: AnalyticsSessionsPayload;
+  topics_module?: AnalyticsTopicsPayload;
 }
 
 export type BackendHealthStatus = "checking" | "healthy" | "unhealthy";
