@@ -30,7 +30,8 @@ export default function DashboardPage() {
     setShowFeedbackModal,
     isInputLocked,
     handleFeedbackSubmitted,
-    evaluatedMessageIds
+    evaluatedMessageIds,
+    visibleFeedbackIds
   } = useDashboard();
 
   const handleAction = () => {
@@ -64,6 +65,7 @@ export default function DashboardPage() {
         isInputLocked={isInputLocked}
         onFeedbackSubmitted={handleFeedbackSubmitted}
         evaluatedMessageIds={evaluatedMessageIds}
+        visibleFeedbackIds={visibleFeedbackIds}
       />
 
       {user && currentChatId && (

@@ -44,6 +44,8 @@ export function useDashboard() {
   const [isUploading, setIsUploading] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [evaluatedMessageIds, setEvaluatedMessageIds] = useState<Set<string>>(new Set());
+  const [visibleFeedbackIds, setVisibleFeedbackIds] = useState<Set<string>>(new Set());
+  const feedbackTimerRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const pendingMessageSentRef = useRef(false);
 
@@ -108,6 +110,17 @@ export function useDashboard() {
         setPresets(fetchedPresets);
         setFolders(fetchedFolders);
 
+        // Pre-populate visible feedback panels for existing historical assistant responses
+        const initialVisibleIds = new Set<string>();
+        chatsWithMessages.forEach((c: any) => {
+          c.messages.forEach((m: any) => {
+            if (m.role === "assistant" && m.id) {
+              initialVisibleIds.add(m.id);
+            }
+          });
+        });
+        setVisibleFeedbackIds(initialVisibleIds);
+
         if (chatsWithMessages.length > 0 && !currentChatId) {
           setCurrentChatId(chatsWithMessages[0].id);
         }
@@ -141,6 +154,10 @@ export function useDashboard() {
   const handleNewChat = async () => {
     if (!user) return;
     try {
+      if (feedbackTimerRef.current) {
+        clearTimeout(feedbackTimerRef.current);
+        feedbackTimerRef.current = null;
+      }
       if (typeof window !== "undefined") {
         localStorage.removeItem("multiturn_pending_message");
         localStorage.removeItem("multiturn_system_prompt");
@@ -378,6 +395,14 @@ export function useDashboard() {
         ),
       );
 
+      // Specification: Feedback panel must appear exactly 2 seconds after the full response has finished
+      if (feedbackTimerRef.current) {
+        clearTimeout(feedbackTimerRef.current);
+      }
+      feedbackTimerRef.current = setTimeout(() => {
+        setVisibleFeedbackIds((prev) => new Set(prev).add(savedAssistantMsg.id));
+      }, 2000);
+
       if (activeChat?.title === "New Chat" || !activeChat?.title) {
         let conciseTitle = "";
         const titleMatch = fullContent.match(/<sidebar_title>(.*?)<\/sidebar_title>/i);
@@ -401,6 +426,10 @@ export function useDashboard() {
       }
 
     } catch (error: any) {
+      if (feedbackTimerRef.current) {
+        clearTimeout(feedbackTimerRef.current);
+        feedbackTimerRef.current = null;
+      }
       const isTimeout = isTimedOut || (error?.name === "AbortError" && isTimedOut);
       const is503 =
         error?.message?.includes("503") ||
@@ -549,7 +578,8 @@ export function useDashboard() {
     setShowFeedbackModal,
     isInputLocked,
     handleFeedbackSubmitted,
-    evaluatedMessageIds
+    evaluatedMessageIds,
+    visibleFeedbackIds
   };
 }
 

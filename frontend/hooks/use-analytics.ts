@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/context/auth-context";
 
 export interface AnalyticsData {
@@ -44,6 +44,14 @@ export interface AnalyticsData {
   raw_data_count: number;
 }
 
+export type BackendHealthStatus = "checking" | "healthy" | "unhealthy";
+
+export interface BackendHealthDetails {
+  api: boolean;
+  chart_service: boolean;
+  data_source: boolean;
+}
+
 export function useAnalytics(options?: {
   sessionId?: string | null;
   mode?: "this_session" | "all_sessions";
@@ -53,10 +61,59 @@ export function useAnalytics(options?: {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Specification: Initial state must be "checking" (unknown), never assumed true
+  const [backendHealth, setBackendHealth] = useState<BackendHealthStatus>("checking");
+  const [healthDetails, setHealthDetails] = useState<BackendHealthDetails>({
+    api: false,
+    chart_service: false,
+    data_source: false,
+  });
+
   const mode = options?.mode || "all_sessions";
   const sessionId = options?.sessionId;
+  const healthRef = useRef<BackendHealthStatus>("checking");
 
-  const fetchData = async () => {
+  const checkHealth = useCallback(async (): Promise<boolean> => {
+    try {
+      const response = await fetch("/api/health", {
+        method: "GET",
+        cache: "no-store",
+        signal: AbortSignal.timeout(3000),
+      });
+
+      if (!response.ok) {
+        setBackendHealth("unhealthy");
+        healthRef.current = "unhealthy";
+        setHealthDetails({ api: false, chart_service: false, data_source: false });
+        return false;
+      }
+
+      const health = await response.json();
+      const isHealthy =
+        health.status === "healthy" &&
+        health.services?.api === true &&
+        health.services?.chart_service === true &&
+        health.services?.data_source === true;
+
+      const newStatus = isHealthy ? "healthy" : "unhealthy";
+      setBackendHealth(newStatus);
+      healthRef.current = newStatus;
+      setHealthDetails({
+        api: Boolean(health.services?.api),
+        chart_service: Boolean(health.services?.chart_service),
+        data_source: Boolean(health.services?.data_source),
+      });
+
+      return isHealthy;
+    } catch {
+      setBackendHealth("unhealthy");
+      healthRef.current = "unhealthy";
+      setHealthDetails({ api: false, chart_service: false, data_source: false });
+      return false;
+    }
+  }, []);
+
+  const fetchData = useCallback(async () => {
     if (authLoading) return;
     if (!user?.id) {
       setLoading(false);
@@ -100,16 +157,48 @@ export function useAnalytics(options?: {
     } finally {
       setLoading(false);
     }
-  };
+  }, [authLoading, user?.id, mode, sessionId]);
 
+  const handleRetry = useCallback(async () => {
+    setBackendHealth("checking");
+    healthRef.current = "checking";
+    await Promise.all([checkHealth(), fetchData()]);
+  }, [checkHealth, fetchData]);
+
+  // Initial mount health check & periodic re-check while Analytics is open
+  useEffect(() => {
+    checkHealth();
+    // Re-check health every 6 seconds
+    const healthInterval = setInterval(() => {
+      checkHealth();
+    }, 6000);
+    return () => clearInterval(healthInterval);
+  }, [checkHealth]);
+
+  // Fetch data on parameters change & live poll every 5s ONLY if backend is healthy
   useEffect(() => {
     if (authLoading) return;
     fetchData();
-    // Live auto-refresh polling every 5 seconds for real-time analytics updates
-    const interval = setInterval(fetchData, 5000);
-    return () => clearInterval(interval);
-  }, [user?.id, authLoading, mode, sessionId]);
 
-  return { data, loading, error, refetch: fetchData };
+    // Auto-refresh polling every 5 seconds for live analytics updates
+    const pollInterval = setInterval(() => {
+      // Only poll live updates if backend health is verified healthy
+      if (healthRef.current === "healthy") {
+        fetchData();
+      }
+    }, 5000);
+
+    return () => clearInterval(pollInterval);
+  }, [authLoading, fetchData, mode, sessionId]);
+
+  return {
+    data,
+    loading,
+    error,
+    refetch: fetchData,
+    backendHealth,
+    healthDetails,
+    checkHealth,
+    handleRetry,
+  };
 }
-

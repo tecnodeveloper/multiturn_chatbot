@@ -155,6 +155,56 @@ def update_session_title(chat_id, title):
 def index():
     return "Multi-turn Chatbot Backend (Gemini & Analytics Enabled)"
 
+@app.route('/health', methods=['GET'])
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    """Health check endpoint verifying API, chart services, and database connectivity."""
+    api_ok = True
+    chart_service_ok = False
+    data_source_ok = False
+
+    # 1. Verify chart service / analytics dependencies
+    try:
+        from analytics.scripts.feedback_processor import VALID_DOMAINS
+        if VALID_DOMAINS and len(VALID_DOMAINS) > 0:
+            chart_service_ok = True
+    except Exception as e:
+        chart_service_ok = False
+
+    # 2. Verify Supabase data source connectivity
+    try:
+        if SUPABASE_URL:
+            anon_key = os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY") or SUPABASE_KEY or ""
+            headers = {
+                "apikey": anon_key,
+                "Authorization": f"Bearer {anon_key}",
+            }
+            res = requests.get(
+                f"{SUPABASE_URL}/rest/v1/domains?select=id&limit=1",
+                headers=headers,
+                timeout=2.5
+            )
+            data_source_ok = res.status_code in [200, 206]
+            if not data_source_ok:
+                auth_res = requests.get(f"{SUPABASE_URL}/auth/v1/health", timeout=2.5)
+                data_source_ok = auth_res.status_code == 200
+    except Exception as e:
+        data_source_ok = False
+
+    is_healthy = api_ok and chart_service_ok and data_source_ok
+
+    result = {
+        "status": "healthy" if is_healthy else "unhealthy",
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "services": {
+            "api": api_ok,
+            "chart_service": chart_service_ok,
+            "data_source": data_source_ok
+        }
+    }
+
+    return jsonify(result), (200 if is_healthy else 503)
+
 @app.route('/api/analytics', methods=['GET'])
 def get_analytics():
     try:

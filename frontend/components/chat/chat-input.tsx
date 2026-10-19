@@ -100,9 +100,6 @@ export const ChatInput: FC<ChatInputProps> = ({
             <Send className="h-5 w-5 fill-current" />
           </Button>
         </form>
-        <p className="mt-3 text-center text-[11px] text-muted-foreground font-normal">
-          MultiTurn AI enforces mandatory evaluation after every response.
-        </p>
       </div>
     </div>
   );

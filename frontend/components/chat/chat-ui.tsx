@@ -28,6 +28,7 @@ interface ChatUIProps {
   isInputLocked?: boolean;
   onFeedbackSubmitted?: (messageId?: string) => void;
   evaluatedMessageIds?: Set<string>;
+  visibleFeedbackIds?: Set<string>;
 }
 
 export const ChatUI: FC<ChatUIProps> = ({
@@ -40,7 +41,8 @@ export const ChatUI: FC<ChatUIProps> = ({
   setAttachedFiles,
   isInputLocked = false,
   onFeedbackSubmitted,
-  evaluatedMessageIds
+  evaluatedMessageIds,
+  visibleFeedbackIds
 }) => {
   const {
     chats,
@@ -164,6 +166,7 @@ export const ChatUI: FC<ChatUIProps> = ({
             chatId={currentChatId || undefined}
             onFeedbackSubmitted={onFeedbackSubmitted}
             evaluatedMessageIds={evaluatedMessageIds}
+            visibleFeedbackIds={visibleFeedbackIds}
           />
         </div>
       </div>

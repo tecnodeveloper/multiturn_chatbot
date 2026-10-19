@@ -18,6 +18,7 @@ interface MessageListProps {
   chatId?: string;
   onFeedbackSubmitted?: (messageId?: string) => void;
   evaluatedMessageIds?: Set<string>;
+  visibleFeedbackIds?: Set<string>;
 }
 
 const AssistantMessage: FC<{ content: string }> = ({ content }) => {
@@ -115,7 +116,8 @@ export const MessageList: FC<MessageListProps> = ({
   onSuggestionClick,
   chatId,
   onFeedbackSubmitted,
-  evaluatedMessageIds
+  evaluatedMessageIds,
+  visibleFeedbackIds
 }) => {
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -141,8 +143,9 @@ export const MessageList: FC<MessageListProps> = ({
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
       {messages.map((item, index) => {
         const isAssistant = item.role === "assistant";
-        // Mandatory feedback evaluation appears after every assistant response
-        const showFeedback = isAssistant && Boolean(chatId);
+        // Mandatory feedback evaluation appears 2s after response completion, never during response generation
+        const isCompletedAndVisible = Boolean(item.id && visibleFeedbackIds?.has(item.id));
+        const showFeedback = isAssistant && Boolean(chatId) && !isSending && isCompletedAndVisible;
         const isEvaluated = Boolean(item.id && evaluatedMessageIds?.has(item.id));
 
         return (
