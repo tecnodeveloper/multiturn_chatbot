@@ -5,9 +5,11 @@ import { useAuth } from "@/context/auth-context";
 
 import { AnalyticsTablesPayload } from "@/types/analytics-tables";
 import { AnalyticsGraphsPayload } from "@/types/analytics-graphs";
+import { AnalyticsSessionsPayload } from "@/types/analytics-sessions";
 
 export * from "@/types/analytics-tables";
 export * from "@/types/analytics-graphs";
+export * from "@/types/analytics-sessions";
 
 export interface AnalyticsData {
   summary: {
@@ -50,6 +52,7 @@ export interface AnalyticsData {
   raw_data_count: number;
   tables?: AnalyticsTablesPayload;
   graphs?: AnalyticsGraphsPayload;
+  sessions?: AnalyticsSessionsPayload;
 }
 
 export type BackendHealthStatus = "checking" | "healthy" | "unhealthy";

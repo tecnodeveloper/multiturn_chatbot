@@ -12,6 +12,7 @@ import { FeedbackTable } from "@/components/analytics/feedback-table";
 import { PerformanceInsights } from "@/components/analytics/performance-insights";
 import { AnalyticsTablesModule } from "@/components/analytics/tables/analytics-tables-module";
 import { AnalyticsGraphsModule } from "@/components/analytics/graphs/analytics-graphs-module";
+import { AnalyticsSessionsModule } from "@/components/analytics/sessions/analytics-sessions-module";
 import { ModulePlaceholder } from "@/components/analytics/module-placeholder";
 import { BackendOfflineView } from "@/components/analytics/backend-offline-view";
 import { AnalyticsErrorView } from "@/components/analytics/analytics-error-view";
@@ -22,9 +23,10 @@ import { useDashboard } from "@/hooks/use-dashboard";
 
 interface AnalyticsPageProps {
   initialTab?: AnalyticsTabId;
+  initialSessionId?: string | null;
 }
 
-const AnalyticsPage: FC<AnalyticsPageProps> = ({ initialTab }) => {
+const AnalyticsPage: FC<AnalyticsPageProps> = ({ initialTab, initialSessionId }) => {
   const [activeTab, setActiveTab] = useState<AnalyticsTabId>(() => {
     if (initialTab) return initialTab;
     if (typeof window !== "undefined") {
@@ -62,7 +64,7 @@ const AnalyticsPage: FC<AnalyticsPageProps> = ({ initialTab }) => {
   const handleTabChange = useCallback((tab: AnalyticsTabId) => {
     setActiveTab(tab);
     if (typeof window !== "undefined") {
-      const url = tab === "overview" ? "/analytics" : `/analytics?tab=${tab}`;
+      const url = tab === "overview" ? "/analytics" : `/analytics/${tab}`;
       window.history.pushState(null, "", url);
     }
   }, []);
@@ -71,6 +73,19 @@ const AnalyticsPage: FC<AnalyticsPageProps> = ({ initialTab }) => {
     if (typeof window === "undefined") return;
 
     const onPopState = () => {
+      const pathname = window.location.pathname;
+      if (pathname.includes("/analytics/sessions")) {
+        setActiveTab("sessions");
+        return;
+      }
+      if (pathname.includes("/analytics/tables")) {
+        setActiveTab("tables");
+        return;
+      }
+      if (pathname.includes("/analytics/graphs")) {
+        setActiveTab("graphs");
+        return;
+      }
       const params = new URLSearchParams(window.location.search);
       const tabParam = params.get("tab") as AnalyticsTabId;
       if (tabParam && ANALYTICS_TABS.some((t) => t.id === tabParam)) {
@@ -145,8 +160,17 @@ const AnalyticsPage: FC<AnalyticsPageProps> = ({ initialTab }) => {
               isLoading={isInitialLoading}
               onBackToOverview={() => handleTabChange("overview")}
             />
+          ) : activeTab === "sessions" ? (
+            /* Sessions Module (Phase 3 — FR7, FR16, FR21, FR22) */
+            <AnalyticsSessionsModule
+              data={data}
+              isLoading={isInitialLoading}
+              onBackToOverview={() => handleTabChange("overview")}
+              onRefresh={refetch}
+              initialSessionId={initialSessionId}
+            />
           ) : activeTab !== "overview" ? (
-            /* Polished Placeholder for Upcoming Modules (Sessions, Topics) */
+            /* Polished Placeholder for Upcoming Modules (Topics) */
             <ModulePlaceholder
               tab={activeTab}
               onBackToOverview={() => handleTabChange("overview")}

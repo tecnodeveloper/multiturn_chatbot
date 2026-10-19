@@ -31,8 +31,8 @@ function resolveTopic(query: string, rawCat?: string | null): string {
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("user_id");
-    const sessionId = searchParams.get("session_id") || searchParams.get("chat_id");
+    const userId = searchParams.get("user_id") || searchParams.get("userId");
+    const sessionId = searchParams.get("session_id") || searchParams.get("chat_id") || searchParams.get("sessionId");
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "http://localhost:54321";
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
@@ -57,13 +57,15 @@ export async function GET(req: Request) {
     const feedbackUrl = `${supabaseUrl}/rest/v1/feedback?select=*&user_id=eq.${userId}${sessionFilter}&order=created_at.desc`;
     const messagesUrl = `${supabaseUrl}/rest/v1/messages?select=*&user_id=eq.${userId}${sessionFilter}&order=created_at.asc`;
     const domainsUrl = `${supabaseUrl}/rest/v1/domains?select=*`;
-    const chatsUrl = `${supabaseUrl}/rest/v1/chats?select=id,title,created_at&user_id=eq.${userId}`;
+    const chatsUrl = `${supabaseUrl}/rest/v1/chats?select=id,title,created_at,updated_at&user_id=eq.${userId}&order=created_at.desc`;
+    const summariesUrl = `${supabaseUrl}/rest/v1/analytics_summary?select=*&order=created_at.desc`;
 
-    const [fRes, mRes, dRes, cRes] = await Promise.all([
+    const [fRes, mRes, dRes, cRes, sRes] = await Promise.all([
       fetch(feedbackUrl, { headers, cache: "no-store" }).catch(() => null),
       fetch(messagesUrl, { headers, cache: "no-store" }).catch(() => null),
       fetch(domainsUrl, { headers, cache: "no-store" }).catch(() => null),
       fetch(chatsUrl, { headers, cache: "no-store" }).catch(() => null),
+      fetch(summariesUrl, { headers, cache: "no-store" }).catch(() => null),
     ]);
 
     // Check if database queries failed due to permission or server errors (e.g. 403 Forbidden, 500, network error)
@@ -94,6 +96,7 @@ export async function GET(req: Request) {
     const messagesData: any[] = mRes && mRes.ok ? await mRes.json() : [];
     const domainsData: any[] = dRes && dRes.ok ? await dRes.json() : [];
     const chatsData: any[] = cRes && cRes.ok ? await cRes.json() : [];
+    const summariesData: any[] = sRes && sRes.ok ? await sRes.json() : [];
 
     const chatsById: Record<string, string> = {};
     for (const c of chatsData) {
@@ -289,6 +292,390 @@ export async function GET(req: Request) {
       }
     }
 
+    function formatDuration(secs: number): string {
+      if (secs <= 0) return "< 1m";
+      if (secs < 60) return `${secs}s`;
+      const mins = Math.floor(secs / 60);
+      const remSecs = secs % 60;
+      if (mins < 60) return `${mins}m ${remSecs}s`;
+      const hrs = Math.floor(mins / 60);
+      const remMins = mins % 60;
+      return `${hrs}h ${remMins}m`;
+    }
+
+    // Build Sessions Analytics Payload (FR7, FR10, FR14, FR16, FR17, FR21, FR22)
+    const summariesByChatId: Record<string, any> = {};
+    for (const s of summariesData) {
+      if (s.chat_id) summariesByChatId[s.chat_id] = s;
+    }
+
+    const feedbackByChat: Record<string, any[]> = {};
+    for (const f of feedbackData) {
+      if (f.chat_id) {
+        if (!feedbackByChat[f.chat_id]) feedbackByChat[f.chat_id] = [];
+        feedbackByChat[f.chat_id].push(f);
+      }
+    }
+
+    const sessionRecords: any[] = [];
+    let totalAssistantMsgsAll = 0;
+    let totalEvaluatedAll = 0;
+    let totalCorrectAll = 0;
+    let totalPartialAll = 0;
+    let totalDurationAll = 0;
+
+    const sortedChats = [...chatsData].sort(
+      (a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+    );
+
+    for (const chat of sortedChats) {
+      const cId = chat.id;
+      const cMsgs = (messagesByChat[cId] || []).sort(
+        (a: any, b: any) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime()
+      );
+      const cFeedback = feedbackByChat[cId] || [];
+      const cFeedbackByMsgId: Record<string, any> = {};
+      for (const f of cFeedback) {
+        if (f.message_id) cFeedbackByMsgId[f.message_id] = f;
+      }
+
+      const userMsgs = cMsgs.filter((m: any) => m.role === "user");
+      const asstMsgs = cMsgs.filter((m: any) => m.role === "assistant");
+      totalAssistantMsgsAll += asstMsgs.length;
+      totalEvaluatedAll += cFeedback.length;
+
+      let cCorrect = 0;
+      let cPartial = 0;
+      let cIncorrect = 0;
+      const cRatingCounts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0 };
+      let cRatingSum = 0;
+      let cRatingCount = 0;
+      const cLengthCounts = { short: 0, to_the_point: 0, lengthy: 0 };
+
+      for (const f of cFeedback) {
+        const s = String(f.correctness || "").toLowerCase();
+        if (s === "correct") {
+          cCorrect += 1;
+          totalCorrectAll += 1;
+        } else if (s === "partial") {
+          cPartial += 1;
+          totalPartialAll += 1;
+        } else if (s === "incorrect") {
+          cIncorrect += 1;
+        }
+
+        const r = Number(f.rating);
+        if (r >= 1 && r <= 4) {
+          cRatingCounts[r] = (cRatingCounts[r] || 0) + 1;
+          cRatingSum += r;
+          cRatingCount += 1;
+        }
+
+        const l = String(f.length_type || "").toLowerCase();
+        if (l === "short") cLengthCounts.short += 1;
+        else if (l === "to_the_point") cLengthCounts.to_the_point += 1;
+        else if (l === "lengthy") cLengthCounts.lengthy += 1;
+      }
+
+      const cAccuracy =
+        cFeedback.length > 0
+          ? Number((((cCorrect + cPartial) / cFeedback.length) * 100).toFixed(1))
+          : null;
+
+      const cAvgRating =
+        cRatingCount > 0 ? Number((cRatingSum / cRatingCount).toFixed(2)) : null;
+
+      const cTimes = asstMsgs
+        .map((m: any) => m.response_time)
+        .filter((t: any) => typeof t === "number" && !isNaN(t) && t > 0)
+        .map((t: number) => Number(t.toFixed(2)));
+
+      let cMin: number | null = null;
+      let cMax: number | null = null;
+      let cAvg: number | null = null;
+      let cMed: number | null = null;
+
+      if (cTimes.length > 0) {
+        const sorted = [...cTimes].sort((a, b) => a - b);
+        cMin = sorted[0];
+        cMax = sorted[sorted.length - 1];
+        cAvg = Number((sorted.reduce((a, b) => a + b, 0) / sorted.length).toFixed(2));
+        const mid = Math.floor(sorted.length / 2);
+        cMed = sorted.length % 2 === 1 ? sorted[mid] : Number(((sorted[mid - 1] + sorted[mid]) / 2).toFixed(2));
+      }
+
+      let startTs = chat.created_at ? new Date(chat.created_at).getTime() : Date.now();
+      let lastActivityTs = startTs;
+      if (cMsgs.length > 0) {
+        startTs = Math.min(startTs, new Date(cMsgs[0].created_at || startTs).getTime());
+        lastActivityTs = new Date(cMsgs[cMsgs.length - 1].created_at || startTs).getTime();
+      } else if (chat.updated_at) {
+        lastActivityTs = new Date(chat.updated_at).getTime();
+      }
+
+      const durationSecs = Math.max(0, Math.floor((lastActivityTs - startTs) / 1000));
+      totalDurationAll += durationSecs;
+
+      const savedSummary = summariesByChatId[cId] || null;
+      const isFinalized = Boolean(savedSummary);
+      const isInactive = !isFinalized && Date.now() - lastActivityTs > 24 * 3600 * 1000 && cMsgs.length > 0;
+      const status: "active" | "completed" | "inactive" = isFinalized
+        ? "completed"
+        : isInactive
+        ? "inactive"
+        : "active";
+
+      const phaseGroups: Record<"start" | "middle" | "end", { asst: number; evalCount: number; correct: number; partial: number; incorrect: number; ratingSum: number; ratingCount: number; times: number[] }> = {
+        start: { asst: 0, evalCount: 0, correct: 0, partial: 0, incorrect: 0, ratingSum: 0, ratingCount: 0, times: [] },
+        middle: { asst: 0, evalCount: 0, correct: 0, partial: 0, incorrect: 0, ratingSum: 0, ratingCount: 0, times: [] },
+        end: { asst: 0, evalCount: 0, correct: 0, partial: 0, incorrect: 0, ratingSum: 0, ratingCount: 0, times: [] },
+      };
+
+      asstMsgs.forEach((m: any, idx: number) => {
+        const turnIdx = Math.floor(idx) + 1;
+        let pKey: "start" | "middle" | "end" = (m.session_phase || "").toLowerCase();
+        if (pKey !== "start" && pKey !== "middle" && pKey !== "end") {
+          pKey = turnIdx <= 2 ? "start" : turnIdx <= 5 ? "middle" : "end";
+        }
+        phaseGroups[pKey].asst += 1;
+        if (typeof m.response_time === "number" && m.response_time > 0) {
+          phaseGroups[pKey].times.push(m.response_time);
+        }
+        const f = cFeedbackByMsgId[m.id];
+        if (f) {
+          phaseGroups[pKey].evalCount += 1;
+          const s = String(f.correctness || "").toLowerCase();
+          if (s === "correct") phaseGroups[pKey].correct += 1;
+          else if (s === "partial") phaseGroups[pKey].partial += 1;
+          else if (s === "incorrect") phaseGroups[pKey].incorrect += 1;
+
+          if (f.rating && f.rating >= 1 && f.rating <= 4) {
+            phaseGroups[pKey].ratingSum += Number(f.rating);
+            phaseGroups[pKey].ratingCount += 1;
+          }
+        }
+      });
+
+      const phases = [
+        {
+          phase: "Start" as const,
+          label: "Start",
+          turns_range: "Turns 1–2",
+          assistant_responses: phaseGroups.start.asst,
+          evaluated_responses: phaseGroups.start.evalCount,
+          correct: phaseGroups.start.correct,
+          partial: phaseGroups.start.partial,
+          incorrect: phaseGroups.start.incorrect,
+          accuracy: phaseGroups.start.evalCount > 0 ? Number((((phaseGroups.start.correct + phaseGroups.start.partial) / phaseGroups.start.evalCount) * 100).toFixed(1)) : null,
+          average_rating: phaseGroups.start.ratingCount > 0 ? Number((phaseGroups.start.ratingSum / phaseGroups.start.ratingCount).toFixed(2)) : null,
+          average_response_time: phaseGroups.start.times.length > 0 ? Number((phaseGroups.start.times.reduce((a, b) => a + b, 0) / phaseGroups.start.times.length).toFixed(2)) : null,
+        },
+        {
+          phase: "Middle" as const,
+          label: "Middle",
+          turns_range: "Turns 3–5",
+          assistant_responses: phaseGroups.middle.asst,
+          evaluated_responses: phaseGroups.middle.evalCount,
+          correct: phaseGroups.middle.correct,
+          partial: phaseGroups.middle.partial,
+          incorrect: phaseGroups.middle.incorrect,
+          accuracy: phaseGroups.middle.evalCount > 0 ? Number((((phaseGroups.middle.correct + phaseGroups.middle.partial) / phaseGroups.middle.evalCount) * 100).toFixed(1)) : null,
+          average_rating: phaseGroups.middle.ratingCount > 0 ? Number((phaseGroups.middle.ratingSum / phaseGroups.middle.ratingCount).toFixed(2)) : null,
+          average_response_time: phaseGroups.middle.times.length > 0 ? Number((phaseGroups.middle.times.reduce((a, b) => a + b, 0) / phaseGroups.middle.times.length).toFixed(2)) : null,
+        },
+        {
+          phase: "End" as const,
+          label: "End",
+          turns_range: "Turns 6+",
+          assistant_responses: phaseGroups.end.asst,
+          evaluated_responses: phaseGroups.end.evalCount,
+          correct: phaseGroups.end.correct,
+          partial: phaseGroups.end.partial,
+          incorrect: phaseGroups.end.incorrect,
+          accuracy: phaseGroups.end.evalCount > 0 ? Number((((phaseGroups.end.correct + phaseGroups.end.partial) / phaseGroups.end.evalCount) * 100).toFixed(1)) : null,
+          average_rating: phaseGroups.end.ratingCount > 0 ? Number((phaseGroups.end.ratingSum / phaseGroups.end.ratingCount).toFixed(2)) : null,
+          average_response_time: phaseGroups.end.times.length > 0 ? Number((phaseGroups.end.times.reduce((a, b) => a + b, 0) / phaseGroups.end.times.length).toFixed(2)) : null,
+        },
+      ];
+
+      let turnCounter = 0;
+      const timeline = cMsgs.map((m: any) => {
+        if (m.role === "assistant") turnCounter += 1;
+        const f = m.role === "assistant" ? cFeedbackByMsgId[m.id] : null;
+        const textContent = typeof m.content === "string" ? m.content : JSON.stringify(m.content);
+        const preview = textContent.replace(/\s+/g, " ").trim();
+        const shortPreview = preview.length > 110 ? preview.slice(0, 110) + "..." : preview;
+
+        let pKey: "start" | "middle" | "end" = (m.session_phase || "").toLowerCase();
+        if (pKey !== "start" && pKey !== "middle" && pKey !== "end") {
+          pKey = turnCounter <= 2 ? "start" : turnCounter <= 5 ? "middle" : "end";
+        }
+
+        return {
+          message_id: m.id,
+          turn_index: m.role === "assistant" ? turnCounter : Math.max(1, turnCounter),
+          timestamp: m.created_at || new Date().toISOString(),
+          formatted_time: m.created_at
+            ? new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+            : "Recent",
+          role: m.role,
+          content: textContent,
+          preview: shortPreview,
+          response_time: typeof m.response_time === "number" && m.response_time > 0 ? Number(m.response_time.toFixed(2)) : null,
+          session_phase: pKey,
+          feedback: f
+            ? {
+                id: f.id,
+                rating: Number(f.rating || 4),
+                correctness: String(f.correctness || "correct").toLowerCase() as any,
+                status: String(f.correctness || "correct").toLowerCase() === "correct" ? "Correct" : String(f.correctness || "correct").toLowerCase() === "partial" ? "Partial" : "Incorrect",
+                length_type: String(f.length_type || "to_the_point").toLowerCase() as any,
+                comment: f.comment,
+                created_at: f.created_at,
+              }
+            : null,
+        };
+      });
+
+      const pendingFeedbackCount = asstMsgs.filter((m: any) => !cFeedbackByMsgId[m.id]).length;
+
+      sessionRecords.push({
+        id: cId,
+        title: chat.title || "Untitled conversation",
+        created_at: chat.created_at || new Date().toISOString(),
+        started_formatted: chat.created_at
+          ? new Date(chat.created_at).toLocaleDateString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+          : "Recent",
+        last_activity: new Date(lastActivityTs).toISOString(),
+        last_activity_formatted: new Date(lastActivityTs).toLocaleDateString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }),
+        duration_seconds: durationSecs,
+        duration_formatted: formatDuration(durationSecs),
+        user_messages_count: userMsgs.length,
+        assistant_responses_count: asstMsgs.length,
+        evaluated_responses_count: cFeedback.length,
+        accuracy: cAccuracy,
+        average_rating: cAvgRating,
+        average_response_time: cAvg,
+        status,
+        is_finalized: isFinalized,
+        finalized_at: savedSummary?.created_at || savedSummary?.summary_data?.finalized_at,
+        pending_feedback_count: pendingFeedbackCount,
+        phases,
+        performance: {
+          total_assistant: asstMsgs.length,
+          total_evaluated: cFeedback.length,
+          correct: cCorrect,
+          partial: cPartial,
+          incorrect: cIncorrect,
+          accuracy: cAccuracy,
+          average_rating: cAvgRating,
+          rating_distribution: cRatingCounts,
+          length_preference: cLengthCounts,
+          response_time: {
+            min: cMin,
+            max: cMax,
+            avg: cAvg,
+            median: cMed,
+            count: cTimes.length,
+          },
+        },
+        timeline,
+        summary: savedSummary
+          ? {
+              id: savedSummary.id,
+              chat_id: savedSummary.chat_id,
+              created_at: savedSummary.created_at,
+              summary_data: savedSummary.summary_data || {},
+            }
+          : null,
+      });
+    }
+
+    const totalSessions = sessionRecords.length;
+    const avgSessionDuration = totalSessions > 0 ? Math.floor(totalDurationAll / totalSessions) : 0;
+    const avgSessionAccuracy =
+      totalEvaluatedAll > 0
+        ? Number((((totalCorrectAll + totalPartialAll) / totalEvaluatedAll) * 100).toFixed(1))
+        : null;
+
+    const sessionsKPIs = {
+      total_sessions: totalSessions,
+      total_assistant_responses: totalAssistantMsgsAll,
+      total_evaluated_responses: totalEvaluatedAll,
+      average_session_accuracy: avgSessionAccuracy,
+      average_response_time: rtAvg,
+      average_session_duration_seconds: avgSessionDuration,
+      average_session_duration_formatted: formatDuration(avgSessionDuration),
+    };
+
+    const sessionInsights: any[] = [];
+    if (totalEvaluatedAll > 0 && avgSessionAccuracy !== null) {
+      if (avgSessionAccuracy >= 75) {
+        sessionInsights.push({
+          id: "high-accuracy",
+          type: "success",
+          title: "High Conversation Accuracy",
+          description: `Overall model accuracy across evaluated turns is ${avgSessionAccuracy}%, indicating reliable assistance across multi-turn sessions.`,
+          metric_label: "Accuracy",
+          metric_value: `${avgSessionAccuracy}%`,
+        });
+      } else {
+        sessionInsights.push({
+          id: "accuracy-attention",
+          type: "warning",
+          title: "Accuracy Below Target",
+          description: `Overall model accuracy is currently ${avgSessionAccuracy}%. Review incorrect responses to identify specific problem areas.`,
+          metric_label: "Accuracy",
+          metric_value: `${avgSessionAccuracy}%`,
+        });
+      }
+    }
+
+    if (rtAvg !== null) {
+      sessionInsights.push({
+        id: "latency-benchmark",
+        type: "info",
+        title: "Response Time Benchmark",
+        description: `Average assistant response generation latency across sessions is ${rtAvg}s.`,
+        metric_label: "Mean Latency",
+        metric_value: `${rtAvg}s`,
+      });
+    }
+
+    const unfinalizedCount = sessionRecords.filter((s) => !s.is_finalized && s.assistant_responses_count > 0).length;
+    if (unfinalizedCount > 0) {
+      sessionInsights.push({
+        id: "unfinalized-sessions",
+        type: "neutral",
+        title: "Sessions Pending Finalization (FR22)",
+        description: `${unfinalizedCount} completed chat session${unfinalizedCount === 1 ? " is" : "s are"} eligible for permanent analytics summary persistence.`,
+        metric_label: "Pending",
+        metric_value: `${unfinalizedCount}`,
+      });
+    } else if (sessionRecords.length > 0) {
+      sessionInsights.push({
+        id: "all-finalized",
+        type: "success",
+        title: "All Sessions Finalized",
+        description: "All chat sessions have permanent analytics summaries recorded in the database.",
+        metric_label: "Finalized",
+        metric_value: "100%",
+      });
+    }
+
+    const selectedSession = sessionId
+      ? sessionRecords.find((s) => s.id === sessionId) || null
+      : sessionRecords.length > 0
+      ? sessionRecords[0]
+      : null;
+
+    const sessionsPayload = {
+      kpis: sessionsKPIs,
+      sessions: sessionRecords,
+      selected_session: selectedSession,
+      insights: sessionInsights,
+    };
+
     // Strict rule: No synthetic feedback generation. Genuine stored data only.
     if (!feedbackData || feedbackData.length === 0) {
       const emptyTopicAccuracy = STANDARD_DOMAINS.map((dom) => ({
@@ -419,6 +806,7 @@ export async function GET(req: Request) {
           total_measured_responses: responseTimeTrend.length,
           average_latency: rtAvg,
         },
+        sessions: sessionsPayload,
       });
     }
 
@@ -935,6 +1323,7 @@ export async function GET(req: Request) {
         length_preference: tableLengthPreference,
       },
       graphs: graphsPayload,
+      sessions: sessionsPayload,
     });
   } catch (error: any) {
     console.error("Analytics API Route Error:", error);
