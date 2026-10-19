@@ -159,10 +159,20 @@ export function useAnalytics(options?: {
     }
   }, [authLoading, user?.id, mode, sessionId]);
 
+  const [isRetrying, setIsRetrying] = useState(false);
+
   const handleRetry = useCallback(async () => {
+    setIsRetrying(true);
     setBackendHealth("checking");
     healthRef.current = "checking";
-    await Promise.all([checkHealth(), fetchData()]);
+    try {
+      const isHealthy = await checkHealth();
+      if (isHealthy) {
+        await fetchData();
+      }
+    } finally {
+      setIsRetrying(false);
+    }
   }, [checkHealth, fetchData]);
 
   // Initial mount health check & periodic re-check while Analytics is open
@@ -200,5 +210,6 @@ export function useAnalytics(options?: {
     healthDetails,
     checkHealth,
     handleRetry,
+    isRetrying,
   };
 }

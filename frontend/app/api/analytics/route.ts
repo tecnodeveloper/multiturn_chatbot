@@ -97,33 +97,11 @@ export async function GET(req: Request) {
       if (d.chat_id) chatDomains[d.chat_id] = d.category;
     }
 
-    // If no live feedback exists yet for this user, synthesize entries from real messages
-    if (!feedbackData || feedbackData.length === 0) {
-      if (messagesData && messagesData.length > 0) {
-        for (const msg of messagesData) {
-          if (msg.role === "assistant") {
-            const content = msg.content || "";
-            const respTime = msg.response_time || 1.2;
-            const cid = msg.chat_id;
-            const cat = chatDomains[cid] || "MachineLearning";
+    // Genuine assistant messages count in selected scope
+    const assistantMessages = messagesData.filter((m: any) => m.role === "assistant");
+    const assistantCount = assistantMessages.length;
 
-            feedbackData.push({
-              id: msg.id,
-              chat_id: cid,
-              message_id: msg.id,
-              created_at: msg.created_at || new Date().toISOString(),
-              rating: respTime < 3.0 ? 4 : respTime < 5.0 ? 3 : 2,
-              correctness: content.length > 50 ? "correct" : "partial",
-              length_type: content.length >= 50 && content.length <= 500 ? "to_the_point" : content.length < 50 ? "short" : "lengthy",
-              comment: content.slice(0, 80),
-              category: cat,
-              response_time: respTime,
-            });
-          }
-        }
-      }
-    }
-
+    // Strict rule: No synthetic feedback generation. Genuine stored data only.
     if (!feedbackData || feedbackData.length === 0) {
       return NextResponse.json({
         summary: {
@@ -152,7 +130,7 @@ export async function GET(req: Request) {
           keywords: [dom.toLowerCase()],
           count: 0,
         })),
-        raw_data_count: messagesData.length,
+        raw_data_count: assistantCount,
       });
     }
 
@@ -240,13 +218,26 @@ export async function GET(req: Request) {
       }
     }
 
-    // 5. Recent Feedback Matrix (latest 10)
+    // 5. Aggregate Topic Counts across ALL genuine feedback records
+    const topicCounts: Record<string, number> = {};
+    for (const d of VALID_DOMAINS) topicCounts[d] = 0;
+
+    for (const row of feedbackData) {
+      const cid = row.chat_id;
+      let userQuery = "Chat prompt";
+      if (cid && messagesByChat[cid]) {
+        const chatMsgs = messagesByChat[cid];
+        const users = chatMsgs.filter((m: any) => m.role === "user");
+        if (users.length > 0) userQuery = users[0].content || userQuery;
+      }
+      const topic = resolveTopic(userQuery, row.category || chatDomains[cid]);
+      topicCounts[topic] = (topicCounts[topic] || 0) + 1;
+    }
+
+    // 6. Recent Feedback Matrix (latest 10)
     const sortedFeedback = [...feedbackData].sort(
       (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime(),
     );
-
-    const topicCounts: Record<string, number> = {};
-    for (const d of VALID_DOMAINS) topicCounts[d] = 0;
 
     const recentFeedback = sortedFeedback.slice(0, 10).map((row) => {
       const cid = row.chat_id;
@@ -254,7 +245,7 @@ export async function GET(req: Request) {
 
       let asstMsg = messagesById[msgId];
       if (!asstMsg && cid && messagesByChat[cid]) {
-        const assts = messagesByChat[cid].filter((m) => m.role === "assistant");
+        const assts = messagesByChat[cid].filter((m: any) => m.role === "assistant");
         if (assts.length > 0) asstMsg = assts[assts.length - 1];
       }
 
@@ -286,7 +277,6 @@ export async function GET(req: Request) {
       const status = rawStatus === "correct" ? "Correct" : rawStatus === "partial" ? "Partial" : "Incorrect";
 
       const topic = resolveTopic(userQuery, row.category || chatDomains[cid]);
-      topicCounts[topic] = (topicCounts[topic] || 0) + 1;
 
       return {
         id: row.id,
@@ -303,7 +293,7 @@ export async function GET(req: Request) {
       };
     });
 
-    // 6. Topics List
+    // 7. Topics List
     const topics = VALID_DOMAINS.map((dom, i) => ({
       cluster: i,
       name: dom,
@@ -325,7 +315,7 @@ export async function GET(req: Request) {
       trends,
       recent_feedback: recentFeedback,
       topics,
-      raw_data_count: messagesData.length,
+      raw_data_count: assistantCount,
     });
   } catch (error: any) {
     console.error("Analytics API Route Error:", error);
