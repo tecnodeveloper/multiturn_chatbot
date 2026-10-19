@@ -61,9 +61,6 @@ export const ChartPhaseAccuracy: FC<ChartPhaseAccuracyProps> = ({
             <h3 className="text-[15px] font-medium text-foreground tracking-tight">
               Accuracy Across Session Phases
             </h3>
-            <span className="px-2 py-0.5 rounded-full text-[10.5px] font-semibold bg-muted/50 text-muted-foreground border border-border">
-              FR20 &bull; Graph 3
-            </span>
           </div>
           <p className="text-[12px] text-muted-foreground">
             Multi-turn accuracy trajectory: Start (turns 1–2), Middle (turns 3–5), and End (turns 6+)

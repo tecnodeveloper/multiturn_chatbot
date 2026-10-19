@@ -44,7 +44,7 @@ export const TableLengthPreference: FC<TableLengthPreferenceProps> = ({
               Table 6: Response-Length Preference
             </h3>
             <p className="text-[12px] text-muted-foreground mt-0.5">
-              Correlate human length preferences with satisfaction ratings (FR19.6)
+              Correlate human length preferences with satisfaction ratings
             </p>
           </div>
         </div>

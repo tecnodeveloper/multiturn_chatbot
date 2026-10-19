@@ -70,9 +70,6 @@ export const AnalyticsGraphsModule: FC<AnalyticsGraphsModuleProps> = ({
               <h2 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight">
                 Graph Analytics
               </h2>
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#f5a623]/15 text-[#f5a623] border border-[#f5a623]/30 tracking-wide uppercase">
-                Phase 3 &bull; FR20
-              </span>
             </div>
             <p className="text-[13px] text-muted-foreground max-w-3xl leading-relaxed mt-0.5">
               Visual insights into chatbot accuracy, correctness, response latency, human rating distributions, and response-length preferences across conversational phases.

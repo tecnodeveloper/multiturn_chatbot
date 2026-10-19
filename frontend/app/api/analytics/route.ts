@@ -33,6 +33,22 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("user_id") || searchParams.get("userId");
     const sessionId = searchParams.get("session_id") || searchParams.get("chat_id") || searchParams.get("sessionId");
+    const timeRange = searchParams.get("time_range") || searchParams.get("timeRange") || searchParams.get("period");
+
+    let dateFilter = "";
+    if (timeRange && timeRange !== "all") {
+      const now = new Date();
+      if (timeRange === "week" || timeRange === "7d") {
+        const d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        dateFilter = `&created_at=gte.${d.toISOString()}`;
+      } else if (timeRange === "month" || timeRange === "30d") {
+        const d = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        dateFilter = `&created_at=gte.${d.toISOString()}`;
+      } else if (timeRange === "year" || timeRange === "365d") {
+        const d = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+        dateFilter = `&created_at=gte.${d.toISOString()}`;
+      }
+    }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "http://localhost:54321";
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
@@ -54,8 +70,8 @@ export async function GET(req: Request) {
     }
 
     const sessionFilter = sessionId && sessionId !== "all" ? `&chat_id=eq.${sessionId}` : "";
-    const feedbackUrl = `${supabaseUrl}/rest/v1/feedback?select=*&user_id=eq.${userId}${sessionFilter}&order=created_at.desc`;
-    const messagesUrl = `${supabaseUrl}/rest/v1/messages?select=*&user_id=eq.${userId}${sessionFilter}&order=created_at.asc`;
+    const feedbackUrl = `${supabaseUrl}/rest/v1/feedback?select=*&user_id=eq.${userId}${sessionFilter}${dateFilter}&order=created_at.desc`;
+    const messagesUrl = `${supabaseUrl}/rest/v1/messages?select=*&user_id=eq.${userId}${sessionFilter}${dateFilter}&order=created_at.asc`;
     const domainsUrl = `${supabaseUrl}/rest/v1/domains?select=*`;
     const chatsUrl = `${supabaseUrl}/rest/v1/chats?select=id,title,created_at,updated_at&user_id=eq.${userId}&order=created_at.desc`;
     const summariesUrl = `${supabaseUrl}/rest/v1/analytics_summary?select=*&order=created_at.desc`;
@@ -647,7 +663,7 @@ export async function GET(req: Request) {
       sessionInsights.push({
         id: "unfinalized-sessions",
         type: "neutral",
-        title: "Sessions Pending Finalization (FR22)",
+        title: "Sessions Pending Finalization",
         description: `${unfinalizedCount} completed chat session${unfinalizedCount === 1 ? " is" : "s are"} eligible for permanent analytics summary persistence.`,
         metric_label: "Pending",
         metric_value: `${unfinalizedCount}`,
@@ -1459,7 +1475,7 @@ export async function GET(req: Request) {
       topicInsights.push({
         id: "insufficient-evaluations",
         type: "neutral",
-        title: "Topics Pending Feedback (FR17)",
+        title: "Topics Pending Feedback",
         description: `${unEvaluatedActiveTopics.length} topic${unEvaluatedActiveTopics.length > 1 ? "s" : ""} (${names}) have assistant responses but no submitted evaluations yet.`,
         metric_label: "Pending",
         metric_value: `${unEvaluatedActiveTopics.length} topics`,

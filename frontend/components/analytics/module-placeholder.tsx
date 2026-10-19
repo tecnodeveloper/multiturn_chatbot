@@ -32,7 +32,7 @@ interface ModuleDetails {
 const MODULE_DATA: Record<Exclude<AnalyticsTabId, "overview">, ModuleDetails> = {
   tables: {
     title: "Analytical Tables",
-    requirement: "Phase 3 — FR19 Specification",
+    requirement: "Multi-Turn Analytics & Accuracy Tables",
     description:
       "Comprehensive multi-dimensional tables aggregating response performance, correctness rates, and turn-by-turn latency distributions.",
     icon: Table2,
@@ -65,7 +65,7 @@ const MODULE_DATA: Record<Exclude<AnalyticsTabId, "overview">, ModuleDetails> = 
   },
   graphs: {
     title: "Advanced Visualizations & Graphs",
-    requirement: "Phase 3 — FR20 Specification",
+    requirement: "Data Visualizations & Performance Graphs",
     description:
       "Dynamic charting suite visualizing conversational trajectory, latency trends over turns, and phase-wise correctness curves.",
     icon: LineChart,
@@ -94,7 +94,7 @@ const MODULE_DATA: Record<Exclude<AnalyticsTabId, "overview">, ModuleDetails> = 
   },
   sessions: {
     title: "Session-Level Insights",
-    requirement: "Phase 3 — FR16 & FR21 Specification",
+    requirement: "Session Lifecycle & Turn Progression",
     description:
       "Deep drill-down into individual chat sessions, turn-by-turn dynamics, phase-transition metrics, and final session summary exports.",
     icon: MessagesSquare,
@@ -112,14 +112,14 @@ const MODULE_DATA: Record<Exclude<AnalyticsTabId, "overview">, ModuleDetails> = 
         description: "Filter individual sessions to inspect localized correctness and response duration metrics.",
       },
       {
-        title: "Session Summary Persistence (FR22)",
+        title: "Session Summary Persistence",
         description: "Automated generation and database storage of final analytics summaries upon session termination.",
       },
     ],
   },
   topics: {
     title: "Topic-Based Performance",
-    requirement: "Phase 3 — FR15 & FR21 Specification",
+    requirement: "Domain Categorization & Accuracy Metrics",
     description:
       "Domain specialization analysis across Machine Learning, Deep Learning, Healthcare AI, Power Systems, and E-commerce AI.",
     icon: Tags,

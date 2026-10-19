@@ -5,7 +5,7 @@ Multi-turn Chatbot using gemini api key and Supabase Persistence
 from flask import Flask, request, jsonify, session, Response, stream_with_context
 from flask_cors import CORS
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 import time
 import os
 import requests
@@ -195,7 +195,7 @@ def health_check():
 
     result = {
         "status": "healthy" if is_healthy else "unhealthy",
-        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "services": {
             "api": api_ok,
             "chart_service": chart_service_ok,

@@ -86,7 +86,7 @@ export const FeedbackDistributionChart: FC<FeedbackDistributionChartProps> = ({
           Correctness distribution
         </h3>
         <p className="text-[11.5px] text-muted-foreground">
-          Evaluated model replies grouped into FR18 correctness categories
+          Evaluated model replies grouped into correctness categories
         </p>
       </div>
 

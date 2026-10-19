@@ -23,13 +23,12 @@ export const OverviewStats: FC<OverviewStatsProps> = ({
 
   const hasFeedback = totalFeedback > 0;
 
-  // FR18 Definition: Overall correctness percentage = (Correct + Partial) / Total Feedback
+  // Strict accuracy = Correct responses / Evaluated responses × 100
   const correctPct = Number(correctness.correct || 0);
   const partialPct = Number(correctness.partial || 0);
-  const rawAccuracy = correctPct + partialPct;
-  const accuracyRateFormatted = hasFeedback ? `${rawAccuracy.toFixed(1)}%` : "—";
+  const strictAccuracyFormatted = hasFeedback ? `${correctPct.toFixed(1)}%` : "N/A";
 
-  // Approximate counts from percentages if exact counts are not exposed separately
+  // Approximate counts from percentages
   const correctCount = Math.round((correctPct / 100) * totalFeedback);
   const partialCount = Math.round((partialPct / 100) * totalFeedback);
 
@@ -41,16 +40,16 @@ export const OverviewStats: FC<OverviewStatsProps> = ({
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      {/* 1. Accuracy Rate */}
+      {/* 1. Accuracy Rate (Strict: Correct / Evaluated * 100) */}
       <StatCard
         title="Accuracy rate"
-        value={accuracyRateFormatted}
+        value={strictAccuracyFormatted}
         subtitle={
           hasFeedback
-            ? `${correctCount} correct, ${partialCount} partial (${totalFeedback} evaluated)`
-            : "Awaiting feedback evaluations"
+            ? `${correctCount} strictly correct (${totalFeedback} evaluated)`
+            : "N/A (Awaiting evaluations)"
         }
-        tooltip="Formula (FR18): (Correct + Partial responses) / Total evaluated responses. Calculated from genuine database feedback."
+        tooltip="Strict accuracy formula: Correct responses / Evaluated responses × 100. Unevaluated responses are excluded."
         icon={<Target className="h-6 w-6" />}
         isLoading={isLoading}
       />
@@ -72,11 +71,11 @@ export const OverviewStats: FC<OverviewStatsProps> = ({
       {/* 3. Average Rating (Strictly 1–4 scale) */}
       <StatCard
         title="Average rating"
-        value={hasFeedback ? `${avgRating.toFixed(1)} / 4` : "—"}
+        value={hasFeedback && avgRating > 0 ? `${avgRating.toFixed(1)} / 4` : "N/A"}
         subtitle={
           hasFeedback
             ? `From ${totalFeedback} rating${totalFeedback === 1 ? "" : "s"} (1–4 scale)`
-            : "1–4 point rating scale"
+            : "N/A (No ratings submitted)"
         }
         tooltip="Average score on the project's 4-point rating scale (1 = Poor, 2 = Fair, 3 = Good, 4 = Excellent). No division by zero."
         icon={<Star className="h-6 w-6" />}

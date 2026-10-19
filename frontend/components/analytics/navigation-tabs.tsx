@@ -30,25 +30,25 @@ export const ANALYTICS_TABS: AnalyticsTabItem[] = [
     id: "tables",
     label: "Tables",
     icon: Table2,
-    description: "Detailed performance, correctness, and latency tables (FR19)",
+    description: "Detailed performance, correctness, and latency tables",
   },
   {
     id: "graphs",
     label: "Graphs",
     icon: LineChart,
-    description: "Visual analysis of accuracy trends, phase dynamics, and response metrics (FR20)",
+    description: "Visual analysis of accuracy trends, phase dynamics, and response metrics",
   },
   {
     id: "sessions",
     label: "Sessions",
     icon: MessagesSquare,
-    description: "Turn-by-turn session insights and phase-wise analysis (FR16/FR21)",
+    description: "Turn-by-turn session insights and phase-wise analysis",
   },
   {
     id: "topics",
     label: "Topics",
     icon: Tags,
-    description: "Domain-based accuracy and classification metrics across 5 topics (FR15/FR21)",
+    description: "Domain-based accuracy and classification metrics across 5 topics",
   },
 ];
 

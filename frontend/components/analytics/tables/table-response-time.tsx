@@ -45,7 +45,7 @@ export const TableResponseTime: FC<TableResponseTimeProps> = ({
               Table 4: Response-Time Summary
             </h3>
             <p className="text-[12px] text-muted-foreground mt-0.5">
-              Summarize chatbot response generation latency across minimum, maximum, mean, and median percentiles (FR19.4)
+              Summarize chatbot response generation latency across minimum, maximum, mean, and median percentiles
             </p>
           </div>
         </div>

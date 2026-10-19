@@ -44,7 +44,7 @@ export const TableRatingDistribution: FC<TableRatingDistributionProps> = ({
               Table 5: Rating Distribution
             </h3>
             <p className="text-[12px] text-muted-foreground mt-0.5">
-              Distribution of human evaluations strictly on the project&apos;s 1&ndash;4 scale (FR19.5)
+              Distribution of human evaluations strictly on the project&apos;s 1&ndash;4 scale
             </p>
           </div>
         </div>

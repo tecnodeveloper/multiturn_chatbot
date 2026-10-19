@@ -44,7 +44,7 @@ export const TablePhaseAccuracy: FC<TablePhaseAccuracyProps> = ({
               Table 3: Phase-Wise Accuracy
             </h3>
             <p className="text-[12px] text-muted-foreground mt-0.5">
-              Compare model accuracy and retention across conversational phases: Start, Middle, and End (FR19.3 & FR16)
+              Compare model accuracy and retention across conversational phases: Start, Middle, and End
             </p>
           </div>
         </div>

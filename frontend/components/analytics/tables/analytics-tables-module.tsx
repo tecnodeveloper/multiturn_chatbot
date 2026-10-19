@@ -67,9 +67,6 @@ export const AnalyticsTablesModule: FC<AnalyticsTablesModuleProps> = ({
               <h2 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight">
                 Analytics Tables
               </h2>
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#f5a623]/15 text-[#f5a623] border border-[#f5a623]/30 tracking-wide uppercase">
-                Phase 3 &bull; FR19
-              </span>
             </div>
             <p className="text-[13px] text-muted-foreground max-w-3xl leading-relaxed mt-0.5">
               Comprehensive analytical tables evaluating topic accuracy, reply correctness, phase dynamics, response latency, human rating distributions, and response-length preferences.

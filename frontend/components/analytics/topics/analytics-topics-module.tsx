@@ -4,7 +4,6 @@ import React, { FC, useState, useMemo } from "react";
 import {
   Tags,
   ArrowLeft,
-  Sparkles,
   RefreshCw,
   LayoutGrid,
   PieChart as PieIcon,
@@ -88,9 +87,6 @@ export const AnalyticsTopicsModule: FC<AnalyticsTopicsModuleProps> = ({
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
                 Topics & Domain Analytics
               </h1>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#f5a623]/15 text-[#f5a623] border border-[#f5a623]/30">
-                <Sparkles className="h-3 w-3" /> FR15 · FR17 · FR20 · FR21
-              </span>
             </div>
             <p className="text-sm text-gray-400 mt-1 max-w-2xl leading-relaxed">
               Explore model performance across Machine Learning, Deep Learning, Healthcare AI, Power Systems, E-commerce AI, and general inquiries. Analyze domain distribution, strict accuracy, helpfulness, and user rating trends.

@@ -66,9 +66,6 @@ export const ChartRatingDistribution: FC<ChartRatingDistributionProps> = ({
             <h3 className="text-[15px] font-medium text-foreground tracking-tight">
               User Rating Distribution
             </h3>
-            <span className="px-2 py-0.5 rounded-full text-[10.5px] font-semibold bg-muted/50 text-muted-foreground border border-border">
-              FR20 &bull; Graph 6
-            </span>
           </div>
           <p className="text-[12px] text-muted-foreground">
             Distribution of evaluations strictly across the project&apos;s 1–4 point scale

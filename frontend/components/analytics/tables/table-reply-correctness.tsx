@@ -181,7 +181,7 @@ export const TableReplyCorrectness: FC<TableReplyCorrectnessProps> = ({
               Table 2: Reply Correctness
             </h3>
             <p className="text-[12px] text-muted-foreground mt-0.5">
-              Inspect correctness, human ratings, latency, and previews of individual assistant responses (FR19.2)
+              Inspect correctness, human ratings, latency, and previews of individual assistant responses
             </p>
           </div>
         </div>

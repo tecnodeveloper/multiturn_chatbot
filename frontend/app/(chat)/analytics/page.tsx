@@ -120,9 +120,6 @@ const AnalyticsPage: FC<AnalyticsPageProps> = ({ initialTab, initialSessionId })
       <div className="flex-1 flex flex-col overflow-y-auto min-h-0 bg-[#06080d]">
         {/* Sticky Page Header */}
         <AnalyticsHeader
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          activeSessionTitle={activeChat?.title}
           onRefresh={refetch}
           backendHealth={backendHealth}
           onRetryHealth={handleRetry}

@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   MessagesSquare,
   ArrowLeft,
-  Sparkles,
   LayoutGrid,
   ListOrdered,
   Eye,
@@ -71,9 +70,6 @@ export function AnalyticsSessionsModule({
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
                 Sessions Analytics
               </h1>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#f5a623]/15 text-[#f5a623] border border-[#f5a623]/30">
-                <Sparkles className="h-3 w-3" /> FR7 · FR16 · FR21 · FR22
-              </span>
             </div>
             <p className="text-sm text-gray-400 mt-1 max-w-2xl leading-relaxed">
               Explore individual chat sessions, track turn progression across Start, Middle, and End phases, inspect response latency and user feedback, and finalize permanent session summaries into the database.
@@ -167,7 +163,7 @@ export function AnalyticsSessionsModule({
         ) : (
           <div className="bg-[#161821] border border-[#1f2937] rounded-xl p-8 text-center text-gray-400">
             <Eye className="w-8 h-8 mx-auto mb-2 opacity-50 text-[#f5a623]" />
-            <p className="text-sm">Select a session from the explorer table above to inspect its conversation timeline, Start/Middle/End phase performance, and FR22 permanent analytics summary.</p>
+            <p className="text-sm">Select a session from the explorer table above to inspect its conversation timeline, Start/Middle/End phase performance, and permanent analytics summary.</p>
           </div>
         )}
       </section>

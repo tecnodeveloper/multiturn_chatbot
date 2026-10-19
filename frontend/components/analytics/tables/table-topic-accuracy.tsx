@@ -44,7 +44,7 @@ export const TableTopicAccuracy: FC<TableTopicAccuracyProps> = ({
               Table 1: Topic vs Accuracy
             </h3>
             <p className="text-[12px] text-muted-foreground mt-0.5">
-              Compare accuracy rates and correctness breakdown across all 5 project domains plus Other (FR19.1)
+              Compare accuracy rates and correctness breakdown across all 5 project domains plus Other
             </p>
           </div>
         </div>

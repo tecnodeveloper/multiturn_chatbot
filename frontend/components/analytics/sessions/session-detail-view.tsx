@@ -77,7 +77,7 @@ export const SessionDetailView: FC<SessionDetailViewProps> = ({
       }
 
       toast.success(
-        "Session successfully finalized! Permanent analytics summary recorded (FR22)."
+        "Session successfully finalized! Permanent analytics summary recorded."
       );
       setShowFinalizeConfirm(false);
       if (onSessionFinalized) {
@@ -177,7 +177,7 @@ export const SessionDetailView: FC<SessionDetailViewProps> = ({
               {isFinalized ? (
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                   <FileCheck className="h-3.5 w-3.5" />
-                  Finalized Session (FR22)
+                  Finalized Session
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#f5a623]/15 text-[#f5a623] border border-[#f5a623]/30">
@@ -215,7 +215,7 @@ export const SessionDetailView: FC<SessionDetailViewProps> = ({
               ) : (
                 <FileCheck className="h-4 w-4" />
               )}
-              End & Finalize Session (FR22)
+              End & Finalize Session
             </Button>
           ) : (
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[12px] font-medium">
@@ -236,7 +236,7 @@ export const SessionDetailView: FC<SessionDetailViewProps> = ({
               </div>
               <div className="flex flex-col gap-1">
                 <h3 className="text-[16px] font-semibold text-foreground">
-                  Finalize Session Analytics (FR22)
+                  Finalize Session Analytics
                 </h3>
                 <p className="text-[12.5px] text-muted-foreground leading-relaxed">
                   This will calculate permanent performance summaries (accuracy rate, average latency, rating distribution) and record them in the database&apos;s <code className="text-[#f5a623] font-mono">analytics_summary</code> table.
@@ -353,9 +353,6 @@ export const SessionDetailView: FC<SessionDetailViewProps> = ({
               <h3 className="text-[15px] font-medium text-foreground tracking-tight">
                 Session Phase Analysis
               </h3>
-              <span className="px-2 py-0.5 rounded-full text-[10.5px] font-semibold bg-muted/50 text-muted-foreground border border-border">
-                FR16 / FR17
-              </span>
             </div>
             <p className="text-[12px] text-muted-foreground">
               Conversational progression across Start (turns 1–2), Middle (turns 3–5), and End (turns 6+)
@@ -569,7 +566,7 @@ export const SessionDetailView: FC<SessionDetailViewProps> = ({
             <div className="flex items-center gap-2">
               <FileCheck className="h-4 w-4 text-emerald-400" />
               <h3 className="text-[14.5px] font-semibold text-foreground">
-                Permanent Analytics Summary Record (FR22)
+                Permanent Analytics Summary Record
               </h3>
             </div>
             <span className="text-[11px] font-mono text-muted-foreground">

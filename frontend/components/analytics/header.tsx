@@ -1,14 +1,7 @@
 "use client";
 
-import { BarChart3, RotateCw, Layers, MessageSquare, ChevronDown, Check } from "lucide-react";
+import { BarChart3, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { BackendHealthStatus } from "@/hooks/use-analytics";
 
 export interface AnalyticsHeaderProps {
@@ -62,79 +55,8 @@ export function AnalyticsHeader({
           </div>
         </div>
 
-        {/* Right Zone — Session Scope Dropdown & Live Mode Controls */}
+        {/* Right Zone — Live Mode Controls */}
         <div className="flex items-center justify-end gap-2.5 z-10">
-          {onViewModeChange && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-9 gap-2 rounded-xl border-border bg-background/60 hover:bg-muted/50 hover:border-[#f5a623]/40 px-3 text-[12.5px] font-medium text-foreground shadow-sm transition-all"
-                >
-                  {viewMode === "this_session" ? (
-                    <MessageSquare className="h-3.5 w-3.5 text-[#f5a623]" />
-                  ) : (
-                    <Layers className="h-3.5 w-3.5 text-[#f5a623]" />
-                  )}
-                  <span className="font-medium whitespace-nowrap">
-                    {viewMode === "this_session" ? "This Session" : "All Sessions"}
-                  </span>
-                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground ml-0.5 opacity-70" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64 bg-card border-border text-foreground p-1.5 shadow-xl">
-                <DropdownMenuLabel className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-2 py-1">
-                  Analytics Scope
-                </DropdownMenuLabel>
-                
-                <DropdownMenuItem
-                  onClick={() => onViewModeChange("this_session")}
-                  className={`flex items-start justify-between px-3 py-2.5 rounded-lg cursor-pointer transition-colors ${
-                    viewMode === "this_session"
-                      ? "bg-[#f5a623]/15 text-[#f5a623] font-medium"
-                      : "text-foreground hover:bg-muted/60"
-                  }`}
-                >
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-[13px] font-medium flex items-center gap-1.5">
-                      <MessageSquare className="h-3.5 w-3.5 text-[#f5a623]" />
-                      This Session
-                    </span>
-                    <span className="text-[11px] text-muted-foreground max-w-[180px] truncate">
-                      {activeSessionTitle ? `Active: ${activeSessionTitle}` : "Active chat session"}
-                    </span>
-                  </div>
-                  {viewMode === "this_session" && (
-                    <Check className="h-4 w-4 text-[#f5a623] shrink-0 mt-0.5" />
-                  )}
-                </DropdownMenuItem>
-
-                <DropdownMenuItem
-                  onClick={() => onViewModeChange("all_sessions")}
-                  className={`flex items-start justify-between px-3 py-2.5 rounded-lg cursor-pointer transition-colors mt-1 ${
-                    viewMode === "all_sessions"
-                      ? "bg-[#f5a623]/15 text-[#f5a623] font-medium"
-                      : "text-foreground hover:bg-muted/60"
-                  }`}
-                >
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-[13px] font-medium flex items-center gap-1.5">
-                      <Layers className="h-3.5 w-3.5 text-[#f5a623]" />
-                      All Sessions
-                    </span>
-                    <span className="text-[11px] text-muted-foreground">
-                      Aggregated user analytics
-                    </span>
-                  </div>
-                  {viewMode === "all_sessions" && (
-                    <Check className="h-4 w-4 text-[#f5a623] shrink-0 mt-0.5" />
-                  )}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-
           {/* Backend Health / Live Mode Status Indicator */}
           {backendHealth === "checking" && (
             <div

@@ -73,9 +73,6 @@ export const ChartAccuracyByTopic: FC<ChartAccuracyByTopicProps> = ({
             <h3 className="text-[15px] font-medium text-foreground tracking-tight">
               Accuracy by Topic
             </h3>
-            <span className="px-2 py-0.5 rounded-full text-[10.5px] font-semibold bg-muted/50 text-muted-foreground border border-border">
-              FR20 &bull; Graph 2
-            </span>
           </div>
           <p className="text-[12px] text-muted-foreground">
             Correctness accuracy rate: (Correct + Partial) / Total Evaluated &times; 100

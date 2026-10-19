@@ -105,31 +105,8 @@ def process_analytics(user_id=None, session_id=None):
     for d in domains_data:
         chat_domains[d.get('chat_id')] = d.get('category')
 
-    # If no live feedback exists yet, synthesize real interaction data from actual messages
+    # Strict rule: No synthetic feedback generation in production analytics paths. Genuine stored data only.
     if not feedback_data or len(feedback_data) == 0:
-        if messages_data and len(messages_data) > 0:
-            # Build live feedback synthetic entries from real system messages
-            for idx, msg in enumerate(messages_data):
-                if msg.get('role') == 'assistant':
-                    content = msg.get('content', '')
-                    resp_time = msg.get('response_time') or 1.2
-                    chat_id = msg.get('chat_id')
-                    category = chat_domains.get(chat_id, "Machine Learning")
-                    
-                    feedback_data.append({
-                        "id": msg.get('id'),
-                        "chat_id": chat_id,
-                        "created_at": msg.get('created_at') or datetime.now().isoformat(),
-                        "rating": 4 if resp_time < 3.0 else 3 if resp_time < 5.0 else 2,
-                        "correctness": "correct" if len(content) > 50 else "partial",
-                        "length_type": "to_the_point" if 50 <= len(content) <= 500 else "short" if len(content) < 50 else "lengthy",
-                        "comment": content[:80],
-                        "category": category,
-                        "response_time": resp_time
-                    })
-
-    if not feedback_data or len(feedback_data) == 0:
-        # Fallback empty analytics payload
         return {
             "summary": {
                 "total_feedback": 0,
@@ -138,13 +115,16 @@ def process_analytics(user_id=None, session_id=None):
             },
             "stats": {
                 "ratings": {"1": 0, "2": 0, "3": 0, "4": 0},
-                "correctness": {"correct": 0, "partial": 0, "incorrect": 0},
+                "correctness": {"correct": 0.0, "partial": 0.0, "incorrect": 0.0},
                 "length_distribution": {"short": 0, "to_the_point": 0, "lengthy": 0}
             },
             "trends": [],
             "recent_feedback": [],
-            "topics": [],
-            "raw_data_count": 0
+            "topics": [
+                {"cluster": i, "name": d, "keywords": [d], "count": 0}
+                for i, d in enumerate(VALID_DOMAINS)
+            ],
+            "raw_data_count": len(messages_data)
         }
 
     df = pd.DataFrame(feedback_data)

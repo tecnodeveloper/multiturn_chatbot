@@ -111,7 +111,7 @@ export const SessionExplorerTable: FC<SessionExplorerTableProps> = ({
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">
           <FileCheck className="h-3 w-3" />
-          Finalized (FR22)
+          Finalized
         </span>
       );
     }
@@ -153,9 +153,6 @@ export const SessionExplorerTable: FC<SessionExplorerTableProps> = ({
               <h3 className="text-[16px] font-medium text-foreground tracking-tight">
                 Session Explorer
               </h3>
-              <span className="px-2 py-0.5 rounded-full text-[10.5px] font-semibold bg-muted/50 text-muted-foreground border border-border">
-                FR21 &bull; Table
-              </span>
             </div>
             <p className="text-[12px] text-muted-foreground mt-0.5">
               Multi-turn chat conversations, turn progression, human evaluation coverage, and duration

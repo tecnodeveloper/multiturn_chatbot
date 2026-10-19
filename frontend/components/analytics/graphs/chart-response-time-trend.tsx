@@ -80,9 +80,6 @@ export const ChartResponseTimeTrend: FC<ChartResponseTimeTrendProps> = ({
             <h3 className="text-[15px] font-medium text-foreground tracking-tight">
               Response Time Trend
             </h3>
-            <span className="px-2 py-0.5 rounded-full text-[10.5px] font-semibold bg-muted/50 text-muted-foreground border border-border">
-              FR20 &bull; Graph 5
-            </span>
           </div>
           <p className="text-[12px] text-muted-foreground">
             Chronological assistant model response generation latency in seconds
