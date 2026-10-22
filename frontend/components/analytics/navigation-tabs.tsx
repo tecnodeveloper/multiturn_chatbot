@@ -6,11 +6,10 @@ import {
   Table2,
   LineChart,
   MessagesSquare,
-  Tags,
   LucideIcon,
 } from "lucide-react";
 
-export type AnalyticsTabId = "overview" | "tables" | "graphs" | "sessions" | "topics";
+export type AnalyticsTabId = "overview" | "tables" | "graphs" | "sessions";
 
 export interface AnalyticsTabItem {
   id: AnalyticsTabId;
@@ -43,12 +42,6 @@ export const ANALYTICS_TABS: AnalyticsTabItem[] = [
     label: "Sessions",
     icon: MessagesSquare,
     description: "Turn-by-turn session insights and phase-wise analysis",
-  },
-  {
-    id: "topics",
-    label: "Topics",
-    icon: Tags,
-    description: "Domain-based accuracy and classification metrics across 5 topics",
   },
 ];
 

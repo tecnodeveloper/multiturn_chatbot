@@ -5,7 +5,6 @@ import {
   Table2,
   LineChart,
   MessagesSquare,
-  Tags,
   ArrowLeft,
   CheckCircle2,
   Sparkles,
@@ -114,31 +113,6 @@ const MODULE_DATA: Record<Exclude<AnalyticsTabId, "overview">, ModuleDetails> = 
       {
         title: "Session Summary Persistence",
         description: "Automated generation and database storage of final analytics summaries upon session termination.",
-      },
-    ],
-  },
-  topics: {
-    title: "Topic-Based Performance",
-    requirement: "Domain Categorization & Accuracy Metrics",
-    description:
-      "Domain specialization analysis across Machine Learning, Deep Learning, Healthcare AI, Power Systems, and E-commerce AI.",
-    icon: Tags,
-    plannedFeatures: [
-      {
-        title: "5-Domain Accuracy Comparison",
-        description: "Side-by-side performance benchmarking across all 5 project domains.",
-      },
-      {
-        title: "Keyword & LLM Classification Engine",
-        description: "Automated categorization of user queries into domain categories with confidence scoring.",
-      },
-      {
-        title: "Domain Latency & Length Benchmarks",
-        description: "Comparative evaluation of which domains demand higher computation times or longer explanations.",
-      },
-      {
-        title: "Topic Weak-Spot Detection",
-        description: "Automated identification of specific domain areas generating partial or incorrect evaluations.",
       },
     ],
   },

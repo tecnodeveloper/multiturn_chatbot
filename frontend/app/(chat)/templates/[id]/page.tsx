@@ -7,11 +7,11 @@ import { Template, templateService } from "@/lib/template-service";
 import { useChat } from "@/context/chat-context";
 import { useAuth } from "@/context/auth-context";
 import { useDashboard } from "@/hooks/use-dashboard";
-import { createChat, createMessage } from "@/db";
+import { createChat } from "@/db";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Play, Copy, Edit2, Trash2, Star, CheckCircle2, Bot, ChevronRight } from "lucide-react";
+import { ArrowLeft, Play, ChevronRight, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
-import { TemplateDeleteDialog } from "@/components/templates/template-delete-dialog";
+import { getTemplateIcon } from "@/components/templates/template-card";
 import Link from "next/link";
 
 export default function TemplateDetailPage() {
@@ -31,8 +31,6 @@ export default function TemplateDetailPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [template, setTemplate] = useState<Template | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const { handleNewChat, handleDeleteChat } = useDashboard();
 
@@ -106,41 +104,7 @@ export default function TemplateDetailPage() {
     }
   };
 
-  const handleToggleFavorite = async () => {
-    if (!template) return;
-    try {
-      const updated = await templateService.toggleFavorite(template.id);
-      setTemplate(updated);
-    } catch (e: any) {
-      toast.error("Failed to update favorite");
-    }
-  };
 
-  const handleDuplicate = async () => {
-    if (!template) return;
-    try {
-      const copy = await templateService.duplicateTemplate(template.id);
-      toast.success(`Duplicated "${template.name}"`);
-      router.push(`/templates/${copy.id}`);
-    } catch (e: any) {
-      toast.error(e.message || "Failed to duplicate template");
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!template) return;
-    setIsDeleting(true);
-    try {
-      await templateService.deleteTemplate(template.id);
-      toast.success("Template deleted");
-      router.push("/templates");
-    } catch (e: any) {
-      toast.error(e.message || "Failed to delete template");
-    } finally {
-      setIsDeleting(false);
-      setIsDeleteDialogOpen(false);
-    }
-  };
 
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
@@ -154,7 +118,7 @@ export default function TemplateDetailPage() {
 
       <main className="relative flex min-w-0 flex-1 flex-col bg-background font-sans h-full overflow-hidden text-foreground">
         {/* Header */}
-        <header className="flex max-h-[64px] min-h-[64px] w-full items-center justify-between border-b border-border px-6 sm:px-8 bg-card/80 backdrop-blur-md shrink-0 sticky top-0 z-20">
+        <header className="flex max-h-[60px] min-h-[60px] w-full items-center justify-between border-b border-border px-4 sm:px-6 bg-card/80 backdrop-blur-md shrink-0 sticky top-0 z-20">
           <div className="flex items-center gap-3">
             {!sidebarOpen && (
               <Button
@@ -180,46 +144,12 @@ export default function TemplateDetailPage() {
           {template && (
             <div className="flex items-center gap-2">
               <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDuplicate}
-                className="h-8 gap-1.5 text-[12px] font-normal rounded-xl border-border hover:border-[#f5a623]/30"
-              >
-                <Copy className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Duplicate</span>
-              </Button>
-
-              {!template.isSystemTemplate && (
-                <>
-                  <Link href={`/templates/${template.id}/edit`}>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8 gap-1.5 text-[12px] font-normal rounded-xl border-border hover:border-[#f5a623]/30"
-                    >
-                      <Edit2 className="h-3.5 w-3.5" />
-                      <span className="hidden sm:inline">Edit</span>
-                    </Button>
-                  </Link>
-
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setIsDeleteDialogOpen(true)}
-                    className="h-8 text-destructive hover:bg-destructive/10 text-[12px] font-normal rounded-xl"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </>
-              )}
-
-              <Button
                 onClick={handleUseTemplate}
                 size="sm"
-                className="h-8 px-4 gap-1.5 rounded-xl bg-[#f5a623] hover:bg-[#e09612] text-[#0f1117] text-[12.5px] font-medium transition-colors shadow-sm active:scale-95"
+                className="h-8.5 px-4 gap-1.5 rounded-xl bg-[#f5a623] hover:bg-[#e09612] text-[#06080d] text-[12.5px] font-semibold transition-colors shadow-sm active:scale-95"
               >
                 <Play className="h-3.5 w-3.5 fill-current" />
-                <span>Use template</span>
+                <span>Use Assistant</span>
               </Button>
             </div>
           )}
@@ -246,7 +176,7 @@ export default function TemplateDetailPage() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-3.5">
                     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#f5a623]/10 text-[#f5a623] shrink-0">
-                      <Bot className="h-5 w-5" />
+                      {getTemplateIcon(template.name)}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -266,20 +196,6 @@ export default function TemplateDetailPage() {
                       </div>
                     </div>
                   </div>
-
-                  <button
-                    onClick={handleToggleFavorite}
-                    aria-label={template.isFavorite ? "Remove from favorites" : "Add to favorites"}
-                    className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <Star
-                      className={`h-5 w-5 ${
-                        template.isFavorite
-                          ? "fill-[#f5a623] text-[#f5a623]"
-                          : "text-muted-foreground/40 hover:text-muted-foreground"
-                      }`}
-                    />
-                  </button>
                 </div>
 
                 <p className="mt-4 text-[13.5px] font-normal text-foreground leading-relaxed">
@@ -360,14 +276,6 @@ export default function TemplateDetailPage() {
             </div>
           )}
         </div>
-
-        <TemplateDeleteDialog
-          isOpen={isDeleteDialogOpen}
-          onClose={() => setIsDeleteDialogOpen(false)}
-          onConfirm={handleDelete}
-          templateName={template?.name}
-          isDeleting={isDeleting}
-        />
       </main>
     </div>
   );

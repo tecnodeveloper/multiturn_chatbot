@@ -2,15 +2,11 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import {
-  MessagesSquare,
-  ArrowLeft,
   LayoutGrid,
   ListOrdered,
   Eye,
-  RefreshCw,
 } from "lucide-react";
 import type { AnalyticsData } from "@/hooks/use-analytics";
-import { Button } from "@/components/ui/button";
 import { SessionsOverviewCards } from "./sessions-overview-cards";
 import { SessionExplorerTable } from "./session-explorer-table";
 import { SessionDetailView } from "./session-detail-view";
@@ -58,52 +54,7 @@ export function AnalyticsSessionsModule({
   const selectedSession = sessions.find((s) => s.id === selectedSessionId) || null;
 
   return (
-    <div className="flex flex-col gap-8 w-full animate-in fade-in-50 duration-200">
-      {/* Top Banner */}
-      <div className="bg-[#161821] rounded-2xl border border-[#1f2937] p-6 sm:p-8 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-        <div className="flex items-start gap-4">
-          <div className="h-12 w-12 rounded-xl bg-[#f5a623]/15 border border-[#f5a623]/30 flex items-center justify-center text-[#f5a623] shrink-0 mt-0.5">
-            <MessagesSquare className="h-6 w-6" />
-          </div>
-          <div>
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-                Sessions Analytics
-              </h1>
-            </div>
-            <p className="text-sm text-gray-400 mt-1 max-w-2xl leading-relaxed">
-              Explore individual chat sessions, track turn progression across Start, Middle, and End phases, inspect response latency and user feedback, and finalize permanent session summaries into the database.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 self-stretch sm:self-auto shrink-0">
-          {onRefresh && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onRefresh}
-              disabled={isLoading}
-              className="border-[#1f2937] hover:border-[#f5a623]/50 text-gray-300 hover:text-white"
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
-              Refresh
-            </Button>
-          )}
-          {onBackToOverview && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onBackToOverview}
-              className="border-[#1f2937] hover:border-[#f5a623]/50 text-gray-300 hover:text-white"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Overview
-            </Button>
-          )}
-        </div>
-      </div>
-
+    <div className="flex flex-col gap-6 w-full animate-in fade-in-50 duration-200">
       {/* Quick Jump Navigation */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
         <button

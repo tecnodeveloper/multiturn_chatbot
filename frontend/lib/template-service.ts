@@ -3,6 +3,7 @@ export type TemplateCategory =
   | "My templates"
   | "System templates"
   | "Favorites"
+  | "Coding Assistant"
   | "Machine Learning"
   | "Deep Learning"
   | "Healthcare AI"
@@ -53,6 +54,7 @@ export const ALL_EVALUATION_CRITERIA: EvaluationCriterion[] = [
 ];
 
 export const TEMPLATE_CATEGORIES: TemplateCategory[] = [
+  "Coding Assistant",
   "Machine Learning",
   "Deep Learning",
   "Healthcare AI",
@@ -61,6 +63,30 @@ export const TEMPLATE_CATEGORIES: TemplateCategory[] = [
 ];
 
 const INITIAL_SYSTEM_TEMPLATES: Template[] = [
+  {
+    id: "system-code-guru",
+    name: "Code Guru Assistant",
+    description:
+      "Your AI coding partner for writing clean code, debugging issues, optimizing performance, and solving complex programming problems.",
+    category: "Coding Assistant",
+    provider: "Gemini",
+    model: "gemini-3.5-flash",
+    systemPrompt:
+      "You are Code Guru Assistant, an expert AI programming partner and senior software engineer. " +
+      "Help developers write clean, robust, and maintainable code across modern languages and frameworks (Python, TypeScript, JavaScript, Go, Rust, C++, Java, React, Next.js, and SQL). " +
+      "Diagnose bugs, analyze runtime errors, propose clean architectural refactorings, optimize computational performance, and adhere to security and testing best practices. " +
+      "Provide complete, runnable code examples with concise inline explanations and step-by-step guidance. " +
+      "Format your answers with clean syntax highlighting, clear headings, and actionable takeaways.",
+    starterPrompt:
+      "Review my code for performance bottlenecks, potential bugs, and readability improvements, then provide an optimized refactoring with clear explanations.",
+    evaluationCriteria: ["Correctness", "Accuracy", "Helpfulness", "Instruction following"],
+    tags: ["coding", "debugging", "refactoring", "performance", "architecture", "best-practices"],
+    isFavorite: true,
+    isSystemTemplate: true,
+    usageCount: 0,
+    createdAt: "2026-09-01T09:00:00Z",
+    updatedAt: "2026-09-01T09:00:00Z",
+  },
   {
     id: "system-ml",
     name: "Machine Learning Assistant",
@@ -206,7 +232,7 @@ const INITIAL_SYSTEM_TEMPLATES: Template[] = [
 
 const STORAGE_KEY = "multiturn_templates";
 const TEMPLATE_VERSION_KEY = "multiturn_templates_version";
-const CURRENT_TEMPLATE_VERSION = "2"; // Bump this to force a cache refresh
+const CURRENT_TEMPLATE_VERSION = "4"; // Bump this to force a cache refresh and purge unwanted cards
 
 class TemplateService {
   private getStoredTemplates(): Template[] {
@@ -216,23 +242,11 @@ class TemplateService {
     try {
       const storedVersion = localStorage.getItem(TEMPLATE_VERSION_KEY);
 
-      // If version mismatch, purge old system templates and re-seed
+      // If version mismatch, purge and reset directly to official templates
       if (storedVersion !== CURRENT_TEMPLATE_VERSION) {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        const validSystemIds = new Set(INITIAL_SYSTEM_TEMPLATES.map((t) => t.id));
-
-        if (raw) {
-          const parsed: Template[] = JSON.parse(raw);
-          // Keep only user-created templates (remove old system templates)
-          const userTemplates = parsed.filter(
-            (t) => !t.isSystemTemplate || validSystemIds.has(t.id)
-          );
-          const merged = [...INITIAL_SYSTEM_TEMPLATES, ...userTemplates.filter((t) => !t.isSystemTemplate)];
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-        } else {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_SYSTEM_TEMPLATES));
-        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_SYSTEM_TEMPLATES));
         localStorage.setItem(TEMPLATE_VERSION_KEY, CURRENT_TEMPLATE_VERSION);
+        return INITIAL_SYSTEM_TEMPLATES;
       }
 
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -241,19 +255,33 @@ class TemplateService {
         return INITIAL_SYSTEM_TEMPLATES;
       }
       const parsed: Template[] = JSON.parse(raw);
-      // Ensure all initial system templates exist
-      const existingIds = new Set(parsed.map((t) => t.id));
+
+      // Ensure all initial system templates exist and remove any unwanted/test templates (like C++ Assiantance)
+      const isUnwanted = (t: Template) => {
+        const name = (t.name || "").toLowerCase();
+        const desc = (t.description || "").toLowerCase();
+        return (
+          name.includes("c++") ||
+          desc.includes("c++") ||
+          name.includes("assiantan") ||
+          desc.includes("teach you c++")
+        );
+      };
+
+      const cleaned = parsed.filter((t) => !isUnwanted(t));
+
+      const existingIds = new Set(cleaned.map((t) => t.id));
       let updated = false;
       for (const sys of INITIAL_SYSTEM_TEMPLATES) {
         if (!existingIds.has(sys.id)) {
-          parsed.unshift(sys);
+          cleaned.unshift(sys);
           updated = true;
         }
       }
-      if (updated) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+      if (updated || cleaned.length !== parsed.length) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
       }
-      return parsed;
+      return cleaned;
     } catch (e) {
       console.error("Failed to read templates from storage", e);
       return INITIAL_SYSTEM_TEMPLATES;
