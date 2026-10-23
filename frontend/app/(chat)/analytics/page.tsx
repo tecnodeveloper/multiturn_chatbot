@@ -86,6 +86,10 @@ const AnalyticsPage: FC<AnalyticsPageProps> = ({ initialTab, initialSessionId })
         setActiveTab("graphs");
         return;
       }
+      if (pathname.includes("/analytics/overview") || pathname === "/analytics") {
+        setActiveTab("overview");
+        return;
+      }
       const params = new URLSearchParams(window.location.search);
       const tabParam = params.get("tab") as AnalyticsTabId;
       if (tabParam && ANALYTICS_TABS.some((t) => t.id === tabParam)) {
@@ -113,19 +117,19 @@ const AnalyticsPage: FC<AnalyticsPageProps> = ({ initialTab, initialSessionId })
       />
 
       <div className="flex-1 flex flex-col overflow-y-auto min-h-0 bg-[#06080d]">
-        {/* Sticky Page Header */}
-        <AnalyticsHeader
-          onRefresh={refetch}
-          backendHealth={backendHealth}
-          onRetryHealth={handleRetry}
-        />
-
-        {/* Horizontal Navigation Shell (4 tabs: Overview, Tables, Graphs, Sessions) */}
-        <NavigationTabs
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          disabled={isBackendOffline}
-        />
+        {/* Sticky Unified Analytics Header & Navigation Shell (4 tabs: Overview, Tables, Graphs, Sessions) */}
+        <div className="sticky top-0 z-40 w-full bg-[#06080d]/85 backdrop-blur-md border-b border-border/80 shadow-sm transition-all">
+          <AnalyticsHeader
+            onRefresh={refetch}
+            backendHealth={backendHealth}
+            onRetryHealth={handleRetry}
+          />
+          <NavigationTabs
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            disabled={isBackendOffline}
+          />
+        </div>
 
         {/* Main Analytics Container */}
         <main className="flex-1 p-4 sm:p-8 pb-32 max-w-[1600px] mx-auto w-full">

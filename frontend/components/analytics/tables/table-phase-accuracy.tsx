@@ -32,7 +32,7 @@ export const TablePhaseAccuracy: FC<TablePhaseAccuracyProps> = ({
   return (
     <div
       id="table-phase-accuracy"
-      className="bg-card rounded-2xl shadow-sm p-6 flex flex-col gap-5 w-full border border-border overflow-hidden"
+      className="bg-card rounded-2xl shadow-sm p-6 flex flex-col gap-5 w-full border border-border overflow-hidden scroll-mt-28"
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/80 pb-4">
         <div className="flex items-center gap-2.5">
@@ -41,11 +41,8 @@ export const TablePhaseAccuracy: FC<TablePhaseAccuracyProps> = ({
           </div>
           <div>
             <h3 className="text-[16px] font-semibold text-foreground tracking-tight">
-              Table 3: Phase-Wise Accuracy
+              Phase-Wise Accuracy
             </h3>
-            <p className="text-[12px] text-muted-foreground mt-0.5">
-              Compare model accuracy and retention across conversational phases: Start, Middle, and End
-            </p>
           </div>
         </div>
 
@@ -94,11 +91,10 @@ export const TablePhaseAccuracy: FC<TablePhaseAccuracyProps> = ({
                   </td>
                   <td className="py-3.5 px-3.5 text-center font-mono">
                     <span
-                      className={`inline-block px-2.5 py-0.5 rounded-full text-[11.5px] ${
-                        hasEvals
+                      className={`inline-block px-2.5 py-0.5 rounded-full text-[11.5px] ${hasEvals
                           ? "bg-muted text-foreground font-medium"
                           : "text-muted-foreground/60"
-                      }`}
+                        }`}
                     >
                       {row.total_evaluated}
                     </span>

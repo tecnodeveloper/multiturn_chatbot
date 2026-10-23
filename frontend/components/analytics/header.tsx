@@ -32,8 +32,8 @@ export function AnalyticsHeader({
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-card/80 backdrop-blur-md">
-      <div className="relative flex items-center justify-between px-4 sm:px-8 py-3.5 max-w-[1600px] mx-auto w-full min-h-[64px]">
+    <header className="w-full border-b border-border/40">
+      <div className="relative flex items-center justify-between px-4 sm:px-8 py-2.5 max-w-[1600px] mx-auto w-full min-h-[52px]">
         {/* Left Zone — Page Identity */}
         <div className="flex items-center gap-2.5 z-10">
           <div className="p-1.5 rounded-xl bg-[#f5a623]/10 text-[#f5a623] shrink-0">
@@ -41,7 +41,7 @@ export function AnalyticsHeader({
           </div>
           <div className="flex flex-col">
             <h1 className="text-[17px] sm:text-[19px] font-medium text-foreground tracking-tight whitespace-nowrap">
-              Response analytics
+              Analytics Dashboard
             </h1>
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className="relative flex h-1.5 w-1.5 shrink-0">

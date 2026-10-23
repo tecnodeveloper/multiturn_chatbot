@@ -33,7 +33,7 @@ export const TableResponseTime: FC<TableResponseTimeProps> = ({
   return (
     <div
       id="table-response-time"
-      className="bg-card rounded-2xl shadow-sm p-6 flex flex-col gap-5 w-full border border-border overflow-hidden"
+      className="bg-card rounded-2xl shadow-sm p-6 flex flex-col gap-5 w-full border border-border overflow-hidden scroll-mt-28"
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/80 pb-4">
         <div className="flex items-center gap-2.5">
@@ -42,17 +42,13 @@ export const TableResponseTime: FC<TableResponseTimeProps> = ({
           </div>
           <div>
             <h3 className="text-[16px] font-semibold text-foreground tracking-tight">
-              Table 4: Response-Time Summary
+              Response-Time Summary
             </h3>
-            <p className="text-[12px] text-muted-foreground mt-0.5">
-              Summarize chatbot response generation latency across minimum, maximum, mean, and median percentiles
-            </p>
+
           </div>
         </div>
 
-        <div className="text-[11.5px] text-muted-foreground bg-muted/30 px-3 py-1 rounded-lg border border-border/60 self-start sm:self-auto">
-          {data?.population || "All measured assistant replies in scope"}
-        </div>
+
       </div>
 
       <div className="overflow-x-auto">

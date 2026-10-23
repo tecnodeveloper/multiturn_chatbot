@@ -10,7 +10,6 @@ import type { AnalyticsData } from "@/hooks/use-analytics";
 import { SessionsOverviewCards } from "./sessions-overview-cards";
 import { SessionExplorerTable } from "./session-explorer-table";
 import { SessionDetailView } from "./session-detail-view";
-import { SessionInsightsPanel } from "./session-insights-panel";
 
 interface AnalyticsSessionsModuleProps {
   data: AnalyticsData | null;
@@ -80,19 +79,12 @@ export function AnalyticsSessionsModule({
       </div>
 
       {/* 1. Session Overview Cards */}
-      <section id="sessions-kpi-cards" aria-label="Session summary metrics">
+      <section id="sessions-kpi-cards" aria-label="Session summary metrics" className="scroll-mt-28">
         <SessionsOverviewCards kpis={sessionsData?.kpis} isLoading={isLoading} />
       </section>
 
-      {/* 2. Session Insights Panel */}
-      {sessionsData?.insights && sessionsData.insights.length > 0 && (
-        <section aria-label="Session performance insights">
-          <SessionInsightsPanel insights={sessionsData.insights} />
-        </section>
-      )}
-
-      {/* 3. Session Explorer Table */}
-      <section id="sessions-table-section" aria-label="Session explorer table">
+      {/* 2. Session Explorer Table */}
+      <section id="sessions-table-section" aria-label="Session explorer table" className="scroll-mt-28">
         <SessionExplorerTable
           sessions={sessions}
           selectedSessionId={selectedSessionId}
@@ -101,8 +93,8 @@ export function AnalyticsSessionsModule({
         />
       </section>
 
-      {/* 4. Deep Inspection / Detail View */}
-      <section ref={detailViewRef} id="session-detail-view" aria-label="Selected session inspection">
+      {/* 3. Deep Inspection / Detail View */}
+      <section ref={detailViewRef} id="session-detail-view" aria-label="Selected session inspection" className="scroll-mt-28">
         {selectedSession ? (
           <SessionDetailView
             session={selectedSession}

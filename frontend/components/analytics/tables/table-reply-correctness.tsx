@@ -168,7 +168,7 @@ export const TableReplyCorrectness: FC<TableReplyCorrectnessProps> = ({
   return (
     <div
       id="table-reply-correctness"
-      className="bg-card rounded-2xl shadow-sm p-6 flex flex-col gap-5 w-full border border-border overflow-hidden"
+      className="bg-card rounded-2xl shadow-sm p-6 flex flex-col gap-5 w-full border border-border overflow-hidden scroll-mt-28"
     >
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/80 pb-4">
@@ -178,11 +178,8 @@ export const TableReplyCorrectness: FC<TableReplyCorrectnessProps> = ({
           </div>
           <div>
             <h3 className="text-[16px] font-semibold text-foreground tracking-tight">
-              Table 2: Reply Correctness
+              Reply Correctness
             </h3>
-            <p className="text-[12px] text-muted-foreground mt-0.5">
-              Inspect correctness, human ratings, latency, and previews of individual assistant responses
-            </p>
           </div>
         </div>
 

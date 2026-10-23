@@ -72,7 +72,7 @@ export const NavigationTabs: FC<NavigationTabsProps> = ({
   };
 
   return (
-    <div className="w-full border-b border-border bg-card/60 backdrop-blur-md sticky top-[64px] z-30">
+    <div className="w-full">
       <div className="max-w-[1600px] mx-auto px-4 sm:px-8">
         <nav
           role="tablist"

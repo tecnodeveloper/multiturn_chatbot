@@ -32,7 +32,7 @@ export const TableLengthPreference: FC<TableLengthPreferenceProps> = ({
   return (
     <div
       id="table-length-preference"
-      className="bg-card rounded-2xl shadow-sm p-6 flex flex-col gap-5 w-full border border-border overflow-hidden"
+      className="bg-card rounded-2xl shadow-sm p-6 flex flex-col gap-5 w-full border border-border overflow-hidden scroll-mt-28"
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/80 pb-4">
         <div className="flex items-center gap-2.5">
@@ -41,11 +41,9 @@ export const TableLengthPreference: FC<TableLengthPreferenceProps> = ({
           </div>
           <div>
             <h3 className="text-[16px] font-semibold text-foreground tracking-tight">
-              Table 6: Response-Length Preference
+              Response-Length Preference
             </h3>
-            <p className="text-[12px] text-muted-foreground mt-0.5">
-              Correlate human length preferences with satisfaction ratings
-            </p>
+
           </div>
         </div>
 
@@ -82,11 +80,10 @@ export const TableLengthPreference: FC<TableLengthPreferenceProps> = ({
                   </td>
                   <td className="py-3.5 px-3.5 text-center font-mono">
                     <span
-                      className={`inline-block px-2.5 py-0.5 rounded-full text-[11.5px] ${
-                        hasCount
+                      className={`inline-block px-2.5 py-0.5 rounded-full text-[11.5px] ${hasCount
                           ? "bg-muted text-foreground font-medium"
                           : "text-muted-foreground/60"
-                      }`}
+                        }`}
                     >
                       {row.count}
                     </span>
