@@ -1,0 +1,74 @@
+[
+  {
+    "scenario": "upstream 503 overloaded",
+    "status": 503,
+    "error_message": "Service Unavailable - High demand",
+    "expected_kind": "OVERLOADED",
+    "expected_code": 503,
+    "expected_retryable": true
+  },
+  {
+    "scenario": "upstream 429 rate limit",
+    "status": 429,
+    "error_message": "Too Many Requests",
+    "expected_kind": "RATE_LIMIT",
+    "expected_code": 429,
+    "expected_retryable": true
+  },
+  {
+    "scenario": "upstream 404 model not found",
+    "status": 404,
+    "error_message": "Model not found",
+    "expected_kind": "MODEL_NOT_FOUND",
+    "expected_code": 404,
+    "expected_retryable": false
+  },
+  {
+    "scenario": "upstream 400 bad request",
+    "status": 400,
+    "error_message": "Invalid argument provided",
+    "expected_kind": "BAD_REQUEST",
+    "expected_code": 400,
+    "expected_retryable": false
+  },
+  {
+    "scenario": "missing API key misconfig",
+    "status": 401,
+    "error_message": "Invalid API key or unauthorized",
+    "expected_kind": "MISCONFIG",
+    "expected_code": 500,
+    "expected_retryable": false
+  },
+  {
+    "scenario": "read timeout",
+    "status": null,
+    "error_message": "Read timed out after 20 seconds",
+    "expected_kind": "TIMEOUT",
+    "expected_code": 504,
+    "expected_retryable": true
+  },
+  {
+    "scenario": "connection reset network error",
+    "status": null,
+    "error_message": "Connection reset by peer ECONNRESET",
+    "expected_kind": "NETWORK",
+    "expected_code": 502,
+    "expected_retryable": true
+  },
+  {
+    "scenario": "upstream 500 internal server error",
+    "status": 500,
+    "error_message": "Internal Server Error",
+    "expected_kind": "UPSTREAM_5XX",
+    "expected_code": 502,
+    "expected_retryable": true
+  },
+  {
+    "scenario": "unhandled generic exception",
+    "status": null,
+    "error_message": "Unexpected NullPointerException in pipeline",
+    "expected_kind": "UNKNOWN",
+    "expected_code": 500,
+    "expected_retryable": false
+  }
+]

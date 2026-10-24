@@ -3,11 +3,15 @@
 import { createContext, useContext, useState, useEffect, ReactNode, Dispatch, SetStateAction } from "react";
 import { ContentType } from "@/types";
 
+import { AIErrorSpec } from "@/lib/ai-errors";
+
 export interface Message {
   id?: string;
   role: "user" | "assistant";
   content: string;
   timestamp?: string;
+  isError?: boolean;
+  error?: AIErrorSpec;
 }
 
 export interface Chat {

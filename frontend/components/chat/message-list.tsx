@@ -21,11 +21,17 @@ interface MessageListProps {
   visibleFeedbackIds?: Set<string>;
 }
 
-const AssistantMessage: FC<{ content: string }> = ({ content }) => {
+const AssistantMessage: FC<{ message: Message }> = ({ message }) => {
   const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
-  const isError = content.startsWith("⚠️") || content.includes("Error 404") || content.includes("Error 503") || content.startsWith("Error:");
+  const content = message.content;
+  const isError = Boolean(message.isError || message.error);
+  const errorDetail = message.error;
 
   if (isError) {
+    const statusLabel = errorDetail
+      ? `HTTP ${errorDetail.code} • ${errorDetail.kind}`
+      : "Error";
+
     return (
       <div className="flex gap-3 justify-start group">
         <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-destructive/15 text-destructive text-xs font-semibold flex-shrink-0 shadow-sm border border-destructive/20">
@@ -38,7 +44,7 @@ const AssistantMessage: FC<{ content: string }> = ({ content }) => {
                 <AlertCircle className="h-3.5 w-3.5" />
                 API Error
               </span>
-              <span className="text-xs text-muted-foreground font-mono">Status 404 / 503 Timeout</span>
+              <span className="text-xs text-muted-foreground font-mono">{statusLabel}</span>
             </div>
             <div className="text-foreground dark:text-foreground text-[14px] leading-6 space-y-2">
               <ReactMarkdown className="prose dark:prose-invert max-w-none break-words text-[14px] leading-6">
@@ -151,7 +157,7 @@ export const MessageList: FC<MessageListProps> = ({
         return (
           <div key={`${item.role}-${item.id || index}`} className="flex flex-col gap-4">
             {isAssistant ? (
-              <AssistantMessage content={item.content} />
+              <AssistantMessage message={item} />
             ) : (
               <div className="flex gap-3 justify-end">
                 <div className="max-w-2xl rounded-2xl rounded-tr-sm bg-slate-200/90 dark:bg-slate-800/90 text-slate-900 dark:text-slate-100 border border-slate-300/60 dark:border-slate-700/60 px-4 py-3 shadow-sm text-[14.5px] leading-6">

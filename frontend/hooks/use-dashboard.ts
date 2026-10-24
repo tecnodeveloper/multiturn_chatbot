@@ -27,6 +27,7 @@ import {
 } from "@/db";
 import { consumeReadableStream } from "@/lib/consume-stream";
 import { convertFileToBase64 } from "@/lib/utils";
+import { classifyAIError, AIErrorSpec } from "@/lib/ai-errors";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -374,9 +375,9 @@ export function useDashboard() {
         controller.signal,
       );
 
-      // If fullContent is empty, the model failed during stream (e.g. 503 high demand or 404 Not Found)
+      // If fullContent is empty, the model failed during stream
       if (!fullContent || fullContent.trim().length === 0) {
-        throw new Error("Error 404: Gemini API failed to return a response. The model endpoint is unavailable, experiencing high demand (503), or timed out after 20 seconds.");
+        throw new Error("Gemini API failed to return a response. The model endpoint is unavailable, overloaded, or timed out.");
       }
 
       // FR10: Calculate explicit response duration delta
@@ -448,27 +449,19 @@ export function useDashboard() {
         clearTimeout(feedbackTimerRef.current);
         feedbackTimerRef.current = null;
       }
-      const isTimeout = isTimedOut || (error?.name === "AbortError" && isTimedOut);
-      const is503 =
-        error?.message?.includes("503") ||
-        error?.message?.toLowerCase().includes("high demand") ||
-        error?.message?.toLowerCase().includes("unavailable");
-      const is404 =
-        isTimeout ||
-        error?.message?.includes("404") ||
-        error?.message?.toLowerCase().includes("not found") ||
-        error?.message?.toLowerCase().includes("timed out");
 
-      const errorMessage = isTimeout
-        ? "Error 404: Gemini API request timed out after 20 seconds. The API failed to respond."
-        : is503
-        ? "Error 503: Gemini model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again shortly."
-        : (error.message || "Error 404: Gemini API response failed.");
+      // Canonical taxonomy classification
+      const errorInput = isTimedOut ? "TIMEOUT_20S" : error;
+      const classified = classifyAIError(errorInput);
 
-      toast.error(errorMessage);
+      toast.error(classified.message);
 
-      // Don't put user in an infinite waiting loop! Show the error message clearly in the chat
-      const errorContent = `⚠️ **${errorMessage}**\n\n*The response could not be retrieved. Please check your Gemini API key in \`frontend/.env.local\`, verify your network connection, or try selecting another model.*`;
+      // Structured error representation
+      const errorContent = `⚠️ **${classified.message}**\n\n*${
+        classified.retryable
+          ? "This issue is usually temporary. Please try again in a few moments."
+          : "Please check your configuration or select another model."
+      }*`;
       const errorMsgId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 11);
 
       setChats((prev) =>
@@ -483,6 +476,8 @@ export function useDashboard() {
                     role: "assistant",
                     content: errorContent,
                     timestamp: new Date().toISOString(),
+                    isError: true,
+                    error: classified,
                   },
                 ],
               }

@@ -29,6 +29,7 @@ SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
 
 from analytics.scripts.topics import TOPIC_CODES, TOPIC_LABELS, classify_topic as heuristic_classify_topic
+from analytics.scripts.ai_errors import classify_exception
 
 # Primary Project Domains according to PDF specifications plus 'Other'
 PROJECT_DOMAINS = TOPIC_CODES
@@ -233,7 +234,16 @@ def chat():
         return jsonify({"error": "Missing message, session_id (chat_id), or user_id"}), 400
 
     if not GEMINI_API_KEY:
-        return jsonify({"error": "No AI API key found. Please set GEMINI_API_KEY environment variable."}), 500
+        kind, code, message, retryable = classify_exception(Exception("missing api key"))
+        return jsonify({
+            "error": message,
+            "error_detail": {
+                "kind": kind,
+                "code": code,
+                "message": message,
+                "retryable": retryable
+            }
+        }), code
     
     # FR10: Track exact dispatch timestamp
     start_time = time.time()
@@ -277,15 +287,26 @@ def chat():
             try:
                 with requests.post(url, json=payload, headers=headers, stream=True, timeout=20) as r:
                     if r.status_code != 200:
-                        err_msg = ""
+                        raw_err = ""
                         try:
                             err_data = r.json()
-                            err_msg = err_data.get("error", {}).get("message", r.text)
+                            raw_err = err_data.get("error", {}).get("message", r.text)
                         except Exception:
-                            err_msg = r.text
-                        error_output = f"Error {r.status_code}: Gemini API call failed - {err_msg}"
-                        yield error_output
-                        save_message(session_id, user_id, 'assistant', error_output, response_time=round(time.time() - start_time, 3), topic_label=topic_label, session_phase=session_phase)
+                            raw_err = r.text
+
+                        kind, code, message, retryable = classify_exception(Exception(raw_err), status=r.status_code)
+                        err_payload = json.dumps({
+                            "error": message,
+                            "error_detail": {
+                                "kind": kind,
+                                "code": code,
+                                "message": message,
+                                "retryable": retryable,
+                                "upstream_status": r.status_code
+                            }
+                        })
+                        yield err_payload
+                        save_message(session_id, user_id, 'assistant', message, response_time=round(time.time() - start_time, 3), topic_label=topic_label, session_phase=session_phase)
                         return
 
                     for line in r.iter_lines():
@@ -305,15 +326,33 @@ def chat():
                                                 yield chunk_text
                                 except Exception:
                                     continue
-            except requests.exceptions.Timeout:
-                timeout_msg = "Error 404: Gemini API request timed out after 20 seconds. No response received."
-                yield timeout_msg
-                save_message(session_id, user_id, 'assistant', timeout_msg, response_time=20.0, topic_label=topic_label, session_phase=session_phase)
+            except requests.exceptions.Timeout as te:
+                kind, code, message, retryable = classify_exception(te)
+                err_payload = json.dumps({
+                    "error": message,
+                    "error_detail": {
+                        "kind": kind,
+                        "code": code,
+                        "message": message,
+                        "retryable": retryable
+                    }
+                })
+                yield err_payload
+                save_message(session_id, user_id, 'assistant', message, response_time=20.0, topic_label=topic_label, session_phase=session_phase)
                 return
             except requests.exceptions.RequestException as re:
-                err_msg = f"Error 404: Gemini API connection error - {str(re)}"
-                yield err_msg
-                save_message(session_id, user_id, 'assistant', err_msg, response_time=round(time.time() - start_time, 3), topic_label=topic_label, session_phase=session_phase)
+                kind, code, message, retryable = classify_exception(re)
+                err_payload = json.dumps({
+                    "error": message,
+                    "error_detail": {
+                        "kind": kind,
+                        "code": code,
+                        "message": message,
+                        "retryable": retryable
+                    }
+                })
+                yield err_payload
+                save_message(session_id, user_id, 'assistant', message, response_time=round(time.time() - start_time, 3), topic_label=topic_label, session_phase=session_phase)
                 return
 
             # FR10: Calculate explicit response duration delta
@@ -334,9 +373,18 @@ def chat():
                         update_session_title(session_id, title)
                 
         except Exception as e:
-            err_text = f"Error 404: {str(e)}"
-            yield err_text
-            save_message(session_id, user_id, 'assistant', err_text, response_time=round(time.time() - start_time, 3), topic_label=topic_label, session_phase=session_phase)
+            kind, code, message, retryable = classify_exception(e)
+            err_payload = json.dumps({
+                "error": message,
+                "error_detail": {
+                    "kind": kind,
+                    "code": code,
+                    "message": message,
+                    "retryable": retryable
+                }
+            })
+            yield err_payload
+            save_message(session_id, user_id, 'assistant', message, response_time=round(time.time() - start_time, 3), topic_label=topic_label, session_phase=session_phase)
 
     return Response(stream_with_context(generate()), mimetype='text/plain')
 

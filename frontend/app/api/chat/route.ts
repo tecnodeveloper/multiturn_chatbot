@@ -1,6 +1,7 @@
 import { streamText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { classifyAIError } from "@/lib/ai-errors";
 
 export const runtime = "edge";
 
@@ -53,12 +54,21 @@ export async function POST(req: Request) {
     }
 
     if (!apiKey && provider !== "Ollama") {
+      const errSpec = classifyAIError({
+        message: `${provider} API key not found. Please verify GEMINI_API_KEY in frontend/.env.local`,
+        kind: "MISCONFIG",
+      });
       return new Response(
-        JSON.stringify({ error: `${provider} API key not found. Please verify GEMINI_API_KEY in frontend/.env.local` }),
-        { status: 400 },
+        JSON.stringify({
+          error: errSpec.message,
+          error_detail: errSpec,
+        }),
+        {
+          status: errSpec.code,
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
-
 
     const finalMessages = [...messages];
     if (fileContexts) {
@@ -82,20 +92,17 @@ export async function POST(req: Request) {
     return result.toTextStreamResponse();
   } catch (error: any) {
     console.error("Chat API Error:", error);
-    const is404 =
-      error?.status === 404 ||
-      error?.statusCode === 404 ||
-      error?.message?.includes("404") ||
-      error?.message?.toLowerCase().includes("not found");
-    const statusCode = is404 ? 404 : (error?.status || 500);
+    const errSpec = classifyAIError(error);
 
-    const errorMessage = is404
-      ? `Error 404: Gemini API model '${requestedModel || "default"}' was not found or failed to respond (404 Not Found).`
-      : (error?.message || "Error: Failed to generate AI response");
-
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      status: statusCode,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({
+        error: errSpec.message,
+        error_detail: errSpec,
+      }),
+      {
+        status: errSpec.code,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   }
 }

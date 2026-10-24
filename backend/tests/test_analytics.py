@@ -12,6 +12,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from app import app, classify_topic
 from analytics.scripts.feedback_processor import resolve_topic, process_analytics, VALID_DOMAINS
+from analytics.scripts.ai_errors import classify_exception
 
 
 class TestTopicClassification(unittest.TestCase):
@@ -55,6 +56,38 @@ class TestTopicClassification(unittest.TestCase):
                 actual,
                 expected,
                 f"classify_topic('{inp}') [{desc}] expected {expected}, got {actual}"
+            )
+
+
+class TestAIErrorTaxonomy(unittest.TestCase):
+    """Test AI error classification contract against shared/ai-error-fixtures.json."""
+
+    def test_shared_ai_error_fixtures(self):
+        fixtures_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "..", "shared", "ai-error-fixtures.json")
+        )
+        self.assertTrue(os.path.exists(fixtures_path), f"Fixtures file not found at {fixtures_path}")
+        with open(fixtures_path, "r", encoding="utf-8") as f:
+            fixtures = json.load(f)
+
+        for item in fixtures:
+            status = item.get("status")
+            err_msg = item["error_message"]
+            kind, code, message, retryable = classify_exception(Exception(err_msg), status=status)
+            self.assertEqual(
+                kind,
+                item["expected_kind"],
+                f"Scenario '{item['scenario']}' kind mismatch: expected {item['expected_kind']}, got {kind}"
+            )
+            self.assertEqual(
+                code,
+                item["expected_code"],
+                f"Scenario '{item['scenario']}' code mismatch: expected {item['expected_code']}, got {code}"
+            )
+            self.assertEqual(
+                retryable,
+                item["expected_retryable"],
+                f"Scenario '{item['scenario']}' retryable mismatch: expected {item['expected_retryable']}, got {retryable}"
             )
 
 

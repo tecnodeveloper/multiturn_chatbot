@@ -5,11 +5,42 @@ export function createRouteClient(
   request: NextRequest,
   response: NextResponse,
 ) {
+  const sbAccessToken = request.cookies.get("sb-access-token")?.value;
+  const globalHeaders: Record<string, string> = {};
+  if (sbAccessToken) {
+    globalHeaders["Authorization"] = `Bearer ${sbAccessToken}`;
+  }
+
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      global: {
+        headers: globalHeaders,
+      },
       cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value;
+        },
+        set(name: string, value: string, options?: CookieOptions) {
+          const isLocal = request.nextUrl.hostname === 'localhost' || request.nextUrl.hostname === '127.0.0.1';
+          response.cookies.set(name, value, {
+            ...options,
+            path: options?.path || "/",
+            secure: isLocal ? false : options?.secure,
+            sameSite: 'lax',
+          });
+        },
+        remove(name: string, options?: CookieOptions) {
+          const isLocal = request.nextUrl.hostname === 'localhost' || request.nextUrl.hostname === '127.0.0.1';
+          response.cookies.set(name, "", {
+            ...options,
+            path: options?.path || "/",
+            secure: isLocal ? false : options?.secure,
+            sameSite: 'lax',
+            maxAge: 0,
+          });
+        },
         getAll() {
           return request.cookies.getAll();
         },

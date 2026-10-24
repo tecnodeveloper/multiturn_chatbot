@@ -62,7 +62,28 @@ export async function finalizeSession(
     .eq("id", chatId)
     .maybeSingle();
 
-  if (chatError || !chat) {
+  if (!chat) {
+    // If not found in user RLS scope, check if it exists under another user to distinguish 403 from 404
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "http://localhost:54321";
+    if (serviceKey) {
+      const checkRes = await fetch(`${supabaseUrl}/rest/v1/chats?select=id,user_id&id=eq.${chatId}`, {
+        headers: {
+          apikey: serviceKey,
+          Authorization: `Bearer ${serviceKey}`,
+        },
+      });
+      if (checkRes.ok) {
+        const rows = await checkRes.json();
+        if (rows && rows.length > 0 && rows[0].user_id !== user.id) {
+          return {
+            status: 403,
+            data: { error: "Unauthorized access to this chat session" },
+          };
+        }
+      }
+    }
+
     return {
       status: 404,
       data: { error: "Chat session not found" },
