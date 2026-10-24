@@ -50,6 +50,7 @@
     "ai": "^6.0.191",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
+    "command-code": "^1.88.0",
     "date-fns": "^2.30.0",
     "framer-motion": "^10.16.4",
     "lucide-react": "^0.292.0",
