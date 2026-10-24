@@ -174,6 +174,12 @@ export function useDashboard() {
 
       setChats((prev) => [nextChat, ...prev]);
       setCurrentChatId(newChat.id);
+
+      // FR14/FR17 (Option C): Background safety net to finalize any eligible stale sessions
+      fetch("/api/analytics/sessions/finalize-stale", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      }).catch((err) => console.error("Error finalizing stale sessions:", err));
     } catch (error) {
       toast.error("Failed to create new chat");
     }

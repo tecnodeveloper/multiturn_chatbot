@@ -7,6 +7,7 @@
 import { readFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
+import { createClient } from "@supabase/supabase-js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -23,34 +24,33 @@ function loadEnv() {
       const val = trimmed.slice(eq + 1).trim();
       process.env[key] = process.env[key] ?? val;
     }
-  } catch { console.warn("Could not load .env.local"); }
+  } catch {
+    console.warn("Could not load .env.local");
+  }
 }
 loadEnv();
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "http://127.0.0.1:54321";
-const SERVICE_KEY  = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-const USER_ID      = "0e62b6c3-c794-42cb-a139-bd5bd48cdad8";
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const TARGET_EMAIL = "recluzedev@gmail.com";
 
-if (!SERVICE_KEY) { console.error("ERROR: SUPABASE_SERVICE_ROLE_KEY not found."); process.exit(1); }
-
-const HEADERS = {
-  apikey: SERVICE_KEY,
-  Authorization: `Bearer ${SERVICE_KEY}`,
-  "Content-Type": "application/json",
-  Prefer: "return=representation",
-};
-
-async function sb(path, opts = {}) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1${path}`, { ...opts, headers: { ...HEADERS, ...(opts.headers || {}) } });
-  if (!res.ok) { const t = await res.text(); throw new Error(`${opts.method||"GET"} ${path} => ${res.status}: ${t}`); }
-  const ct = res.headers.get("content-type") || "";
-  return ct.includes("json") ? res.json() : [];
+if (!SERVICE_KEY) {
+  console.error("ERROR: SUPABASE_SERVICE_ROLE_KEY not found.");
+  process.exit(1);
 }
 
-// Canonical DB enum labels (spaced = domain_category_type)
+const supabaseAdmin = createClient(SUPABASE_URL, SERVICE_KEY, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+});
+
+// Canonical codes (Phase 1 single source of truth)
 const SCENARIOS = [
   {
-    dbLabel: "Machine Learning", title: "ML Regression & Clustering Session",
+    canonicalCode: "MachineLearning",
+    title: "ML Regression & Clustering Session",
     msgs: [
       "explain supervised machine learning regression and clustering algorithms",
       "what is the difference between SVM and logistic regression for classification",
@@ -61,7 +61,8 @@ const SCENARIOS = [
     ],
   },
   {
-    dbLabel: "Deep Learning", title: "CNN & Transformer Architecture Review",
+    canonicalCode: "DeepLearning",
+    title: "CNN & Transformer Architecture Review",
     msgs: [
       "how does a CNN transformer work in deep learning architectures",
       "explain backpropagation through a deep neural network with RNN layers",
@@ -71,7 +72,8 @@ const SCENARIOS = [
     ],
   },
   {
-    dbLabel: "Healthcare AI", title: "Healthcare AI Patient Data Analysis",
+    canonicalCode: "HealthcareAI",
+    title: "Healthcare AI Patient Data Analysis",
     msgs: [
       "how is patient data used in healthcare hospitals for AI diagnostics",
       "explain the role of machine learning in medical imaging and radiology",
@@ -82,7 +84,8 @@ const SCENARIOS = [
     ],
   },
   {
-    dbLabel: "Power Systems", title: "Power Grid Voltage & Solar Storage",
+    canonicalCode: "PowerSystems",
+    title: "Power Grid Voltage & Solar Storage",
     msgs: [
       "explain how power grid voltage stability is maintained using AI",
       "how does solar battery storage interact with the smart grid",
@@ -92,7 +95,8 @@ const SCENARIOS = [
     ],
   },
   {
-    dbLabel: "E-commerce AI", title: "E-commerce Recommendation Systems",
+    canonicalCode: "E-commerceAI",
+    title: "E-commerce Recommendation Systems",
     msgs: [
       "how do e-commerce product recommendation systems work using collaborative filtering",
       "explain cart abandonment prediction using machine learning in retail",
@@ -103,7 +107,8 @@ const SCENARIOS = [
     ],
   },
   {
-    dbLabel: "Machine Learning", title: "Feature Engineering & Model Selection",
+    canonicalCode: "MachineLearning",
+    title: "Feature Engineering & Model Selection",
     msgs: [
       "what is feature engineering and why is it critical in machine learning pipelines",
       "compare random forests and gradient boosting for classification tasks",
@@ -113,50 +118,94 @@ const SCENARIOS = [
   },
 ];
 
-const CORRECTNESS  = ["correct","correct","correct","partial","partial","incorrect"];
-const LENGTH_TYPES = ["to_the_point","to_the_point","short","lengthy","to_the_point","short"];
-const RATINGS      = [4,4,3,4,3,2,4,3,2,4,3,4];
+const CORRECTNESS = ["correct", "correct", "correct", "partial", "partial", "incorrect"];
+const LENGTH_TYPES = ["to_the_point", "to_the_point", "short", "lengthy", "to_the_point", "short"];
+const RATINGS = [4, 4, 3, 4, 3, 2, 4, 3, 2, 4, 3, 4];
 
-function pick(arr, idx) { return arr[idx % arr.length]; }
+function pick(arr, idx) {
+  return arr[idx % arr.length];
+}
 
 function daysAgo(n, h = 0) {
-  const d = new Date(); d.setDate(d.getDate() - n); d.setHours(10 + h, 0, 0, 0);
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  d.setHours(10 + h, 0, 0, 0);
   return d.toISOString();
 }
+
 function minutesAfter(iso, mins) {
   return new Date(new Date(iso).getTime() + mins * 60000).toISOString();
 }
-const ASST = (topic, q) =>
-  `Explanation on "${q.slice(0,60)}": In ${topic}, the key aspects are: ` +
+
+const ASST = (code, q) =>
+  `Explanation on "${q.slice(0, 60)}": In ${code}, the key aspects are: ` +
   `[1] Foundational concepts are established in literature. ` +
   `[2] Practical implementations vary by domain. ` +
   `[3] Evaluation metrics must reflect the business goal. ` +
-  `This covers the primary dimensions of your ${topic} question.`;
+  `This covers the primary dimensions of your ${code} question.`;
 
 async function seed() {
-  console.log("\n🌱 Seeding analytics for user:", USER_ID);
+  console.log("\n🌱 Resolving target user:", TARGET_EMAIL);
 
-  // Idempotent cleanup
-  const oldChats = await sb(`/chats?user_id=eq.${USER_ID}&select=id`);
-  for (const c of oldChats) await sb(`/chats?id=eq.${c.id}`, { method: "DELETE" });
-  console.log(`🧹 Deleted ${oldChats.length} prior chats (cascade).`);
+  // 1. Resolve user id dynamically
+  const { data: usersData, error: userErr } = await supabaseAdmin.auth.admin.listUsers();
+  if (userErr) throw userErr;
 
-  let totalChats = 0, totalMsgs = 0, totalFb = 0, totalDom = 0;
+  const targetUser = usersData.users.find((u) => u.email === TARGET_EMAIL);
+  if (!targetUser) {
+    throw new Error(`User ${TARGET_EMAIL} not found in Supabase Auth`);
+  }
+
+  const userId = targetUser.id;
+  console.log(`✓ Resolved user_id: ${userId}`);
+
+  // 2. Reset that user's prior chats (cascade) for idempotency
+  const { data: oldChats, error: listChatErr } = await supabaseAdmin
+    .from("chats")
+    .select("id")
+    .eq("user_id", userId);
+
+  if (listChatErr) throw listChatErr;
+
+  if (oldChats && oldChats.length > 0) {
+    for (const c of oldChats) {
+      await supabaseAdmin.from("chats").delete().eq("id", c.id);
+    }
+    console.log(`🧹 Deleted ${oldChats.length} prior chats (cascade).`);
+  }
+
+  let totalChats = 0,
+    totalMsgs = 0,
+    totalFb = 0,
+    totalDom = 0;
 
   for (let di = 0; di < SCENARIOS.length; di++) {
     const sc = SCENARIOS[di];
+    // Spread created_at over ~3 weeks (21 days down to 6 days ago)
     const chatCreatedAt = daysAgo(21 - di * 3);
 
-    const [chat] = await sb("/chats", {
-      method: "POST",
-      body: JSON.stringify({ user_id: USER_ID, title: sc.title, created_at: chatCreatedAt, updated_at: chatCreatedAt }),
-    });
+    const { data: chat, error: chatErr } = await supabaseAdmin
+      .from("chats")
+      .insert({
+        user_id: userId,
+        title: sc.title,
+        created_at: chatCreatedAt,
+        updated_at: chatCreatedAt,
+      })
+      .select("*")
+      .single();
+
+    if (chatErr) throw chatErr;
     totalChats++;
 
-    await sb("/domains", {
-      method: "POST",
-      body: JSON.stringify({ chat_id: chat.id, category: sc.dbLabel, created_at: chatCreatedAt }),
+    // Insert ONE domains row per chat with canonical code
+    const { error: domErr } = await supabaseAdmin.from("domains").insert({
+      chat_id: chat.id,
+      category: sc.canonicalCode,
+      created_at: chatCreatedAt,
     });
+
+    if (domErr) throw domErr;
     totalDom++;
 
     let fbIdx = (di * 7) % RATINGS.length;
@@ -168,57 +217,62 @@ async function seed() {
       const asstTime = minutesAfter(userTime, 1.5);
       const rt = parseFloat((0.4 + Math.random() * 11.6).toFixed(3));
 
-      await sb("/messages", {
-        method: "POST",
-        body: JSON.stringify({ chat_id: chat.id, user_id: USER_ID, role: "user", content: userText, session_phase: phase, created_at: userTime }),
+      // User message
+      const { error: uMsgErr } = await supabaseAdmin.from("messages").insert({
+        chat_id: chat.id,
+        user_id: userId,
+        role: "user",
+        content: userText,
+        session_phase: phase,
+        created_at: userTime,
       });
+      if (uMsgErr) throw uMsgErr;
       totalMsgs++;
 
-      const [asstMsg] = await sb("/messages", {
-        method: "POST",
-        body: JSON.stringify({ chat_id: chat.id, user_id: USER_ID, role: "assistant", content: ASST(sc.dbLabel, userText), response_time: rt, session_phase: phase, created_at: asstTime }),
-      });
+      // Assistant message with response_time and session_phase
+      const { data: asstMsg, error: aMsgErr } = await supabaseAdmin
+        .from("messages")
+        .insert({
+          chat_id: chat.id,
+          user_id: userId,
+          role: "assistant",
+          content: ASST(sc.canonicalCode, userText),
+          response_time: rt,
+          session_phase: phase,
+          created_at: asstTime,
+        })
+        .select("*")
+        .single();
+      if (aMsgErr) throw aMsgErr;
       totalMsgs++;
 
-      await sb("/feedback", {
-        method: "POST",
-        body: JSON.stringify({
-          chat_id: chat.id, user_id: USER_ID, message_id: asstMsg.id,
-          rating: pick(RATINGS, fbIdx), correctness: pick(CORRECTNESS, fbIdx),
-          length_type: pick(LENGTH_TYPES, fbIdx), category: sc.dbLabel,
-          comment: `Turn ${turnIndex} feedback`,
-          created_at: minutesAfter(asstTime, 1),
-        }),
+      // Feedback row for each assistant message
+      const { error: fbErr } = await supabaseAdmin.from("feedback").insert({
+        chat_id: chat.id,
+        user_id: userId,
+        message_id: asstMsg.id,
+        rating: pick(RATINGS, fbIdx),
+        correctness: pick(CORRECTNESS, fbIdx),
+        length_type: pick(LENGTH_TYPES, fbIdx),
+        category: sc.canonicalCode,
+        comment: `Turn ${turnIndex} feedback`,
+        created_at: minutesAfter(asstTime, 1),
       });
+      if (fbErr) throw fbErr;
       totalFb++;
       fbIdx++;
     }
-    console.log(`   ✓ [${di+1}/6] "${sc.title}" — ${sc.msgs.length} turns, ${sc.msgs.length} feedback rows`);
+    console.log(
+      `   ✓ [${di + 1}/6] "${sc.title}" — ${sc.msgs.length} turns, ${sc.msgs.length} feedback rows, code=${sc.canonicalCode}`
+    );
   }
 
-  console.log(`\n✅ Seeded: ${totalChats} chats, ${totalMsgs} messages, ${totalFb} feedback rows, ${totalDom} domains`);
-
-  // API verification
-  console.log("\n🔍 Verifying via Next.js API…");
-  try {
-    const res = await fetch(`http://localhost:3000/api/analytics?user_id=${USER_ID}`);
-    if (!res.ok) { console.warn(`   API returned ${res.status} — is 'npm run dev' running?`); return; }
-    const data = await res.json();
-    const s = data.summary || {}, st = data.stats || {};
-    console.log(`   total_feedback:        ${s.total_feedback}`);
-    console.log(`   average_rating:        ${s.average_rating}`);
-    console.log(`   ratings:               ${JSON.stringify(st.ratings)}`);
-    console.log(`   correctness:           ${JSON.stringify(st.correctness)}`);
-    console.log(`   length_distribution:   ${JSON.stringify(st.length_distribution)}`);
-    console.log(`   topics count:          ${data.topics?.length}`);
-    console.log(`   sessions total:        ${data.sessions?.kpis?.total_sessions}`);
-    const sess = data.sessions?.sessions || [];
-    const withPhases = sess.filter(s => s.phases?.some(p => p.assistant_responses > 0));
-    console.log(`   sessions with phases:  ${withPhases.length}/${sess.length}`);
-    const g = data.graphs?.topic_distribution;
-    if (g) console.log(`   topic_distribution:    ${g.filter(t=>t.count>0).map(t=>`${t.topic}=${t.count}`).join(", ")}`);
-    console.log("\n✅ Verification complete.");
-  } catch(e) { console.warn(`   Skipped: ${e.message}`); }
+  console.log(
+    `\n✅ Seeded successfully:\n - ${totalChats} chats\n - ${totalMsgs} messages\n - ${totalFb} feedback rows (> 10)\n - ${totalDom} domains rows with canonical codes`
+  );
 }
 
-seed().catch(err => { console.error("\n❌ Seed failed:", err.message); process.exit(1); });
+seed().catch((err) => {
+  console.error("\n❌ Seed failed:", err);
+  process.exit(1);
+});

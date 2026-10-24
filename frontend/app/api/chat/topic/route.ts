@@ -9,10 +9,21 @@ export async function POST(req: NextRequest) {
     const res = new NextResponse();
     const supabase = createRouteClient(req, res);
 
-    const {
+    let {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser();
+
+    if (!user) {
+      const sbAccessToken = req.cookies.get("sb-access-token")?.value;
+      if (sbAccessToken) {
+        const tokenResult = await supabase.auth.getUser(sbAccessToken);
+        if (tokenResult.data?.user) {
+          user = tokenResult.data.user;
+          authError = null;
+        }
+      }
+    }
 
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
