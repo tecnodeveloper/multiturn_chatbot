@@ -15,7 +15,7 @@ export const getDomainsByChatId = async (chatId: string) => {
 
 export const createDomain = async (domain: {
   chat_id: string;
-  category: "Machine Learning" | "Deep Learning" | "Healthcare AI" | "Power Systems" | "E-commerce AI";
+  category: "MachineLearning" | "DeepLearning" | "HealthcareAI" | "PowerSystems" | "E-commerceAI" | "Other";
   feedback_id?: string;
 }) => {
   const { data, error } = await supabase

@@ -64,37 +64,12 @@ def fetch_live_data(user_id=None, session_id=None):
         print(f"Database connection error: {e}")
         return [], [], []
 
-VALID_DOMAINS = [
-    "MachineLearning",
-    "DeepLearning",
-    "HealthcareAI",
-    "PowerSystems",
-    "E-commerceAI",
-    "Other"
-]
+try:
+    from .topics import TOPIC_CODES, TOPIC_LABELS, classify_topic, resolve_topic
+except ImportError:
+    from analytics.scripts.topics import TOPIC_CODES, TOPIC_LABELS, classify_topic, resolve_topic
 
-def resolve_topic(user_query, raw_cat):
-    if raw_cat:
-        cat_clean = raw_cat.replace(" ", "")
-        for dom in VALID_DOMAINS:
-            if dom.lower() == cat_clean.lower():
-                return dom
-
-    if not user_query or len(user_query.strip()) < 6:
-        return "Other"
-
-    uq = user_query.lower()
-    if any(k in uq for k in ["deep learning", "deeplearning", "cnn", "rnn", "neural", "transformer", "pytorch"]):
-        return "DeepLearning"
-    if any(k in uq for k in ["health", "medical", "hospital", "patient", "clinical", "healthcareai"]):
-        return "HealthcareAI"
-    if any(k in uq for k in ["power", "grid", "voltage", "energy", "solar", "battery", "powersystems"]):
-        return "PowerSystems"
-    if any(k in uq for k in ["e-commerce", "ecommerce", "recommend", "cart", "product", "retail", "e-commerceai"]):
-        return "E-commerceAI"
-    if any(k in uq for k in ["machine learning", "machinelearning", "regression", "classification", "clustering", "svm", "dataset"]):
-        return "MachineLearning"
-    return "Other"
+VALID_DOMAINS = TOPIC_CODES
 
 
 def process_analytics(user_id=None, session_id=None):
@@ -157,7 +132,7 @@ def process_analytics(user_id=None, session_id=None):
     length_counts = {"short": 0, "to_the_point": 0, "lengthy": 0}
     if 'length_type' in df.columns:
         l_counts = df['length_type'].value_counts().to_dict()
-        for k, v in length_counts.items():
+        for k, v in l_counts.items():
             if str(k) in length_counts:
                 length_counts[str(k)] = int(v)
 
@@ -249,7 +224,7 @@ def process_analytics(user_id=None, session_id=None):
             "length_type": length_label
         })
 
-    # 6. Feedback Volume by Project Domain / Topic
+    # 6. Feedback Volume by Project Domain / Topic (computed over ALL feedback rows, not just recent 10)
     domain_totals = {
         "MachineLearning": 0,
         "DeepLearning": 0,
@@ -259,8 +234,15 @@ def process_analytics(user_id=None, session_id=None):
         "Other": 0
     }
 
-    for item in recent_feedback:
-        t_name = item.get("topic") or "Other"
+    for _, row in df.iterrows():
+        chat_id = row.get('chat_id')
+        user_msg_for_topic = None
+        if chat_id and chat_id in messages_by_chat:
+            user_msgs = [m for m in messages_by_chat[chat_id] if m.get('role') == 'user']
+            if user_msgs:
+                user_msg_for_topic = user_msgs[-1].get('content')
+        user_query_for_topic = user_msg_for_topic or f"User inquiry on {row.get('category') or 'AI Topic'}"
+        t_name = resolve_topic(user_query_for_topic, row.get('category') or chat_domains.get(chat_id))
         if t_name in domain_totals:
             domain_totals[t_name] += 1
         else:

@@ -1,0 +1,72 @@
+[
+  {
+    "input": "",
+    "expected_code": "Other",
+    "description": "empty string"
+  },
+  {
+    "input": "hi",
+    "expected_code": "Other",
+    "description": "short string below minimum threshold"
+  },
+  {
+    "input": "   ",
+    "expected_code": "Other",
+    "description": "whitespace only"
+  },
+  {
+    "input": "what is deep learning and cnn architectures",
+    "expected_code": "DeepLearning",
+    "description": "deep learning keywords"
+  },
+  {
+    "input": "how to build a transformer model with pytorch neural network",
+    "expected_code": "DeepLearning",
+    "description": "transformer and pytorch keywords"
+  },
+  {
+    "input": "how does healthcare hospital patient clinical data work",
+    "expected_code": "HealthcareAI",
+    "description": "healthcare keywords"
+  },
+  {
+    "input": "medical diagnosis using artificial intelligence in clinics",
+    "expected_code": "HealthcareAI",
+    "description": "medical and clinical keywords"
+  },
+  {
+    "input": "explain electric power grid and voltage solar battery",
+    "expected_code": "PowerSystems",
+    "description": "power systems keywords"
+  },
+  {
+    "input": "energy management for renewable solar inverter systems",
+    "expected_code": "PowerSystems",
+    "description": "energy and solar keywords"
+  },
+  {
+    "input": "recommend products in e-commerce cart and retail store",
+    "expected_code": "E-commerceAI",
+    "description": "ecommerce keywords"
+  },
+  {
+    "input": "customer shopping cart product recommendation system",
+    "expected_code": "E-commerceAI",
+    "description": "cart and product recommend keywords"
+  },
+  {
+    "input": "supervised machine learning linear regression and dataset",
+    "expected_code": "MachineLearning",
+    "description": "machine learning regression dataset keywords"
+  },
+  {
+    "input": "train a classification model with svm and clustering algorithms",
+    "expected_code": "MachineLearning",
+    "description": "classification svm clustering model keywords"
+  },
+  {
+    "input": "what is the weather like in Tokyo tomorrow?",
+    "expected_code": "Other",
+    "description": "unrelated general topic"
+  }
+]

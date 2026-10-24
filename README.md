@@ -421,7 +421,7 @@ Analytics Dashboard (Recharts visualizations)
 
 ---
 
-## 🧪 Testing
+##  Testing
 
 ```bash
 # E2E tests (Playwright)
@@ -435,9 +435,8 @@ uv run python -m pytest tests/
 
 ---
 
-## 📝 Important Notes
+## Important Notes
 
 - The **backend** loads `frontend/.env.local` automatically — no separate `backend/.env` is needed.
 - The **Vercel AI SDK** handles streaming on the Next.js side (`/api/chat`); the Flask backend manages its own independent streaming for `/api/chat` on port 5000.
 - **Ollama** integration requires a locally running Ollama instance; the `OLLAMA_URL` env var defaults to `http://127.0.0.1:11434/v1`.
-- The project has migrated from **Groq/LLaMA 3** to **Google Gemini** as the primary cloud AI provider.

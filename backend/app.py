@@ -20,7 +20,7 @@ app.secret_key = os.urandom(24)
 CORS(app)
 
 # Configuration
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_GENERATIVE_AI_API_KEY") or os.getenv("NEXT_PUBLIC_GEMINI_API_KEY") or ""
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_GENERATIVE_AI_API_KEY") or ""
 MODEL = "gemini-3.5-flash"
 FAST_MODEL = "gemini-3.5-flash"
 
@@ -28,15 +28,13 @@ FAST_MODEL = "gemini-3.5-flash"
 SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
 
+from analytics.scripts.topics import TOPIC_CODES, TOPIC_LABELS, classify_topic as heuristic_classify_topic
+
 # Primary Project Domains according to PDF specifications plus 'Other'
-PROJECT_DOMAINS = [
-    "MachineLearning",
-    "DeepLearning",
-    "HealthcareAI",
-    "PowerSystems",
-    "E-commerceAI",
-    "Other"
-]
+PROJECT_DOMAINS = TOPIC_CODES
+
+# Maps internal classification codes -> canonical display labels
+DOMAIN_LABEL_MAP = TOPIC_LABELS
 
 # Supabase Helper functions
 def supabase_headers():
@@ -48,22 +46,14 @@ def supabase_headers():
     }
 
 def classify_topic(user_message):
-    """FR11: Real-time Topic Classification using lightweight Gemini LLM or keyword fallback."""
-    if not user_message or len(user_message.strip()) < 5:
-        return "Other"
+    """FR11: Real-time Topic Classification using consolidated heuristics or lightweight Gemini LLM."""
+    # Fast domain keyword heuristics (consolidated rule set)
+    heuristic = heuristic_classify_topic(user_message)
+    if heuristic != "Other":
+        return heuristic
 
-    # Fast domain keyword heuristics
-    uq = user_message.lower()
-    if any(k in uq for k in ["deep learning", "deeplearning", "cnn", "rnn", "transformer", "pytorch"]):
-        return "DeepLearning"
-    if any(k in uq for k in ["health", "medical", "hospital", "patient", "clinical", "healthcare"]):
-        return "HealthcareAI"
-    if any(k in uq for k in ["power", "grid", "voltage", "energy", "solar", "battery"]):
-        return "PowerSystems"
-    if any(k in uq for k in ["e-commerce", "ecommerce", "recommend", "cart", "product", "retail"]):
-        return "E-commerceAI"
-    if any(k in uq for k in ["machine learning", "machinelearning", "regression", "classification", "clustering"]):
-        return "MachineLearning"
+    if not user_message or len(user_message.strip()) < 6:
+        return "Other"
 
     prompt = (
         f"Classify the following user message into EXACTLY ONE of these categories:\n"
@@ -131,6 +121,7 @@ def save_message(chat_id, user_id, role, content, response_time=None, topic_labe
             msg_data = res.json()
             if topic_label and isinstance(msg_data, list) and len(msg_data) > 0:
                 domain_url = f"{SUPABASE_URL}/rest/v1/domains"
+                # Save the canonical code directly
                 requests.post(domain_url, headers=supabase_headers(), json={
                     "chat_id": chat_id,
                     "category": topic_label
@@ -350,6 +341,7 @@ def chat():
     return Response(stream_with_context(generate()), mimetype='text/plain')
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    debug = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+    app.run(debug=debug, port=int(os.getenv("PORT", "5000")))
 
 

@@ -37,6 +37,26 @@ class TestTopicClassification(unittest.TestCase):
         self.assertEqual(resolve_topic("", "E-commerceAI"), "E-commerceAI")
         self.assertEqual(resolve_topic("", "UnknownCategory"), "Other")
 
+    def test_shared_topic_fixtures(self):
+        """Cross-stack topic fixtures test against shared/topic-fixtures.json."""
+        fixtures_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "..", "shared", "topic-fixtures.json")
+        )
+        self.assertTrue(os.path.exists(fixtures_path), f"Fixtures file not found at {fixtures_path}")
+        with open(fixtures_path, "r", encoding="utf-8") as f:
+            fixtures = json.load(f)
+
+        for item in fixtures:
+            inp = item["input"]
+            expected = item["expected_code"]
+            desc = item.get("description", "")
+            actual = classify_topic(inp)
+            self.assertEqual(
+                actual,
+                expected,
+                f"classify_topic('{inp}') [{desc}] expected {expected}, got {actual}"
+            )
+
 
 class TestAnalyticsCalculationsEdgeCases(unittest.TestCase):
     """Test calculation edge cases: empty datasets, zero divisions, extreme ratings."""

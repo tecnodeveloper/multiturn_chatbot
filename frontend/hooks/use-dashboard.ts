@@ -274,6 +274,18 @@ export function useDashboard() {
         ),
       );
 
+      // FR11/FR15: If this is the first user message of the chat, persist the classified topic once
+      if (currentMsgCount === 0) {
+        fetch("/api/chat/topic", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: userContent,
+          }),
+        }).catch((err) => console.error("Failed to persist chat topic:", err));
+      }
+
       const controller = new AbortController();
       abortControllerRef.current = controller;
 

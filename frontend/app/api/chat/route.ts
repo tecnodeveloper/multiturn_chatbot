@@ -20,7 +20,6 @@ export async function POST(req: Request) {
       apiKey =
         process.env.GEMINI_API_KEY ||
         process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
-        process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
         "";
       const google = createGoogleGenerativeAI({
         apiKey: apiKey,
@@ -45,7 +44,6 @@ export async function POST(req: Request) {
       apiKey =
         process.env.GEMINI_API_KEY ||
         process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
-        process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
         "";
       const google = createGoogleGenerativeAI({
         apiKey: apiKey,

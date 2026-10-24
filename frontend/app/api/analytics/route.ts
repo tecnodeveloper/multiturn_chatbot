@@ -2,31 +2,8 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-const VALID_DOMAINS = [
-  "MachineLearning",
-  "DeepLearning",
-  "HealthcareAI",
-  "PowerSystems",
-  "E-commerceAI",
-  "Other",
-];
-
-function resolveTopic(query: string, rawCat?: string | null): string {
-  if (rawCat) {
-    const clean = rawCat.replace(/\s+/g, "").toLowerCase();
-    for (const d of VALID_DOMAINS) {
-      if (d.toLowerCase() === clean) return d;
-    }
-  }
-  if (!query || query.trim().length < 4) return "Other";
-  const uq = query.toLowerCase();
-  if (["deep learning", "deeplearning", "cnn", "rnn", "neural", "transformer", "pytorch"].some((k) => uq.includes(k))) return "DeepLearning";
-  if (["health", "medical", "hospital", "patient", "clinical", "healthcare"].some((k) => uq.includes(k))) return "HealthcareAI";
-  if (["power", "grid", "voltage", "energy", "solar", "battery"].some((k) => uq.includes(k))) return "PowerSystems";
-  if (["e-commerce", "ecommerce", "recommend", "cart", "product", "retail"].some((k) => uq.includes(k))) return "E-commerceAI";
-  if (["machine learning", "machinelearning", "regression", "classification", "clustering", "dataset", "model"].some((k) => uq.includes(k))) return "MachineLearning";
-  return "Other";
-}
+import { TOPIC_CODES, TOPIC_LABELS, classifyTopic, resolveTopic } from "@/lib/classify-topic";
+const VALID_DOMAINS = TOPIC_CODES;
 
 export async function GET(req: Request) {
   try {
@@ -125,19 +102,7 @@ export async function GET(req: Request) {
     }
 
     // Standard FR19 Domain Name Mapping
-    const DOMAIN_MAP: Record<string, string> = {
-      MachineLearning: "Machine Learning",
-      DeepLearning: "Deep Learning",
-      HealthcareAI: "Healthcare AI",
-      PowerSystems: "Power Systems",
-      "E-commerceAI": "E-commerce AI",
-      Other: "Other",
-      "Machine Learning": "Machine Learning",
-      "Deep Learning": "Deep Learning",
-      "Healthcare AI": "Healthcare AI",
-      "Power Systems": "Power Systems",
-      "E-commerce AI": "E-commerce AI",
-    };
+    const DOMAIN_MAP: Record<string, string> = TOPIC_LABELS;
 
     const STANDARD_DOMAINS = [
       "Machine Learning",
@@ -555,9 +520,16 @@ export async function GET(req: Request) {
 
       const pendingFeedbackCount = asstMsgs.filter((m: any) => !cFeedbackByMsgId[m.id]).length;
 
+      // FR11/FR15: Resolve session topic from stored domain or classified first user message
+      const firstUserMsg = userMsgs.length > 0 ? userMsgs[0].content || "" : "";
+      const rawSessionTopic = chatDomains[cId] || classifyTopic(firstUserMsg);
+      const sessionDomainLabel = DOMAIN_MAP[rawSessionTopic] || "Other";
+
       sessionRecords.push({
         id: cId,
         title: chat.title || "Untitled conversation",
+        domain: sessionDomainLabel,
+        topic: sessionDomainLabel,
         created_at: chat.created_at || new Date().toISOString(),
         started_formatted: chat.created_at
           ? new Date(chat.created_at).toLocaleDateString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
@@ -956,7 +928,8 @@ export async function GET(req: Request) {
       const rawStatus = String(row.correctness || "correct").toLowerCase();
       const status = rawStatus === "correct" ? "Correct" : rawStatus === "partial" ? "Partial" : "Incorrect";
 
-      const topic = resolveTopic(userQuery, row.category || chatDomains[cid]);
+      const rawTopic = resolveTopic(userQuery, row.category || chatDomains[cid]);
+      const topic = DOMAIN_MAP[rawTopic] || "Other";
 
       return {
         id: row.id,
