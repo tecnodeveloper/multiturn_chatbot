@@ -21,8 +21,8 @@ CORS(app)
 
 # Configuration
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_GENERATIVE_AI_API_KEY") or ""
-MODEL = "gemini-3.5-flash"
-FAST_MODEL = "gemini-3.5-flash"
+MODEL = "gemini-1.5-flash"
+FAST_MODEL = "gemini-1.5-flash"
 
 # Supabase Configuration
 SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
@@ -121,9 +121,10 @@ def save_message(chat_id, user_id, role, content, response_time=None, topic_labe
         if res.status_code in (200, 201):
             msg_data = res.json()
             if topic_label and isinstance(msg_data, list) and len(msg_data) > 0:
-                domain_url = f"{SUPABASE_URL}/rest/v1/domains"
-                # Save the canonical code directly
-                requests.post(domain_url, headers=supabase_headers(), json={
+                # Upsert so only one domain row exists per chat (unique constraint on chat_id)
+                domain_url = f"{SUPABASE_URL}/rest/v1/domains?on_conflict=chat_id"
+                upsert_headers = {**supabase_headers(), "Prefer": "resolution=merge-duplicates,return=minimal"}
+                requests.post(domain_url, headers=upsert_headers, json={
                     "chat_id": chat_id,
                     "category": topic_label
                 })
@@ -272,8 +273,8 @@ def chat():
             for m in messages:
                 role = "user" if m.get("role") == "user" else "model"
                 contents.append({"role": role, "parts": [{"text": m.get("content", "")}]})
-            if not contents:
-                contents = [{"role": "user", "parts": [{"text": user_message}]}]
+            # Always append the current user message (history is fetched before it is saved)
+            contents.append({"role": "user", "parts": [{"text": user_message}]})
 
             payload = {
                 "contents": contents,
