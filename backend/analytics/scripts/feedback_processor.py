@@ -55,9 +55,11 @@ def fetch_live_data(user_id=None, session_id=None):
         m_res = requests.get(m_url, headers=get_supabase_headers(), timeout=5)
         messages_list = m_res.json() if m_res.status_code == 200 and isinstance(m_res.json(), list) else []
 
-        # 3. Fetch Domains
+        # 3. Fetch Domains — scoped to this user's chats via the messages chat_id set
         d_res = requests.get(f"{SUPABASE_URL}/rest/v1/domains?select=*", headers=get_supabase_headers(), timeout=5)
-        domains_list = d_res.json() if d_res.status_code == 200 and isinstance(d_res.json(), list) else []
+        all_domains = d_res.json() if d_res.status_code == 200 and isinstance(d_res.json(), list) else []
+        user_chat_ids = {m.get('chat_id') for m in messages_list if m.get('chat_id')}
+        domains_list = [d for d in all_domains if d.get('chat_id') in user_chat_ids]
 
         return feedback_list, messages_list, domains_list
     except Exception as e:
@@ -145,8 +147,12 @@ def process_analytics(user_id=None, session_id=None):
         day_df = df[df['day'] == day]
         if len(day_df) > 0:
             total_day = len(day_df)
-            correct_day = len(day_df[day_df.get('correctness', '') == 'correct'])
-            partial_day = len(day_df[day_df.get('correctness', '') == 'partial'])
+            if 'correctness' in day_df.columns:
+                correct_day = int((day_df['correctness'] == 'correct').sum())
+                partial_day = int((day_df['correctness'] == 'partial').sum())
+            else:
+                correct_day = 0
+                partial_day = 0
             accuracy = round(((correct_day + partial_day) / total_day) * 100, 1) if total_day > 0 else 0.0
             trends.append({
                 "day": day,

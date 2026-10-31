@@ -87,9 +87,14 @@ export async function GET(req: Request) {
 
     let feedbackData: any[] = fRes && fRes.ok ? await fRes.json() : [];
     const messagesData: any[] = mRes && mRes.ok ? await mRes.json() : [];
-    const domainsData: any[] = dRes && dRes.ok ? await dRes.json() : [];
+    const allDomainsData: any[] = dRes && dRes.ok ? await dRes.json() : [];
     const chatsData: any[] = cRes && cRes.ok ? await cRes.json() : [];
-    const summariesData: any[] = sRes && sRes.ok ? await sRes.json() : [];
+    const allSummariesData: any[] = sRes && sRes.ok ? await sRes.json() : [];
+
+    // Scope domains and summaries to this user's chats only (neither table has a direct user_id column)
+    const userChatIdSet = new Set(chatsData.map((c: any) => c.id));
+    const domainsData = allDomainsData.filter((d: any) => userChatIdSet.has(d.chat_id));
+    const summariesData = allSummariesData.filter((s: any) => userChatIdSet.has(s.chat_id));
 
     const chatsById: Record<string, string> = {};
     for (const c of chatsData) {
